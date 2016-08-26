@@ -33,7 +33,6 @@ public class HomeFragment extends Fragment implements LocationListener {
     private boolean locationEnabled;
     private LocationManager locationService;
     private String locationProvider;
-    private HomeFragment homeFrag;
     private boolean locationServicesActivated = false;
 
     public HomeFragment() {
@@ -64,20 +63,13 @@ public class HomeFragment extends Fragment implements LocationListener {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
-    public void setLocationData(double lat, double lng) {
-        TextView locationInfo = (TextView) getActivity().findViewById(R.id.locationInfo);
-        locationInfo.setText("Location: (" + lat + "," + lng + ")");
-    }
-
     @Override
     public void onLocationChanged(Location location) {
         Log.i(CLASS_TAG, "Location provider changed: " + location);
         double lat = location.getLatitude();
         double lng = location.getLongitude();
-        HomeFragment homeFrag = (HomeFragment) getActivity()
-            .getSupportFragmentManager()
-            .findFragmentById(R.id.home);
-        homeFrag.setLocationData(lat, lng);
+        TextView locationInfo = (TextView) getActivity().findViewById(R.id.locationInfo);
+        locationInfo.setText("Location: (" + lat + "," + lng + ")");
     }
 
     @Override
@@ -99,12 +91,11 @@ public class HomeFragment extends Fragment implements LocationListener {
     public void onResume() {
         super.onResume();
 
-        homeFrag = (HomeFragment) getChildFragmentManager().findFragmentById(R.id.home_frag);
         if (locationProvider != null) {
             locationService.requestLocationUpdates(locationProvider,
                 MIN_TIME,
                 MIN_DISTANCE,
-                homeFrag);
+                this);
             locationServicesActivated = true;
             Toast.makeText(getActivity(), "Location resumed", Toast.LENGTH_LONG).show();
         }
@@ -114,7 +105,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     public void onPause() {
         super.onPause();
         if (locationServicesActivated) {
-            locationService.removeUpdates(homeFrag);
+            locationService.removeUpdates(this);
         }
     }
 
