@@ -12,10 +12,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.R;
+import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -34,6 +45,8 @@ public class HomeFragment extends Fragment implements LocationListener {
     private LocationManager locationService;
     private String locationProvider;
     private boolean locationServicesActivated = false;
+    private AQuery aq;
+    private View inflatedView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -42,6 +55,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        aq = new AQuery(getActivity());
 
         locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
@@ -53,14 +67,92 @@ public class HomeFragment extends Fragment implements LocationListener {
             return;
         }
 
-        Toast.makeText(getActivity(), "Created", Toast.LENGTH_LONG).show();
+    }
+
+    private Double safeParseDouble(CharSequence text) {
+        if (text == null) {
+            return null;
+        }
+
+        try {
+            return Double.parseDouble(text.toString());
+        } catch (NumberFormatException e) {
+            Log.w(CLASS_TAG, "Wrong number format", e);
+            return null;
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        inflatedView = inflater.inflate(R.layout.fragment_home, container, false);
+        //        getActivity().findViewById(R.id.update_places).setOnClickListener(
+//            new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    Location location = locationService.getLastKnownLocation(locationProvider);
+//                    aq.ajax("https://maps.googleapis.com/maps/api/place/nearbysearch/output?" +
+//                        "key=" + AppConstants.GOOGLE_API_KEY
+//                        + "&location=" + location.getLatitude() + "," + location.getLongitude()
+//                        + "&radius" + safeParseDouble(aq.id(R.id.location_range).getText())
+//                        + "&rankby=distance",
+//                        JSONObject.class,
+//                        new AjaxCallback<JSONObject>() {
+//                            @Override
+//                            public void callback(String url, JSONObject object, AjaxStatus status) {
+//                                object
+//                            }
+//                        });
+//                }
+//            }
+//        );
+
+        final ListView locations = (ListView)inflatedView.findViewById(R.id.locations);
+        inflatedView.findViewById(R.id.update_places).setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Location location = locationService.getLastKnownLocation(locationProvider);
+                    aq.ajax("http://www.panoramio.com/map/get_panoramas.php?set=public" +
+                            "&from=0&to=20&minx=-180&miny=-90&maxx=180&maxy=90&size=medium&mapfilter=true",
+                        JSONObject.class,
+                        new AjaxCallback<JSONObject>() {
+                            @Override
+                            public void callback(String url, JSONObject object, AjaxStatus status) {
+                                try {
+                                    Log.d(CLASS_TAG, "Query code: " + status.getCode()
+                                        + ", error: " + status.getError() + ", message: " + status.getMessage());
+                                    if (object == null) {
+                                        return;
+                                    }
+
+                                    JSONArray photos = object.getJSONArray("photos");
+                                    List<PanoramioImageInfo> photosInfos = new ArrayList<PanoramioImageInfo>();
+                                    int n = photos.length();
+                                    for (int i = 0; i < n; i++) {
+                                        JSONObject photo = photos.getJSONObject(i);
+                                        PanoramioImageInfo info = new PanoramioImageInfo();
+                                        info.setPhotoTitle(photo.getString("photo_title"));
+                                        info.setPhotoFileUrl(photo.getString("photo_file_url"));
+                                        info.setWidth(photo.getDouble("width"));
+                                        info.setHeight(photo.getDouble("height"));
+                                        photosInfos.add(info);
+                                    }
+                                    ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
+                                        R.layout.location_item,
+                                        photosInfos);
+                                    locations.setAdapter(adapter);
+                                } catch (JSONException e) {
+                                    Log.w(CLASS_TAG, "Json not supported format", e);
+                                }
+                            }
+                        });
+                }
+            }
+        );
+
+        return inflatedView;
     }
 
     @Override

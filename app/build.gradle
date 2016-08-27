@@ -25,4 +25,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:recyclerview-v7:21.0.3'
+    compile 'com.googlecode.android-query:android-query:0.25.9'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }
