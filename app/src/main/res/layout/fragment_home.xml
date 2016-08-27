@@ -16,13 +16,25 @@
                   android:orientation="horizontal">
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:text="Location range"/>
+                  android:text="@string/location_xrange"/>
 
-        <EditText android:id="@+id/location_range"
+        <EditText android:id="@+id/location_xrange"
                   android:layout_width="0dp"
                   android:layout_height="wrap_content"
                   android:inputType="numberDecimal"
-                  android:layout_weight="1"/>
+                  android:layout_weight="1"
+                  android:text="0.05"/>
+
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/location_yrange"/>
+
+        <EditText android:id="@+id/location_yrange"
+                  android:layout_width="0dp"
+                  android:layout_height="wrap_content"
+                  android:inputType="numberDecimal"
+                  android:layout_weight="1"
+                  android:text="0.05"/>
 
     </LinearLayout>
 
@@ -34,14 +46,36 @@
 
     </ListView>
 
+    <TextView android:id="@+id/locations_result_info"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"/>
+
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:gravity="center">
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+        <Button android:id="@+id/prev"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:text="Prev"/>
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+
+        <EditText
+                android:id="@+id/locations_page_id"
+                android:layout_width="40dp"
+                android:gravity="center"
+                android:layout_height="match_parent"
+                android:text="1"/>
+
+        <EditText
+                android:id="@+id/locations_page_size"
+                android:layout_width="40dp"
+                android:gravity="center"
+                android:layout_height="match_parent"
+                android:text="10"/>
+
+        <Button android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:text="Next"/>
     </LinearLayout>
 

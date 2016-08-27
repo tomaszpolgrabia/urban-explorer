@@ -8,24 +8,23 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
+import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -47,6 +46,14 @@ public class HomeFragment extends Fragment implements LocationListener {
     private boolean locationServicesActivated = false;
     private AQuery aq;
     private View inflatedView;
+    private TextView pageSizeWidget;
+    private TextView pageIdWidget;
+    private Long pageId = 1L;
+    private ListView locations;
+    private Button prevWidget;
+    private Button nextWidget;
+    private Long photosCount;
+    private TextView locationsResultInfo;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -108,51 +115,146 @@ public class HomeFragment extends Fragment implements LocationListener {
 //            }
 //        );
 
-        final ListView locations = (ListView)inflatedView.findViewById(R.id.locations);
+        locations = (ListView)inflatedView.findViewById(R.id.locations);
         inflatedView.findViewById(R.id.update_places).setOnClickListener(
             new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Location location = locationService.getLastKnownLocation(locationProvider);
-                    aq.ajax("http://www.panoramio.com/map/get_panoramas.php?set=public" +
-                            "&from=0&to=20&minx=-180&miny=-90&maxx=180&maxy=90&size=medium&mapfilter=true",
-                        JSONObject.class,
-                        new AjaxCallback<JSONObject>() {
-                            @Override
-                            public void callback(String url, JSONObject object, AjaxStatus status) {
-                                try {
-                                    Log.d(CLASS_TAG, "Query code: " + status.getCode()
-                                        + ", error: " + status.getError() + ", message: " + status.getMessage());
-                                    if (object == null) {
-                                        return;
-                                    }
-
-                                    JSONArray photos = object.getJSONArray("photos");
-                                    List<PanoramioImageInfo> photosInfos = new ArrayList<PanoramioImageInfo>();
-                                    int n = photos.length();
-                                    for (int i = 0; i < n; i++) {
-                                        JSONObject photo = photos.getJSONObject(i);
-                                        PanoramioImageInfo info = new PanoramioImageInfo();
-                                        info.setPhotoTitle(photo.getString("photo_title"));
-                                        info.setPhotoFileUrl(photo.getString("photo_file_url"));
-                                        info.setWidth(photo.getDouble("width"));
-                                        info.setHeight(photo.getDouble("height"));
-                                        photosInfos.add(info);
-                                    }
-                                    ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
-                                        R.layout.location_item,
-                                        photosInfos);
-                                    locations.setAdapter(adapter);
-                                } catch (JSONException e) {
-                                    Log.w(CLASS_TAG, "Json not supported format", e);
-                                }
-                            }
-                        });
+                    fetchPanoramioLocations();
                 }
             }
         );
 
+        pageSizeWidget = (TextView) inflatedView.findViewById(R.id.locations_page_size);
+        pageIdWidget = (TextView) inflatedView.findViewById(R.id.locations_page_id);
+
+        pageIdWidget.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.d(CLASS_TAG, "Before text changed");
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                pageId = Math.max(1, NumberUtils.safeParseLong(charSequence));
+                Log.d(CLASS_TAG, "text changed");
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                Log.d(CLASS_TAG, "After text changed");
+            }
+        });
+
+        pageSizeWidget.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.d(CLASS_TAG, "Before text changed");
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                fetchPanoramioLocations();
+                Log.d(CLASS_TAG, "text changed");
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                Log.d(CLASS_TAG, "After text changed");
+            }
+        });
+
+        prevWidget = (Button)inflatedView.findViewById(R.id.prev);
+        nextWidget = (Button)inflatedView.findViewById(R.id.next);
+
+        prevWidget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (pageId > 1) {
+                    pageId--;
+                    pageIdWidget.setText(Long.toString(pageId));
+                    fetchPanoramioLocations();
+                }
+            }
+        });
+
+        nextWidget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pageId++;
+                pageIdWidget.setText(Long.toString(pageId));
+                fetchPanoramioLocations();
+            }
+        });
+
         return inflatedView;
+    }
+
+    private void fetchPanoramioLocations() {
+
+        Location location = locationService.getLastKnownLocation(locationProvider);
+        Double radiusX = fetchRadiusX();
+        Double radiusY = fetchRadiusY();
+        final String aqQuery = "http://www.panoramio.com/map/get_panoramas.php?" +
+            "set=public" +
+            "&from=" + (pageId - 1) * fetchLocationPageSize() +
+            "&to="   + pageId * fetchLocationPageSize() +
+            "&minx=" + (location.getLongitude() - radiusX) +
+            "&miny=" + (location.getLatitude() - radiusY) +
+            "&maxx=" + (location.getLongitude() + radiusX) +
+            "&maxy=" + (location.getLatitude() + radiusX) +
+            "&size=medium" +
+            "&mapfilter=true";
+        Log.d(CLASS_TAG, "Query: " + aqQuery);
+        aq.ajax(aqQuery,
+            JSONObject.class,
+            new AjaxCallback<JSONObject>() {
+                @Override
+                public void callback(String url, JSONObject object, AjaxStatus status) {
+                    try {
+                        Log.d(CLASS_TAG, "Query code: " + status.getCode()
+                            + ", error: " + status.getError() + ", message: " + status.getMessage());
+                        if (object == null) {
+                            return;
+                        }
+
+                        List<PanoramioImageInfo> photosInfos =
+                            PanoramioUtils.fetchPanoramioImagesFromResponse(object);
+
+                        photosCount = PanoramioUtils.fetchPanoramioImagesCountFromResponse(object);
+                        locationsResultInfo = (TextView)inflatedView.findViewById(R.id.locations_result_info);
+                        Long pageSize = fetchLocationPageSize();
+                        Long start = (pageId - 1) * pageSize + 1;
+                        Long end = pageId * pageSize;
+                        locationsResultInfo.setText("" + start + "-" + end + " from " + photosCount);
+
+                        ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
+                            R.layout.location_item,
+                            photosInfos);
+                        locations.setAdapter(adapter);
+                    } catch (JSONException e) {
+                        Log.w(CLASS_TAG, "Json not supported format", e);
+                    }
+                }
+            });
+    }
+
+    private Long fetchLocationPageSize() {
+        return NumberUtils.safeParseLong(pageSizeWidget.getText());
+    }
+
+    private Long fetchLocationPageId() {
+        return Math.max(0L, NumberUtils.safeParseLong(pageIdWidget.getText()));
+    }
+
+    private Double fetchRadiusX() {
+        final TextView radiusxTextView = (TextView) inflatedView.findViewById(R.id.location_xrange);
+        return safeParseDouble(radiusxTextView.getText());
+    }
+
+    private Double fetchRadiusY() {
+        final TextView radiusyTextView = (TextView) inflatedView.findViewById(R.id.location_yrange);
+        return safeParseDouble(radiusyTextView.getText());
     }
 
     @Override

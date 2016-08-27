@@ -11,4 +11,6 @@
     <string name="login">Login</string>
     <string name="location_update_frequency">Location update frequency</string>
     <string name="save">Save</string>
+    <string name="location_yrange">Location y-range</string>
+    <string name="location_xrange">Location x-range</string>
 </resources>
