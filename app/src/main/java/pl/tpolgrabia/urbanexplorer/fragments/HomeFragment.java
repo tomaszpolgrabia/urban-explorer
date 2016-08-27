@@ -20,6 +20,7 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
@@ -192,7 +193,7 @@ public class HomeFragment extends Fragment implements LocationListener {
 
     private void fetchPanoramioLocations() {
 
-        Location location = locationService.getLastKnownLocation(locationProvider);
+        final Location location = locationService.getLastKnownLocation(locationProvider);
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
         final String aqQuery = "http://www.panoramio.com/map/get_panoramas.php?" +
@@ -232,6 +233,18 @@ public class HomeFragment extends Fragment implements LocationListener {
                             R.layout.location_item,
                             photosInfos);
                         locations.setAdapter(adapter);
+
+                        locations.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                            @Override
+                            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long rowId) {
+                                PanoramioAdapter panAdapter = (PanoramioAdapter) locations.getAdapter();
+                                PanoramioImageInfo photoInfo = panAdapter.getItem(pos);
+                                MainActivity activity = (MainActivity) getActivity();
+                                activity.switchToPhoto(photoInfo);
+                                return false;
+                            }
+                        });
+
                     } catch (JSONException e) {
                         Log.w(CLASS_TAG, "Json not supported format", e);
                     }

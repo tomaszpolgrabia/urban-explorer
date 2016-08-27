@@ -1,11 +1,13 @@
 package pl.tpolgrabia.urbanexplorer.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by tpolgrabia on 27.08.16.
  */
-public class PanoramioImageInfo {
+public class PanoramioImageInfo implements Serializable{
+    private static final long serialVersionUID = -3749926831546160047L;
     private Double height;
     private String ownerName;
     private Long ownerId;
