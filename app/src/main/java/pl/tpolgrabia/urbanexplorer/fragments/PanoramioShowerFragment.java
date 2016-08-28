@@ -22,6 +22,10 @@ public class PanoramioShowerFragment extends Fragment {
 
     public static final String PANORAMIO_PHOTO_ARG_KEY = "PANORAMIO_PHOTO_ARG_KEY";
     private TextView photoTitle;
+    private TextView photoUploadDate;
+    private TextView photoAuthor;
+    private TextView photoUrl;
+    private TextView photoLocation;
 
     public PanoramioShowerFragment() {
         // Required empty public constructor
@@ -47,8 +51,21 @@ public class PanoramioShowerFragment extends Fragment {
                 (ImageView) inflatedView.findViewById(R.id.photo_container),
                 MainActivity.options);
 
-            photoTitle = (TextView)inflatedView.findViewById(R.id.phot_title);
+            photoTitle = (TextView)inflatedView.findViewById(R.id.photo_title);
             photoTitle.setText(imageInfo.getPhotoTitle());
+
+            photoUploadDate = (TextView)inflatedView.findViewById(R.id.photo_upload);
+            photoUploadDate.setText(imageInfo.getUploadDate());
+
+            photoAuthor = (TextView)inflatedView.findViewById(R.id.photo_author);
+            photoAuthor.setText(imageInfo.getOwnerName());
+
+            photoUrl = (TextView)inflatedView.findViewById(R.id.photo_url);
+            photoUrl.setText(imageInfo.getPhotoUrl());
+
+            photoLocation = (TextView)inflatedView.findViewById(R.id.photo_location);
+            photoLocation.setText(imageInfo.getLatitude() + "," + imageInfo.getLongitude());
+
         }
 
         return inflatedView;

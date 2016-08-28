@@ -26,6 +26,8 @@ import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -39,6 +41,8 @@ public class HomeFragment extends Fragment implements LocationListener {
     private static final long MIN_TIME = 60000;
     private static final float MIN_DISTANCE = 100;
     private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
+    private static final String LOCATIONS_LIST_IMAGE_SIZE = "medium";
+    private static final String LOCATIONS_ORDER = "popularity";
     private boolean gpsLocationEnabled;
     private boolean networkLocationEnabled;
     private boolean locationEnabled;
@@ -46,13 +50,14 @@ public class HomeFragment extends Fragment implements LocationListener {
     private String locationProvider;
     private boolean locationServicesActivated = false;
     private AQuery aq;
+    
     private View inflatedView;
     private TextView pageSizeWidget;
     private TextView pageIdWidget;
     private Long pageId = 1L;
     private ListView locations;
-    private Button prevWidget;
-    private Button nextWidget;
+    private ImageView prevWidget;
+    private ImageView nextWidget;
     private Long photosCount;
     private TextView locationsResultInfo;
 
@@ -165,8 +170,8 @@ public class HomeFragment extends Fragment implements LocationListener {
             }
         });
 
-        prevWidget = (Button)inflatedView.findViewById(R.id.prev);
-        nextWidget = (Button)inflatedView.findViewById(R.id.next);
+        prevWidget = (ImageView)inflatedView.findViewById(R.id.prev);
+        nextWidget = (ImageView)inflatedView.findViewById(R.id.next);
 
         prevWidget.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,6 +198,10 @@ public class HomeFragment extends Fragment implements LocationListener {
 
     private void fetchPanoramioLocations() {
 
+        fetchPanoramioPhotos();
+    }
+
+    private void fetchPanoramioPhotos() {
         final Location location = locationService.getLastKnownLocation(locationProvider);
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
@@ -204,7 +213,8 @@ public class HomeFragment extends Fragment implements LocationListener {
             "&miny=" + (location.getLatitude() - radiusY) +
             "&maxx=" + (location.getLongitude() + radiusX) +
             "&maxy=" + (location.getLatitude() + radiusX) +
-            "&size=medium" +
+            "&size=" + LOCATIONS_LIST_IMAGE_SIZE +
+            "&order=" + LOCATIONS_ORDER +
             "&mapfilter=true";
         Log.d(CLASS_TAG, "Query: " + aqQuery);
         aq.ajax(aqQuery,
@@ -219,8 +229,13 @@ public class HomeFragment extends Fragment implements LocationListener {
                             return;
                         }
 
-                        List<PanoramioImageInfo> photosInfos =
-                            PanoramioUtils.fetchPanoramioImagesFromResponse(object);
+                        List<PanoramioImageInfo> photosInfos;
+                        try {
+                            photosInfos = PanoramioUtils.fetchPanoramioImagesFromResponse(object.getJSONArray("photos"));
+                        } catch (ParseException e) {
+                            Log.w(CLASS_TAG, "Parse exception", e);
+                            photosInfos = new ArrayList<>();
+                        }
 
                         photosCount = PanoramioUtils.fetchPanoramioImagesCountFromResponse(object);
                         locationsResultInfo = (TextView)inflatedView.findViewById(R.id.locations_result_info);
