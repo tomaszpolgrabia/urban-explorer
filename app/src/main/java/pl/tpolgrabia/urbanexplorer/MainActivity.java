@@ -65,7 +65,6 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         // LinearLayout locations = (LinearLayout) findViewById(R.id.locations);
         // locations.setOnTouchListener(new OnSwipeTouchListener);
-        gestureDetector = new GestureDetectorCompat(this, this);
         updateSwipeHandler();
     }
 
@@ -220,6 +219,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
                 gestureDetector.onTouchEvent(ev);
             }
         });
+        gestureDetector = new GestureDetectorCompat(this, this);
     }
 
     private void swipeRight() {
