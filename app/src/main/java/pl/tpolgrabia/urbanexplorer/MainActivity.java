@@ -66,6 +66,10 @@ public class MainActivity extends ActionBarActivity  {
         arguments.putSerializable(PanoramioShowerFragment.PANORAMIO_PHOTO_ARG_KEY, photoInfo);
         panoramioShower.setArguments(arguments);
 
+        ctx.setCustomAnimations(R.anim.slide_in_down,
+            R.anim.slide_out_down,
+            R.anim.slide_in_up,
+            R.anim.slide_out_up);
         ctx.replace(R.id.fragments, panoramioShower);
         ctx.addToBackStack(PHOTO_BACKSTACK);
 

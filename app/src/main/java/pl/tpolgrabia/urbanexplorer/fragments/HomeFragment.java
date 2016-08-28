@@ -50,7 +50,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     private String locationProvider;
     private boolean locationServicesActivated = false;
     private AQuery aq;
-    
+
     private View inflatedView;
     private TextView pageSizeWidget;
     private TextView pageIdWidget;
