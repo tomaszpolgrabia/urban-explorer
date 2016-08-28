@@ -66,7 +66,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
             .add(R.id.fragments, new HomeFragment())
             .commit();
 
-        LinearLayout locations = (LinearLayout) findViewById(R.id.locations);
+
         // locations.setOnTouchListener(new OnSwipeTouchListener);
         gestureDetector = new GestureDetectorCompat(this, this);
     }
