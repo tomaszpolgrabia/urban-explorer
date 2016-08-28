@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout
         android:id="@+id/fragments"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -12,4 +12,4 @@
         tools:context="pl.tpolgrabia.urbanexplorer.MainActivity" android:orientation="horizontal">
 
 
-</FrameLayout>
+</pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout>

@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.widget.LinearLayout;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -20,6 +19,8 @@ import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorer.utils.ImageLoaderUtils;
+import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
+import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
 public class MainActivity extends ActionBarActivity implements GestureDetector.OnGestureListener {
 
@@ -34,12 +35,6 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     private GestureDetectorCompat gestureDetector;
     private float SWIPE_THRESHOLD = 50;
     private int currentFragmentId = 0;
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        gestureDetector.onTouchEvent(event);
-        return super.onTouchEvent(event);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +61,12 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
             .add(R.id.fragments, new HomeFragment())
             .commit();
 
-        LinearLayout locations = (LinearLayout) findViewById(R.id.locations);
+
+
+        // LinearLayout locations = (LinearLayout) findViewById(R.id.locations);
         // locations.setOnTouchListener(new OnSwipeTouchListener);
         gestureDetector = new GestureDetectorCompat(this, this);
+        updateSwipeHandler();
     }
 
     @Override
@@ -184,7 +182,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     }
 
     private void swipeLeft() {
-        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
+        currentFragmentId = (int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1);
         switchFragment();
     }
 
@@ -211,10 +209,21 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
         ctx.replace(R.id.fragments, fragment);
         ctx.addToBackStack(null);
         ctx.commit();
+        updateSwipeHandler();
+    }
+
+    private void updateSwipeHandler() {
+        SwipeFrameLayout swipeFragments = (SwipeFrameLayout) findViewById(R.id.fragments);
+        swipeFragments.setCustomInterceptor(new CustomInterceptor() {
+            @Override
+            public void handle(MotionEvent ev) {
+                gestureDetector.onTouchEvent(ev);
+            }
+        });
     }
 
     private void swipeRight() {
-        currentFragmentId = (int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1);
+        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
         switchFragment();
     }
 }
