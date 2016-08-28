@@ -1,13 +1,23 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
+             android:orientation="vertical"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment">
+    <TextView android:id="@+id/wiki_current_location"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Location:"/>
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ListView android:layout_width="match_parent"
+              android:layout_height="0dp"
+              android:layout_weight="1">
+
+    </ListView>
+
+    <Button android:id="@+id/wiki_fetch_places"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/hello_blank_fragment"/>
+            android:layout_height="wrap_content"
+            android:text="Fetch wiki places in the neighbourhood"/>
 
-</FrameLayout>
+</LinearLayout>

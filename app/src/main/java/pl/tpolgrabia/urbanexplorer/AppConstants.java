@@ -5,4 +5,6 @@ package pl.tpolgrabia.urbanexplorer;
  */
 public class AppConstants {
     public static final String GOOGLE_API_KEY = "AIzaSyDAnmEK6cgovRrefUuYojL1pxPEbIBLZUw";
+    public static final long MIN_TIME = 60000;
+    public static final float MIN_DISTANCE = 100;
 }
