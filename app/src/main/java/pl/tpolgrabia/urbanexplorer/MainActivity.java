@@ -11,10 +11,12 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
+import com.crashlytics.android.Crashlytics;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import io.fabric.sdk.android.Fabric;
 import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
@@ -69,6 +71,8 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         // locations.setOnTouchListener(new OnSwipeTouchListener);
         gestureDetector = new GestureDetectorCompat(this, this);
+        Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
+        Fabric.with(fabric);
     }
 
     @Override
