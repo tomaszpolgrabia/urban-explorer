@@ -51,7 +51,7 @@ public class HomeFragment extends Fragment  {
     private TextView locationsResultInfo;
     private StandardLocationListener locationCallback = new StandardLocationListener();
     private LocationManager locationService;
-    private String locationProvider = LocationUtils.getDefaultLocation(getActivity());
+    private String locationProvider = null;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -61,7 +61,7 @@ public class HomeFragment extends Fragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         aq = new AQuery(getActivity());
-
+        locationProvider = LocationUtils.getDefaultLocation(getActivity());
         locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
 
     }

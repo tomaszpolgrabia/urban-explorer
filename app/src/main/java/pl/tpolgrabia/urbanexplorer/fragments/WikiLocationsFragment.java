@@ -10,9 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import pl.tpolgrabia.urbanexplorer.R;
+import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
+import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
+import pl.tpolgrabia.urbanexplorer.dto.WikiResponse;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.WikiUtils;
 
@@ -55,8 +60,23 @@ public class WikiLocationsFragment extends Fragment {
         fetchPlaces.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
-                WikiUtils.fetchNearPlaces(this, location.getLatitude(), location.getLongitude());
+                final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+                WikiUtils.fetchNearPlaces(getActivity(), location.getLatitude(), location.getLongitude(), 10L, new WikiResponseCallback() {
+                    @Override
+                    public void callback(WikiStatus status, WikiResponse response) {
+                        // handling here wiki locations
+                        if (status != WikiStatus.SUCCESS) {
+                            Toast.makeText(getActivity(), "Sorry, currently we have problem with interfacing wiki" +
+                                ": " + status + ". Try again later", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // TODO on success
+
+                        ListView locations = (ListView) inflatedView.findViewById(R.id.wiki_places);
+                        locations.setAdapter(new WikiLocationsAdapter(getActivity(), response.getPages()));
+                    }
+                });
             }
         });
 

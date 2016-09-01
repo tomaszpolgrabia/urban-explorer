@@ -49,19 +49,18 @@ public class WikiUtils {
                     "&ggscoord=" + latitude + "%7C" + longitude +
                     "&ggsradius=10000" +
                     "&ggslimit=" + resultsLimit +
-                    "&format" + WIKI_FORMAT;
+                    "&format=" + WIKI_FORMAT;
                 aq.ajax(qurl, JSONObject.class, new AjaxCallback<JSONObject>() {
                     @Override
                     public void callback(String url, JSONObject object, AjaxStatus status) {
                         if (status.getCode() == 200) {
-                            callback.callback(WikiStatus.SUCCESS, null);
-                        } else {
                             try {
-                                callback.callback(WikiStatus.NETWORK_ERROR, fetchWikiResponse(object));
+                                callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
                             } catch (JSONException e) {
-                                Log.e(CLASS_TAG, "General error", e);
-                                callback.callback(WikiStatus.GENERAL_ERROR, null);
+                                Log.e(CLASS_TAG, "JSon error", e);
                             }
+                        } else {
+                            callback.callback(WikiStatus.NETWORK_ERROR, null);
                         }
                     }
                 });
@@ -71,6 +70,10 @@ public class WikiUtils {
     }
 
     public static WikiResponse fetchWikiResponse(JSONObject object) throws JSONException {
+        if (object == null) {
+            return null;
+        }
+
         WikiResponse wikiResponse = new WikiResponse();
         wikiResponse.setBatchComplete(Boolean.valueOf(object.getString("batchcomplete")));
         wikiResponse.setPages(fetchPages(object.getJSONObject("query").getJSONObject("pages")));
@@ -89,16 +92,19 @@ public class WikiUtils {
 
     public static WikiPage fetchPage(JSONObject jpage) throws JSONException {
         WikiPage wikiPage = new WikiPage();
-        wikiPage.setCoordinates(fetchCoordinates(jpage.getJSONArray("coordinates")));
-        wikiPage.setIndex(jpage.getLong("index"));
-        wikiPage.setNs(jpage.getLong("ns"));
-        wikiPage.setPageId(jpage.getLong("pageId"));
-        wikiPage.setThumbnail(fetchThumbnail(jpage.getJSONObject("thumbnail")));
-        wikiPage.setTitle(jpage.getString("title"));
-        return null;
+        wikiPage.setCoordinates(fetchCoordinates(jpage.optJSONArray("coordinates")));
+        wikiPage.setIndex(jpage.optLong("index"));
+        wikiPage.setNs(jpage.optLong("ns"));
+        wikiPage.setPageId(jpage.optLong("pageid"));
+        wikiPage.setThumbnail(fetchThumbnail(jpage.optJSONObject("thumbnail")));
+        wikiPage.setTitle(jpage.optString("title"));
+        return wikiPage;
     }
 
     public static WikiThumbnail fetchThumbnail(JSONObject jthumbnail) throws JSONException {
+        if (jthumbnail == null) {
+            return null;
+        }
         WikiThumbnail wikiThumbnail = new WikiThumbnail();
         wikiThumbnail.setWidth(jthumbnail.getLong("width"));
         wikiThumbnail.setHeight(jthumbnail.getLong("height"));
@@ -107,11 +113,15 @@ public class WikiUtils {
     }
 
     public static List<WikiLocation> fetchCoordinates(JSONArray jcoordinates) throws JSONException {
+        if (jcoordinates == null) {
+            return null;
+        }
+
         List<WikiLocation> wikiLocations = new ArrayList<WikiLocation>();
 
         int n = jcoordinates.length();
         for (int i = 0; i < n; i++) {
-            wikiLocations.add(fetchCoordinate(jcoordinates.getJSONObject(i)))
+            wikiLocations.add(fetchCoordinate(jcoordinates.getJSONObject(i)));
         }
 
         return wikiLocations;

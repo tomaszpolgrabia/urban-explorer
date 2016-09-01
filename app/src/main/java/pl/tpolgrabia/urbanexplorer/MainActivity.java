@@ -1,5 +1,6 @@
 package pl.tpolgrabia.urbanexplorer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
@@ -86,6 +87,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
         // lLinearLayout locations = (LinearLayout) findViewById(R.id.locations);
         // locations.setOnTouchListener(new OnSwipeTouchListener);
         gestureDetector = new GestureDetectorCompat(this, this);
+        locationCallback = new StandardLocationListener();
         initLocalication();
     }
 
@@ -239,13 +241,17 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     private void initLocalication() {
         if (checkForLocalicatonEnabled()) return;
 
+        final Context ctx = this;
+
         locationCallback.setLocationChangedCallback(new StandardLocationListenerCallback() {
             @Override
             public void callback(Location location) {
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
-                TextView locationInfo = (TextView) findViewById(R.id.locationInfo);
-                locationInfo.setText("Location: (" + lat + "," + lng + ")");
+                // getSupportFragmentManager().findFragmentById(R.id.wiki_)
+                // TextView locationInfo = (TextView) findViewById(R.id.locationInfo);
+                // locationInfo.setText("Location: (" + lat + "," + lng + ")");
+                Toast.makeText(ctx, "Location: (" + lat + "," + lng + ")", Toast.LENGTH_SHORT).show();
             }
         });
     }
