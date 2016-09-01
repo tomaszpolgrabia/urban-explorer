@@ -127,7 +127,34 @@ public class HomeFragment extends Fragment implements LocationListener {
 
                 if (firstVisibleItem + visibleItemCount >= totalItemCount) {
                     // scrolled to the bottom
+                    Location location = locationService.getLastKnownLocation(locationProvider);
+                    PanoramioUtils.fetchPanoramioImages(
+                        getActivity(),
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        fetchRadiusX(),
+                        fetchRadiusY(),
+                        (long)(firstVisibleItem + visibleItemCount),
+                        fetchLocationPageSize(),
+                        new PanoramioResponseCallback() {
+                            @Override
+                            public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
+                                if (status != PanoramioResponseStatus.SUCCESS) {
+                                    return;
+                                }
 
+                                PanoramioAdapter adapter = (PanoramioAdapter) locations.getAdapter();
+                                adapter.addAll(images);
+
+                                // TODO loading on end scroll should now working
+                                // TODO we can remove pagination
+                                // TODO we can think about removing first items also and last if the number
+                                // TODO of items exceeds the limit (to save the memory)
+
+                            }
+                        }
+
+                    );
 
                 }
 
