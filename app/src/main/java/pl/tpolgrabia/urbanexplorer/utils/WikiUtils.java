@@ -31,6 +31,7 @@ public class WikiUtils {
                                        final double latitude,
                                        final double longitude,
                                        final long resultsLimit,
+                                       final long radiusLimit,
                                        final WikiResponseCallback callback) {
         final AQuery aq = new AQuery(ctx);
         aq.ajax("TODO", JSONObject.class, new AjaxCallback<JSONObject>(){
@@ -47,7 +48,7 @@ public class WikiUtils {
                     "&wbptterms=description" +
                     "&generator=geosearch" +
                     "&ggscoord=" + latitude + "%7C" + longitude +
-                    "&ggsradius=10000" +
+                    "&ggsradius=" + radiusLimit +
                     "&ggslimit=" + resultsLimit +
                     "&format=" + WIKI_FORMAT;
                 aq.ajax(qurl, JSONObject.class, new AjaxCallback<JSONObject>() {
