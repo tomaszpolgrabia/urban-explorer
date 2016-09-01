@@ -16,18 +16,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
-import org.json.JSONException;
-import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
+import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
 import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -100,6 +96,44 @@ public class HomeFragment extends Fragment implements LocationListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         inflatedView = inflater.inflate(R.layout.fragment_home, container, false);
+        locations = (ListView)inflatedView.findViewById(R.id.locations);
+        locations.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long rowId) {
+                PanoramioAdapter panAdapter = (PanoramioAdapter) locations.getAdapter();
+                PanoramioImageInfo photoInfo = panAdapter.getItem(pos);
+                MainActivity activity = (MainActivity) getActivity();
+                activity.switchToPhoto(photoInfo);
+                return false;
+            }
+        });
+
+        locations.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+
+            @Override
+            public void onScroll(AbsListView view,
+                                 int firstVisibleItem,
+                                 int visibleItemCount,
+                                 int totalItemCount) {
+
+                if (firstVisibleItem <= 0) {
+                    // scrolled to the top
+                }
+
+                if (firstVisibleItem + visibleItemCount >= totalItemCount) {
+                    // scrolled to the bottom
+
+
+                }
+
+            }
+        });
+
         //        getActivity().findViewById(R.id.update_places).setOnClickListener(
 //            new View.OnClickListener() {
 //                @Override
@@ -198,73 +232,32 @@ public class HomeFragment extends Fragment implements LocationListener {
 
     private void fetchPanoramioLocations() {
 
-        fetchPanoramioPhotos();
-    }
-
-    private void fetchPanoramioPhotos() {
         final Location location = locationService.getLastKnownLocation(locationProvider);
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
-        final String aqQuery = "http://www.panoramio.com/map/get_panoramas.php?" +
-            "set=public" +
-            "&from=" + (pageId - 1) * fetchLocationPageSize() +
-            "&to="   + pageId * fetchLocationPageSize() +
-            "&minx=" + (location.getLongitude() - radiusX) +
-            "&miny=" + (location.getLatitude() - radiusY) +
-            "&maxx=" + (location.getLongitude() + radiusX) +
-            "&maxy=" + (location.getLatitude() + radiusX) +
-            "&size=" + LOCATIONS_LIST_IMAGE_SIZE +
-            "&order=" + LOCATIONS_ORDER +
-            "&mapfilter=true";
-        Log.d(CLASS_TAG, "Query: " + aqQuery);
-        aq.ajax(aqQuery,
-            JSONObject.class,
-            new AjaxCallback<JSONObject>() {
+        PanoramioUtils.fetchPanoramioImages(
+            getActivity(),
+            location.getLatitude(),
+            location.getLongitude(),
+            radiusX,
+            radiusY,
+            (pageId - 1) * fetchLocationPageSize(),
+            fetchLocationPageSize(),
+            new PanoramioResponseCallback() {
                 @Override
-                public void callback(String url, JSONObject object, AjaxStatus status) {
-                    try {
-                        Log.d(CLASS_TAG, "Query code: " + status.getCode()
-                            + ", error: " + status.getError() + ", message: " + status.getMessage());
-                        if (object == null) {
-                            return;
-                        }
+                public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
+                    Long pageSize = fetchLocationPageSize();
+                    Long start = (pageId - 1) * pageSize + 1;
+                    Long end = pageId * pageSize;
+                    locationsResultInfo.setText("" + start + "-" + end + " from " + imagesCount);
 
-                        List<PanoramioImageInfo> photosInfos;
-                        try {
-                            photosInfos = PanoramioUtils.fetchPanoramioImagesFromResponse(object.getJSONArray("photos"));
-                        } catch (ParseException e) {
-                            Log.w(CLASS_TAG, "Parse exception", e);
-                            photosInfos = new ArrayList<>();
-                        }
-
-                        photosCount = PanoramioUtils.fetchPanoramioImagesCountFromResponse(object);
-                        locationsResultInfo = (TextView)inflatedView.findViewById(R.id.locations_result_info);
-                        Long pageSize = fetchLocationPageSize();
-                        Long start = (pageId - 1) * pageSize + 1;
-                        Long end = pageId * pageSize;
-                        locationsResultInfo.setText("" + start + "-" + end + " from " + photosCount);
-
-                        ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
-                            R.layout.location_item,
-                            photosInfos);
-                        locations.setAdapter(adapter);
-
-                        locations.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                            @Override
-                            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long rowId) {
-                                PanoramioAdapter panAdapter = (PanoramioAdapter) locations.getAdapter();
-                                PanoramioImageInfo photoInfo = panAdapter.getItem(pos);
-                                MainActivity activity = (MainActivity) getActivity();
-                                activity.switchToPhoto(photoInfo);
-                                return false;
-                            }
-                        });
-
-                    } catch (JSONException e) {
-                        Log.w(CLASS_TAG, "Json not supported format", e);
-                    }
+                    ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
+                        R.layout.location_item,
+                        images);
+                    locations.setAdapter(adapter);
                 }
-            });
+            }
+        );
     }
 
     private Long fetchLocationPageSize() {
