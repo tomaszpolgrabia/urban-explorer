@@ -72,6 +72,8 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         // locations.setOnTouchListener(new OnSwipeTouchListener);
         gestureDetector = new GestureDetectorCompat(this, this);
+        Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
+        Fabric.with(fabric);
     }
 
     @Override
