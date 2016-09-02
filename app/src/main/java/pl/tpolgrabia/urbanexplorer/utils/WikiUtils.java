@@ -42,7 +42,7 @@ public class WikiUtils {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 // TODO handle response
-                String qurl = "https://en.wikipedia.org/w/api.php?" +
+                final String qurl = "https://en.wikipedia.org/w/api.php?" +
                     "action=query" +
                     "&prop=coordinates%7Cpageimages%7Cpageterms" +
                     "&colimit=50" +
@@ -63,7 +63,7 @@ public class WikiUtils {
                             try {
                                 callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
                             } catch (JSONException e) {
-                                Log.e(CLASS_TAG, "JSon error", e);
+                                Log.e(CLASS_TAG, "JSon error: " + object.toString(), e);
                             }
                         } else {
                             callback.callback(WikiStatus.NETWORK_ERROR, null);
