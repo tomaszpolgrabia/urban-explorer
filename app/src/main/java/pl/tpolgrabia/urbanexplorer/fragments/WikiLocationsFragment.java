@@ -24,7 +24,14 @@ public class WikiLocationsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_wiki_locations, container, false);
+        View inflatedView = inflater.inflate(R.layout.fragment_wiki_locations, container, false);
+        inflatedView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                throw new RuntimeException("FAKE BUG 2");
+            }
+        });
+        return inflatedView;
     }
 
 }
