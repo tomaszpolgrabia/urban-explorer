@@ -19,6 +19,7 @@ import pl.tpolgrabia.urbanexplorer.dto.WikiThumbnail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by tpolgrabia on 28.08.16.
@@ -26,12 +27,15 @@ import java.util.List;
 public class WikiUtils {
     private static final String CLASS_TAG = WikiUtils.class.getSimpleName();
     private static final String WIKI_FORMAT = "json";
+    private static final long WIKI_MIN_RADIUS = 10L;
+    private static final Long WIKI_MAX_RESULTS_LIMIT = 500L;
+    private static final Long WIKI_MIN_RESULTS = 10L;
 
     public static void fetchNearPlaces(Context ctx,
                                        final double latitude,
                                        final double longitude,
-                                       final long resultsLimit,
-                                       final long radiusLimit,
+                                       final Long resultsLimit,
+                                       final Long radiusLimit,
                                        final WikiResponseCallback callback) {
         final AQuery aq = new AQuery(ctx);
         aq.ajax("TODO", JSONObject.class, new AjaxCallback<JSONObject>(){
@@ -48,8 +52,9 @@ public class WikiUtils {
                     "&wbptterms=description" +
                     "&generator=geosearch" +
                     "&ggscoord=" + latitude + "%7C" + longitude +
-                    "&ggsradius=" + radiusLimit +
-                    "&ggslimit=" + resultsLimit +
+                    "&ggsradius=" + Math.max(WIKI_MIN_RADIUS, ifNullSet(radiusLimit, 10000L)) +
+                    "&ggslimit=" + Math.min(WIKI_MIN_RESULTS, Math.max(WIKI_MAX_RESULTS_LIMIT,
+                        checkIfNullLong(resultsLimit))) +
                     "&format=" + WIKI_FORMAT;
                 aq.ajax(qurl, JSONObject.class, new AjaxCallback<JSONObject>() {
                     @Override
@@ -68,6 +73,14 @@ public class WikiUtils {
 
             }
         });
+    }
+
+    private static <T> T ifNullSet(T val, T def) {
+        return val == null ? def : val;
+    }
+
+    private static Long checkIfNullLong(Long lval) {
+        return lval != null ? lval : 0L;
     }
 
     public static WikiResponse fetchWikiResponse(JSONObject object) throws JSONException {

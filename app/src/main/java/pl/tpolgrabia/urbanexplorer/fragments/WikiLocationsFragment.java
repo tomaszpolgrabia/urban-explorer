@@ -5,6 +5,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,14 +59,16 @@ public class WikiLocationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+                Editable search_limit = ((EditText) inflatedView.findViewById(R.id.wiki_search_limit)).getText();
+                Editable radius_limit = ((EditText) inflatedView.findViewById(R.id.wiki_search_radius)).getText();
                 WikiUtils.fetchNearPlaces(
                     getActivity(),
                     location.getLatitude(),
                     location.getLongitude(),
                     NumberUtils.safeParseLong(
-                        ((EditText) inflatedView.findViewById(R.id.wiki_search_limit)).getText()),
+                            search_limit != null ? search_limit.toString(): null),
                     NumberUtils.safeParseLong(
-                        ((EditText) inflatedView.findViewById(R.id.wiki_search_radius)).getText()),
+                            radius_limit != null ? radius_limit.toString() : null),
                     new WikiResponseCallback() {
                         @Override
                         public void callback(WikiStatus status, WikiResponse response) {

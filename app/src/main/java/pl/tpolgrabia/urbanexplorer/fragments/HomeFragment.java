@@ -126,7 +126,7 @@ public class HomeFragment extends Fragment  {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                pageId = Math.max(1, NumberUtils.safeParseLong(charSequence));
+                pageId = Math.max(1, NumberUtils.safeParseLong(safeAndroidText2String(charSequence)));
                 Log.d(CLASS_TAG, "text changed");
             }
 
@@ -252,11 +252,16 @@ public class HomeFragment extends Fragment  {
     }
 
     private Long fetchLocationPageSize() {
-        return NumberUtils.safeParseLong(pageSizeWidget.getText());
+        CharSequence page_size = pageSizeWidget.getText();
+        return NumberUtils.safeParseLong(safeAndroidText2String(page_size));
+    }
+
+    private String safeAndroidText2String(CharSequence page_size) {
+        return page_size != null ? page_size.toString() : null;
     }
 
     private Long fetchLocationPageId() {
-        return Math.max(0L, NumberUtils.safeParseLong(pageIdWidget.getText()));
+        return Math.max(0L, NumberUtils.safeParseLong(safeAndroidText2String(pageIdWidget.getText())));
     }
 
     private Double fetchRadiusX() {
