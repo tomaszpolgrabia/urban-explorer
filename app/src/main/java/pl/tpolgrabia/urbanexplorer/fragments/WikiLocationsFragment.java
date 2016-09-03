@@ -18,8 +18,10 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
+import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
 import pl.tpolgrabia.urbanexplorer.dto.WikiPage;
@@ -139,15 +141,28 @@ public class WikiLocationsFragment extends Fragment {
             }
         });
 
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.getLocationCallback().addCallback(new StandardLocationListenerCallback() {
+            @Override
+            public void callback(Location location) {
+                updateLocationInfo();
+            }
+        });
+
         return inflatedView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        updateLocationInfo();
+    }
 
+    public void updateLocationInfo() {
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
-        currentLocation.setText("Location: " + location.getLatitude() + "," + location.getLongitude());
+        if (location != null) {
+            currentLocation.setText("Location: " + location.getLatitude() + "," + location.getLongitude());
+        }
     }
 
     @Override

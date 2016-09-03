@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
+import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
@@ -49,9 +50,7 @@ public class HomeFragment extends Fragment  {
     private ImageView nextWidget;
     private Long photosCount;
     private TextView locationsResultInfo;
-    private StandardLocationListener locationCallback = new StandardLocationListener();
     private LocationManager locationService;
-    private String locationProvider = null;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -61,8 +60,14 @@ public class HomeFragment extends Fragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         aq = new AQuery(getActivity());
-        locationProvider = LocationUtils.getDefaultLocation(getActivity());
-        locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        MainActivity mainActivity = ((MainActivity) getActivity());
+        mainActivity.getLocationCallback()
+            .addCallback(new StandardLocationListenerCallback() {
+                @Override
+                public void callback(Location location) {
+                    updateLocationInfo();
+                }
+            });
 
     }
 
@@ -177,6 +182,7 @@ public class HomeFragment extends Fragment  {
             }
         });
 
+
         return inflatedView;
     }
 
@@ -274,4 +280,18 @@ public class HomeFragment extends Fragment  {
         return safeParseDouble(radiusyTextView.getText());
     }
 
+    @Override
+    public void onResume() {
+        updateLocationInfo();
+    }
+
+    public void updateLocationInfo() {
+        TextView locationInfo = (TextView) getView().findViewById(R.id.locationInfo);
+        locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        if (currLocation != null) {
+            // update home fragment's location info
+            locationInfo.setText("Location: " + currLocation.getLatitude() + "," + currLocation.getLongitude());
+        }
+    }
 }

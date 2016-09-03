@@ -53,6 +53,11 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     private String locationProvider;
     private boolean locationServicesActivated = false;
 
+
+    public StandardLocationListener getLocationCallback() {
+        return locationCallback;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         gestureDetector.onTouchEvent(event);
@@ -81,7 +86,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         getSupportFragmentManager()
             .beginTransaction()
-            .add(R.id.fragments, new HomeFragment())
+            .replace(R.id.fragments, new HomeFragment())
             .commit();
 
         // lLinearLayout locations = (LinearLayout) findViewById(R.id.locations);
