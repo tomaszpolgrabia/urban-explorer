@@ -1,6 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.callbacks;
 
-import pl.tpolgrabia.urbanexplorer.dto.WikiResponse;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiResponse;
 
 /**
  * Created by tpolgrabia on 28.08.16.

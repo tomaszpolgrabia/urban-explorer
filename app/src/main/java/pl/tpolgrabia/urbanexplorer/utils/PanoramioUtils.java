@@ -3,9 +3,9 @@ package pl.tpolgrabia.urbanexplorer.utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioMapLocation;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioResponse;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioMapLocation;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioResponse;
 import pl.tpolgrabia.urbanexplorer.exceptions.PanoramioResponseNotExpected;
 
 import java.text.ParseException;

@@ -1,7 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.adapters;
 
 import android.content.Context;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,7 @@ import android.widget.*;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.dto.WikiPage;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiPage;
 
 import java.util.List;
 

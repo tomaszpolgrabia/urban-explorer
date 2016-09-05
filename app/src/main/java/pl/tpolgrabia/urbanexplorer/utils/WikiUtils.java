@@ -2,7 +2,6 @@ package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
 import android.util.Log;
-import android.view.View;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
@@ -11,15 +10,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
-import pl.tpolgrabia.urbanexplorer.dto.WikiLocation;
-import pl.tpolgrabia.urbanexplorer.dto.WikiPage;
-import pl.tpolgrabia.urbanexplorer.dto.WikiResponse;
-import pl.tpolgrabia.urbanexplorer.dto.WikiThumbnail;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiLocation;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiPage;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiResponse;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiThumbnail;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by tpolgrabia on 28.08.16.
@@ -148,5 +146,10 @@ public class WikiUtils {
         wikiLocation.setPrimary(jlocation.getString("primary"));
         wikiLocation.setGlobe(jlocation.getString("globe"));
         return wikiLocation;
+    }
+
+    public static void doNow(Context ctx) {
+        AQuery aq = new AQuery(ctx);
+
     }
 }

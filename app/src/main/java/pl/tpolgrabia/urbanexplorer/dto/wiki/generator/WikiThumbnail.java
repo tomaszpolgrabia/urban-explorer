@@ -1,4 +1,4 @@
-package pl.tpolgrabia.urbanexplorer.dto;
+package pl.tpolgrabia.urbanexplorer.dto.wiki.generator;
 
 /**
  * Created by tpolgrabia on 28.08.16.
