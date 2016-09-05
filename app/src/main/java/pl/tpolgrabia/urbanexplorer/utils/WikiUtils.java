@@ -14,6 +14,9 @@ import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiLocation;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiPage;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiResponse;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiThumbnail;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoObject;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponse;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponseCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -148,8 +151,64 @@ public class WikiUtils {
         return wikiLocation;
     }
 
-    public static void doNow(Context ctx) {
+    public static void fetchGeoSearchWikiMetadata(Context ctx,
+                                                  Double latitude,
+                                                  Double longitude,
+                                                  Double radius,
+                                                  Long limit,
+                                                  final WikiGeoResponseCallback callback) {
         AQuery aq = new AQuery(ctx);
+        aq.ajax("https://en.wikipedia.org/w/api.php" +
+            "?action=query" +
+            "&list=geosearch" +
+            "&gscoord=" + latitude + "%7C" + longitude +
+            "gsradius=" + radius +
+            "&gslimit=" + limit, JSONObject.class, new AjaxCallback<JSONObject>() {
+            @Override
+            public void callback(String url, JSONObject object, AjaxStatus status) {
+                if (status.getCode() == 200) {
+                    try {
+                        callback.callback(WikiStatus.SUCCESS, fetchWikiGeoResponse(object));
+                    } catch (Throwable t) {
+                        callback.callback(WikiStatus.GENERAL_ERROR, null);
+                    }
+                } else {
+                    callback.callback(WikiStatus.NETWORK_ERROR, null);
+                }
+                super.callback(url, object, status);
+            }
+        });
 
+    }
+
+    public static WikiGeoResponse fetchWikiGeoResponse(JSONObject object) {
+        WikiGeoResponse response = new WikiGeoResponse();
+        response.setBatchComplete(object.optBoolean("batch_complete"));
+        response.setQuery(fetchQueriesData(object.optJSONObject("query")));
+        return response;
+    }
+
+    public static List<WikiGeoObject> fetchQueriesData(JSONObject object) {
+        String val;
+        Iterator<String> it = object.keys();
+        List<WikiGeoObject> geoObjects = new ArrayList<>();
+        while (it.hasNext()) {
+            val = it.next();
+            JSONObject geoPage = object.optJSONObject(val);
+            geoObjects.add(fetchWikiGeoObject(geoPage));
+        }
+        return geoObjects;
+    }
+
+    public static WikiGeoObject fetchWikiGeoObject(JSONObject geoPage) {
+        WikiGeoObject object = new WikiGeoObject();
+        object.setPageId(geoPage.optLong("pageid"));
+        object.setNs(geoPage.optLong("ns"));
+        object.setTitle(geoPage.optString("title"));
+        object.setLatitude(geoPage.optDouble("lat"));
+        object.setLongitude(geoPage.optDouble("lon"));
+        object.setDistance(geoPage.optDouble("dist"));
+        object.setPrimary(geoPage.optString("primary"));
+        return object;
     }
 }
