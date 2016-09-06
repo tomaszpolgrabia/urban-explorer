@@ -211,4 +211,55 @@ public class WikiUtils {
         object.setPrimary(geoPage.optString("primary"));
         return object;
     }
+
+    public static void fetchAppData(final Context ctx,
+                                    final Double latitude,
+                                    final Double longitude,
+                                    final Double radius,
+                                    final Long limit) {
+
+        fetchGeoSearchWikiMetadata(ctx, latitude, longitude, radius, limit, new WikiGeoResponseCallback() {
+            @Override
+            public void callback(WikiStatus status, WikiGeoResponse response) {
+                List<WikiGeoObject> geoData = response.getQuery();
+                if (geoData == null) {
+                    return;
+                }
+
+                List<Long> pageIds = new ArrayList<Long>();
+                for (WikiGeoObject wikiGeoObject : geoData) {
+                    pageIds.add(wikiGeoObject.getPageId());
+                }
+
+                fetchPageInfos(ctx,
+                    pageIds,
+                    new WikiResponseCallback() {
+                        @Override
+                        public void callback(WikiStatus status, WikiResponse response) {
+
+                        }
+                    });
+            }
+        });
+
+    }
+
+    public static void fetchPageInfos(Context ctx, List<Long> pageIds, final WikiResponseCallback callback) {
+        AQuery aq = new AQuery(ctx);
+        aq.ajax("FILL_URL_TO_FIND_DATA_BY_PAGEIDS", JSONObject.class, new AjaxCallback<JSONObject>() {
+            @Override
+            public void callback(String url, JSONObject object, AjaxStatus status) {
+                if (status.getCode() != 200) {
+                    try {
+                        callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
+                    } catch (Throwable t) {
+                        Log.e(CLASS_TAG, "General error", t);
+                        callback.callback(WikiStatus.GENERAL_ERROR, null);
+                    }
+                } else {
+                    callback.callback(WikiStatus.NETWORK_ERROR, null);
+                }
+            }
+        });
+    }
 }
