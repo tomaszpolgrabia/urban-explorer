@@ -9,9 +9,9 @@ public class WikiAppObject implements Serializable {
     private String url;
     private String thumbnail;
     private String title;
-    private String latitude;
-    private String longitude;
-    private String distance;
+    private Double latitude;
+    private Double longitude;
+    private Double distance;
 
     public String getUrl() {
         return url;
@@ -37,27 +37,27 @@ public class WikiAppObject implements Serializable {
         this.title = title;
     }
 
-    public String getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public String getDistance() {
+    public Double getDistance() {
         return distance;
     }
 
-    public void setDistance(String distance) {
+    public void setDistance(Double distance) {
         this.distance = distance;
     }
 

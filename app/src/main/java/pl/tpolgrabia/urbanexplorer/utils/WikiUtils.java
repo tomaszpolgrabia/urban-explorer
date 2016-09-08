@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiLocation;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiPage;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiResponse;
@@ -19,9 +20,7 @@ import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoObject;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponse;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponseCallback;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by tpolgrabia on 28.08.16.
@@ -223,21 +222,49 @@ public class WikiUtils {
         fetchGeoSearchWikiMetadata(ctx, latitude, longitude, radius, limit, new WikiGeoResponseCallback() {
             @Override
             public void callback(WikiStatus status, WikiGeoResponse response) {
-                List<WikiGeoObject> geoData = response.getQuery();
-                if (geoData == null) {
+                final List<WikiGeoObject> geoItems = response.getQuery();
+                if (geoItems == null) {
                     return;
                 }
 
                 List<Long> pageIds = new ArrayList<Long>();
-                for (WikiGeoObject wikiGeoObject : geoData) {
+                for (WikiGeoObject wikiGeoObject : geoItems) {
                     pageIds.add(wikiGeoObject.getPageId());
+                }
+
+                final Map<Long, WikiGeoObject> geoItemsMap = new HashMap<>();
+                for (WikiGeoObject geoItem : geoItems) {
+                    geoItemsMap.put(geoItem.getPageId(), geoItem);
                 }
 
                 WikiResponseCallback tcallback = callback;
 
                 fetchPageInfos(ctx,
                     pageIds,
-                    tcallback);
+                    new WikiResponseCallback() {
+                        @Override
+                        public void callback(WikiStatus status, WikiResponse response) {
+                            if (status != WikiStatus.SUCCESS) {
+                                return;
+                            }
+
+                            List<WikiAppObject> results = new ArrayList<WikiAppObject>();
+                            List<WikiPage> pages = response.getPages();
+                            for (WikiPage page : pages) {
+                                WikiAppObject appObject = new WikiAppObject();
+                                appObject.setTitle(page.getTitle());
+                                appObject.setDistance(geoItemsMap.get(page.getPageId()).getDistance());
+                                appObject.setLatitude(page.getCoordinates().get(0).getLatitude());
+                                appObject.setLongitude(page.getCoordinates().get(0).getLongitude());
+                                appObject.setThumbnail(page.getThumbnail().getSource());
+                                appObject.setUrl(page.getThumbnail().getSource());
+                                results.add(appObject);
+                            }
+
+                            // TODO here add callback invocation with result
+
+                        }
+                    });
             }
         });
 
@@ -269,4 +296,6 @@ public class WikiUtils {
             }
         });
     }
+
+
 }
