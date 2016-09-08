@@ -5,6 +5,7 @@ import android.util.Log;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -216,7 +217,8 @@ public class WikiUtils {
                                     final Double latitude,
                                     final Double longitude,
                                     final Double radius,
-                                    final Long limit) {
+                                    final Long limit,
+                                    final WikiResponseCallback callback) {
 
         fetchGeoSearchWikiMetadata(ctx, latitude, longitude, radius, limit, new WikiGeoResponseCallback() {
             @Override
@@ -231,14 +233,11 @@ public class WikiUtils {
                     pageIds.add(wikiGeoObject.getPageId());
                 }
 
+                WikiResponseCallback tcallback = callback;
+
                 fetchPageInfos(ctx,
                     pageIds,
-                    new WikiResponseCallback() {
-                        @Override
-                        public void callback(WikiStatus status, WikiResponse response) {
-
-                        }
-                    });
+                    tcallback);
             }
         });
 
@@ -246,7 +245,15 @@ public class WikiUtils {
 
     public static void fetchPageInfos(Context ctx, List<Long> pageIds, final WikiResponseCallback callback) {
         AQuery aq = new AQuery(ctx);
-        aq.ajax("FILL_URL_TO_FIND_DATA_BY_PAGEIDS", JSONObject.class, new AjaxCallback<JSONObject>() {
+        aq.ajax("https://en.wikipedia.org/w/api.php" +
+            "?action=query" +
+            "&prop=coordinates%7Cpageimages%7Cpageterms" +
+            "&colimit=50" +
+            "&piprop=thumbnail" +
+            "&pithumbsize=144" +
+            "&pilimit=50" +
+            "&wbptterms=description" +
+            "&pageids=" + StringUtils.join(pageIds, "|"), JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 if (status.getCode() != 200) {
