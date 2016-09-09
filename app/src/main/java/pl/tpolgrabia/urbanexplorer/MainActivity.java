@@ -246,7 +246,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         final Context ctx = this;
 
-        locationCallback.setLocationChangedCallback(new StandardLocationListenerCallback() {
+        locationCallback.addCallback(new StandardLocationListenerCallback() {
             @Override
             public void callback(Location location) {
                 double lat = location.getLatitude();
