@@ -192,6 +192,10 @@ public class HomeFragment extends Fragment  {
 
     private void fetchPanoramioPhotos() {
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        if (location == null) {
+            Toast.makeText(getActivity(), "Sorry, I didn't received yet any location update", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
         final String aqQuery = "http://www.panoramio.com/map/get_panoramas.php?" +
@@ -281,6 +285,7 @@ public class HomeFragment extends Fragment  {
 
     @Override
     public void onResume() {
+        super.onResume();
         updateLocationInfo();
     }
 
@@ -288,7 +293,8 @@ public class HomeFragment extends Fragment  {
         TextView locationInfo = (TextView) getView().findViewById(R.id.locationInfo);
         locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
-        if (currLocation != null) {
+        Log.v(CLASS_TAG, "Current location: " + currLocation + ", locationInfo: " + locationInfo);
+        if (currLocation != null && locationInfo != null) {
             // update home fragment's location info
             locationInfo.setText("Location: " + currLocation.getLatitude() + "," + currLocation.getLongitude());
         }
