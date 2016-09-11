@@ -11,6 +11,7 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -188,6 +189,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     }
 
     private void swipeDown() {
+        Toast.makeText(this, "Swiped down", Toast.LENGTH_SHORT).show();
 
     }
 

@@ -8,6 +8,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,7 +25,10 @@ import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -39,6 +43,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
     private static final String LOCATIONS_LIST_IMAGE_SIZE = "medium";
     private static final String LOCATIONS_ORDER = "popularity";
+    private static final int PANORAMIA_BULK_DATA_SIZE = 10;
     private boolean gpsLocationEnabled;
     private boolean networkLocationEnabled;
     private boolean locationEnabled;
@@ -49,14 +54,10 @@ public class HomeFragment extends Fragment implements LocationListener {
     private boolean initialized = false;
 
     private View inflatedView;
-    private TextView pageSizeWidget;
-    private TextView pageIdWidget;
     private Long pageId = 1L;
-    private ListView locations;
-    private ImageView prevWidget;
-    private ImageView nextWidget;
-    private Long photosCount;
-    private TextView locationsResultInfo;
+    private Semaphore loading = new Semaphore(1, true);
+    private List<PanoramioImageInfo> photos = new ArrayList<>();
+    private boolean photosInitialized = false;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -76,6 +77,8 @@ public class HomeFragment extends Fragment implements LocationListener {
             startActivityForResult(locationSettingsIntent, LOCATION_SETTINGS_REQUEST_ID);
             return;
         }
+
+        // loading.release();
 
     }
 
@@ -97,11 +100,12 @@ public class HomeFragment extends Fragment implements LocationListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         inflatedView = inflater.inflate(R.layout.fragment_home, container, false);
-        locations = (ListView)inflatedView.findViewById(R.id.locations);
+        ListView locations = (ListView)inflatedView.findViewById(R.id.locations);
+        final ListView finalLocations = locations;
         locations.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long rowId) {
-                PanoramioAdapter panAdapter = (PanoramioAdapter) locations.getAdapter();
+                PanoramioAdapter panAdapter = (PanoramioAdapter) finalLocations.getAdapter();
                 PanoramioImageInfo photoInfo = panAdapter.getItem(pos);
                 MainActivity activity = (MainActivity) getActivity();
                 activity.switchToPhoto(photoInfo);
@@ -122,16 +126,27 @@ public class HomeFragment extends Fragment implements LocationListener {
                                  int visibleItemCount,
                                  int totalItemCount) {
 
-                if (firstVisibleItem <= 0) {
-                    // scrolled to the top
-                    Log.v(CLASS_TAG, "Scrolled to the top");
-                }
+                try {
 
-                if (firstVisibleItem + visibleItemCount >= totalItemCount) {
-                    Log.v(CLASS_TAG, "Scrolled to the bottom");
-                    // scrolled to the bottom
-                    fetchAdditionalPhotos(firstVisibleItem, visibleItemCount);
+                    if (firstVisibleItem <= 0) {
+                        // scrolled to the top
+                        Log.v(CLASS_TAG, "Scrolled to the top");
+                    }
 
+                    if (firstVisibleItem + visibleItemCount >= totalItemCount) {
+                        Log.v(CLASS_TAG, "Scrolled to the bottom");
+                        // scrolled to the bottom
+                        final View fragView = getView();
+                        if (fragView == null) {
+                            Log.v(CLASS_TAG, "Frag still not initialized");
+                            return;
+                        }
+                        fetchAdditionalPhotos();
+
+                    }
+
+                } catch (InterruptedException e) {
+                    Log.e(CLASS_TAG, "Aquiring lock interrupted exception", e);
                 }
 
             }
@@ -159,100 +174,64 @@ public class HomeFragment extends Fragment implements LocationListener {
 //        );
 
         locations = (ListView)inflatedView.findViewById(R.id.locations);
-        inflatedView.findViewById(R.id.update_places).setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    fetchPanoramioLocations();
-                }
-            }
-        );
-
-        pageSizeWidget = (TextView) inflatedView.findViewById(R.id.locations_page_size);
-        pageIdWidget = (TextView) inflatedView.findViewById(R.id.locations_page_id);
-
-        pageIdWidget.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(CLASS_TAG, "Before text changed");
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                pageId = Math.max(1, NumberUtils.safeParseLong(charSequence));
-                Log.d(CLASS_TAG, "text changed");
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                Log.d(CLASS_TAG, "After text changed");
-            }
-        });
-
-        pageSizeWidget.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d(CLASS_TAG, "Before text changed");
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                fetchPanoramioLocations();
-                Log.d(CLASS_TAG, "text changed");
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                Log.d(CLASS_TAG, "After text changed");
-            }
-        });
-
-        prevWidget = (ImageView)inflatedView.findViewById(R.id.prev);
-        nextWidget = (ImageView)inflatedView.findViewById(R.id.next);
-
-        prevWidget.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (pageId > 1) {
-                    pageId--;
-                    pageIdWidget.setText(Long.toString(pageId));
-                    fetchPanoramioLocations();
-                }
-            }
-        });
-
-        nextWidget.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                pageId++;
-                pageIdWidget.setText(Long.toString(pageId));
-                fetchPanoramioLocations();
-            }
-        });
 
         initialized = true;
 
-        fetchAdditionalPhotos(0, 10);
+//        try {
+//            fetchAdditionalPhotos(0, PANORAMIA_BULK_DATA_SIZE);
+//        } catch (InterruptedException e) {
+//            Log.e(CLASS_TAG, "Acquiring lock interrupted", e);
+//        }
         // FIXME hardcoded values
 
         return inflatedView;
     }
 
-    private void fetchAdditionalPhotos(int firstVisibleItem, int visibleItemCount) {
+    private void fetchAdditionalPhotos() throws InterruptedException {
+
         if (!initialized) {
             Log.v(CLASS_TAG, "Fetching additional photos blocked till system is initialized");
             return;
         }
 
-        Log.v(CLASS_TAG, "Fetching additional photos");
-        Location location = locationService.getLastKnownLocation(locationProvider);
+        if (locationProvider == null) {
+            Log.i(CLASS_TAG, "Location providers not available");
+            Toast.makeText(getActivity(), "Location provicers not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (getView() == null) {
+            Log.v(CLASS_TAG, "Application still not initialized");
+            return;
+        }
+
+        final Location location = locationService.getLastKnownLocation(locationProvider);
+
+        if (location == null) {
+            Log.i(CLASS_TAG, "Location still not available");
+            Toast.makeText(getActivity(), "Location still not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Log.v(CLASS_TAG, "Fetching additional photos. Trying loading acquirng lock");
+        if (!loading.tryAcquire()) {
+            Log.v(CLASS_TAG, "Fetching additional photos. Loading in progress");
+            return;
+        }
+
+
+        int offset = photos.size();
+
+        Log.v(CLASS_TAG, "Fetching additional photos offset: " + offset + ", count: " + PANORAMIA_BULK_DATA_SIZE);
+        Log.d(CLASS_TAG, "Fetching location using " + locationProvider + " provider");
+
         PanoramioUtils.fetchPanoramioImages(
             getActivity(),
             location.getLatitude(),
             location.getLongitude(),
             fetchRadiusX(),
             fetchRadiusY(),
-            (long)(firstVisibleItem + visibleItemCount),
+            (long)(offset + PANORAMIA_BULK_DATA_SIZE),
             fetchLocationPageSize(),
             new PanoramioResponseCallback() {
                 @Override
@@ -263,21 +242,25 @@ public class HomeFragment extends Fragment implements LocationListener {
                         return;
                     }
 
-                    PanoramioAdapter adapter = (PanoramioAdapter) locations.getAdapter();
-                    if (adapter != null) {
-                        adapter.addAll(images);
+                    ListView locations = (ListView) getView().findViewById(R.id.locations);
+                    ArrayAdapter<PanoramioImageInfo> adapter = (ArrayAdapter<PanoramioImageInfo>) locations.getAdapter();
+                    photos.addAll(images);
+                    if (adapter == null) {
+                        locations.setAdapter(new PanoramioAdapter(getActivity(), R.id.list_item, images));
                     } else {
-                        locations.setAdapter(new PanoramioAdapter(getActivity(),
-                            R.layout.location_item,
-                            images));
+                        adapter.addAll(images);
                     }
+                    // locations.setSelection(photos.size() - 1 - PANORAMIA_BULK_DATA_SIZE);
 
                     // TODO loading on end scroll should now working
                     // TODO we can remove pagination
                     // TODO we can think about removing first items also and last if the number
                     // TODO of items exceeds the limit (to save the memory)
 
-                    Log.v(CLASS_TAG, "Finished loading additional photos");
+                    Log.v(CLASS_TAG, "Finished Fetching additional photos count: " + photos.size());
+
+                    photosInitialized = true;
+                    loading.release();
 
                 }
             }
@@ -304,11 +287,11 @@ public class HomeFragment extends Fragment implements LocationListener {
                     Long pageSize = fetchLocationPageSize();
                     Long start = (pageId - 1) * pageSize + 1;
                     Long end = pageId * pageSize;
-                    locationsResultInfo.setText("" + start + "-" + end + " from " + imagesCount);
 
                     ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
                         R.layout.location_item,
                         images);
+                    ListView locations = (ListView)getView().findViewById(R.id.locations);
                     locations.setAdapter(adapter);
                 }
             }
@@ -316,12 +299,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     }
 
     private Long fetchLocationPageSize() {
-        final CharSequence sPageSize = pageSizeWidget != null ? pageSizeWidget.getText() : null;
-        return NumberUtils.safeParseLong(sPageSize);
-    }
-
-    private Long fetchLocationPageId() {
-        return Math.max(0L, NumberUtils.safeParseLong(pageIdWidget.getText()));
+        return new Long(PANORAMIA_BULK_DATA_SIZE);
     }
 
     private Double fetchRadiusX() {
@@ -341,6 +319,13 @@ public class HomeFragment extends Fragment implements LocationListener {
         double lng = location.getLongitude();
         TextView locationInfo = (TextView) getActivity().findViewById(R.id.locationInfo);
         locationInfo.setText("Location: (" + lat + "," + lng + ")");
+        if (!photosInitialized) {
+            try {
+                fetchAdditionalPhotos();
+            } catch (InterruptedException e) {
+                Log.e(CLASS_TAG, "Failed acquirng loading lock", e);
+            }
+        }
     }
 
     @Override
