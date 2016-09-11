@@ -5,15 +5,31 @@ package pl.tpolgrabia.urbanexplorer.utils;
  */
 public class NumberUtils {
     public static Long safeParseLong(String s) {
-        if (s == null || "".equals(s)) {
+        if (s == null || "".equals(s.trim())) {
             return null;
         }
 
+        String trimmed = s.trim();
+
         try {
-            return Long.parseLong(s);
+            return Long.parseLong(trimmed);
         } catch (NumberFormatException e) {
             return null;
         }
 
+    }
+
+    public static Double safeParseDouble(String s) {
+        if (s == null || "".equals(s.trim())) {
+            return null;
+        }
+
+        String trimmed = s.trim();
+
+        try {
+            return Double.parseDouble(trimmed);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

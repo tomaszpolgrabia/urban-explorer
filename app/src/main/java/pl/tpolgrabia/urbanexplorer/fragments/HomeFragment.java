@@ -290,7 +290,12 @@ public class HomeFragment extends Fragment  {
     }
 
     public void updateLocationInfo() {
-        TextView locationInfo = (TextView) getView().findViewById(R.id.locationInfo);
+        final View view = getView();
+        if (view == null) {
+            Log.wtf(CLASS_TAG, "Fragment has no view");
+            return;
+        }
+        TextView locationInfo = (TextView) view.findViewById(R.id.locationInfo);
         locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
         Log.v(CLASS_TAG, "Current location: " + currLocation + ", locationInfo: " + locationInfo);

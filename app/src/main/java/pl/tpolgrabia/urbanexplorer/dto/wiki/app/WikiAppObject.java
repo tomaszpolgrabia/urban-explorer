@@ -12,6 +12,7 @@ public class WikiAppObject implements Serializable {
     private Double latitude;
     private Double longitude;
     private Double distance;
+    private Long pageId;
 
     public String getUrl() {
         return url;
@@ -71,5 +72,13 @@ public class WikiAppObject implements Serializable {
             ", longitude='" + longitude + '\'' +
             ", distance='" + distance + '\'' +
             '}';
+    }
+
+    public Long getPageId() {
+        return pageId;
+    }
+
+    public void setPageId(Long pageId) {
+        this.pageId = pageId;
     }
 }

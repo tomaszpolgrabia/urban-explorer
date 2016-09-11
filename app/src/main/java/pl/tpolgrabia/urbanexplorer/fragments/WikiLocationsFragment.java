@@ -22,13 +22,14 @@ import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
-import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiPage;
-import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiResponse;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
+import pl.tpolgrabia.urbanexplorer.utils.WikiAppResponseCallback;
 import pl.tpolgrabia.urbanexplorer.utils.WikiUtils;
+
+import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -73,17 +74,17 @@ public class WikiLocationsFragment extends Fragment {
                 final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
                 Editable search_limit = ((EditText) inflatedView.findViewById(R.id.wiki_search_limit)).getText();
                 Editable radius_limit = ((EditText) inflatedView.findViewById(R.id.wiki_search_radius)).getText();
-                WikiUtils.fetchNearPlaces(
-                    getActivity(),
+
+
+                WikiUtils.fetchAppData(getActivity(),
                     location.getLatitude(),
                     location.getLongitude(),
+                    NumberUtils.safeParseDouble(search_limit != null ? search_limit.toString() : null),
                     NumberUtils.safeParseLong(
-                            search_limit != null ? search_limit.toString(): null),
-                    NumberUtils.safeParseLong(
-                            radius_limit != null ? radius_limit.toString() : null),
-                    new WikiResponseCallback() {
+                        radius_limit != null ? radius_limit.toString() : null),
+                    new WikiAppResponseCallback() {
                         @Override
-                        public void callback(WikiStatus status, final WikiResponse response) {
+                        public void callback(WikiStatus status, final List<WikiAppObject> appObjects) {
                             // handling here wiki locations
                             if (status != WikiStatus.SUCCESS) {
                                 Toast.makeText(getActivity(), "Sorry, currently we have problem with interfacing wiki" +
@@ -101,43 +102,45 @@ public class WikiLocationsFragment extends Fragment {
 //                                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
 //                                            Uri.parse(item.get);
 //                                    startActivity(intent);
-                                    final WikiPage item = response.getPages().get(position);
+                                    final WikiAppObject item = appObjects.get(position);
                                     new AQuery(getActivity()).ajax(
-                                            "https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids="
-                                                    + item.getPageId() + "&inprop=url&format=json",
-                                            JSONObject.class,
-                                            new AjaxCallback<JSONObject>() {
-                                                @Override
-                                                public void callback(String url, JSONObject object, AjaxStatus status) {
-                                                    if (status.getCode() != 200) {
-                                                        Toast.makeText(getActivity(),
-                                                                "Sorry, network error code: " + status.getCode(),
-                                                                Toast.LENGTH_LONG)
-                                                                .show();
-                                                        return;
-                                                    }
+                                        "https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids="
+                                            + item.getPageId() + "&inprop=url&format=json",
+                                        JSONObject.class,
+                                        new AjaxCallback<JSONObject>() {
+                                            @Override
+                                            public void callback(String url, JSONObject object, AjaxStatus status) {
+                                                if (status.getCode() != 200) {
+                                                    Toast.makeText(getActivity(),
+                                                        "Sorry, network error code: " + status.getCode(),
+                                                        Toast.LENGTH_LONG)
+                                                        .show();
+                                                    return;
+                                                }
 
 
-                                                    try {
-                                                        String wikiUrl = object.getJSONObject("query")
-                                                                .getJSONObject("pages")
-                                                                .getJSONObject(item.getPageId().toString())
-                                                                .getString("fullurl");
-                                                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                                                                Uri.parse(wikiUrl));
-                                                        startActivity(intent);
-                                                    } catch (JSONException e) {
-                                                        Log.e(CLASS_TAG, "Error", e);
-                                                    }
+                                                try {
+                                                    String wikiUrl = object.getJSONObject("query")
+                                                        .getJSONObject("pages")
+                                                        .getJSONObject(item.getPageId().toString())
+                                                        .getString("fullurl");
+                                                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                                                        Uri.parse(wikiUrl));
+                                                    startActivity(intent);
+                                                } catch (JSONException e) {
+                                                    Log.e(CLASS_TAG, "Error", e);
                                                 }
                                             }
+                                        }
                                     );
                                     return false;
                                 }
                             });
-                            locations.setAdapter(new WikiLocationsAdapter(getActivity(), response.getPages()));
+                            locations.setAdapter(new WikiLocationsAdapter(getActivity(), appObjects));
                         }
-                    });
+                    }
+                );
+
             }
         });
 

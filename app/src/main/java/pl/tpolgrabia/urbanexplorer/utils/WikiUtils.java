@@ -2,6 +2,7 @@ package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
@@ -31,6 +32,8 @@ public class WikiUtils {
     private static final long WIKI_MIN_RADIUS = 10L;
     private static final Long WIKI_MAX_RESULTS_LIMIT = 500L;
     private static final Long WIKI_MIN_RESULTS = 10L;
+    private static final Double WIKI_STD_RADIUS = 10000.0;
+    private static final Long WIKI_STD_LIMIT = 10L;
 
     public static void fetchNearPlaces(Context ctx,
                                        final double latitude,
@@ -157,22 +160,32 @@ public class WikiUtils {
                                                   Double radius,
                                                   Long limit,
                                                   final WikiGeoResponseCallback callback) {
+
+        if (radius == null) {
+            radius = WIKI_STD_RADIUS;
+        }
+
+        if (limit ==  null) {
+            limit = WIKI_STD_LIMIT;
+        }
+
         AQuery aq = new AQuery(ctx);
-        aq.ajax("https://en.wikipedia.org/w/api.php" +
-            "?action=query" +
-            "&list=geosearch" +
-            "&gscoord=" + latitude + "%7C" + longitude +
-            "gsradius=" + radius +
-            "&gslimit=" + limit, JSONObject.class, new AjaxCallback<JSONObject>() {
+        aq.ajax("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=52.2181737%7C21.1530673&gsradius=10000&gslimit=10&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
+                Log.v(CLASS_TAG, "Finished waiting for " + url
+                    + " with status " + status.getCode() + ":" + status.getMessage()
+                    + " and response:  " + object);
                 if (status.getCode() == 200) {
                     try {
                         callback.callback(WikiStatus.SUCCESS, fetchWikiGeoResponse(object));
                     } catch (Throwable t) {
+                        Log.e(CLASS_TAG, "General error during fetching", t);
                         callback.callback(WikiStatus.GENERAL_ERROR, null);
                     }
                 } else {
+                    Log.e(CLASS_TAG, "Couldn't fetch wiki metadata " +  object
+                        + ", status: " + status.getCode() + ": " + status.getMessage() + " from url: " + url);
                     callback.callback(WikiStatus.NETWORK_ERROR, null);
                 }
                 super.callback(url, object, status);
@@ -184,17 +197,16 @@ public class WikiUtils {
     public static WikiGeoResponse fetchWikiGeoResponse(JSONObject object) {
         WikiGeoResponse response = new WikiGeoResponse();
         response.setBatchComplete(object.optBoolean("batch_complete"));
-        response.setQuery(fetchQueriesData(object.optJSONObject("query")));
+        response.setQuery(fetchQueriesData(object.optJSONObject("query").optJSONArray("geosearch")));
         return response;
     }
 
-    public static List<WikiGeoObject> fetchQueriesData(JSONObject object) {
-        String val;
-        Iterator<String> it = object.keys();
+    public static List<WikiGeoObject> fetchQueriesData(JSONArray object) {
         List<WikiGeoObject> geoObjects = new ArrayList<>();
-        while (it.hasNext()) {
-            val = it.next();
-            JSONObject geoPage = object.optJSONObject(val);
+        int n = object.length();
+        int idx;
+        for (idx = 0; idx < n; idx++)  {
+            JSONObject geoPage = object.optJSONObject(idx);
             geoObjects.add(fetchWikiGeoObject(geoPage));
         }
         return geoObjects;
@@ -217,11 +229,19 @@ public class WikiUtils {
                                     final Double longitude,
                                     final Double radius,
                                     final Long limit,
-                                    final WikiResponseCallback callback) {
+                                    final WikiAppResponseCallback callback) {
 
         fetchGeoSearchWikiMetadata(ctx, latitude, longitude, radius, limit, new WikiGeoResponseCallback() {
             @Override
             public void callback(WikiStatus status, WikiGeoResponse response) {
+
+                Log.v(CLASS_TAG, "Fetching finished with status: " + status + " and values: " + response);
+
+                if (status != WikiStatus.SUCCESS) {
+                    Toast.makeText(ctx, "Sorry, couldn't fetch wiki metadata", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 final List<WikiGeoObject> geoItems = response.getQuery();
                 if (geoItems == null) {
                     return;
@@ -237,7 +257,6 @@ public class WikiUtils {
                     geoItemsMap.put(geoItem.getPageId(), geoItem);
                 }
 
-                WikiResponseCallback tcallback = callback;
 
                 fetchPageInfos(ctx,
                     pageIds,
@@ -245,6 +264,7 @@ public class WikiUtils {
                         @Override
                         public void callback(WikiStatus status, WikiResponse response) {
                             if (status != WikiStatus.SUCCESS) {
+                                callback.callback(WikiStatus.NETWORK_ERROR, null);
                                 return;
                             }
 
@@ -256,12 +276,17 @@ public class WikiUtils {
                                 appObject.setDistance(geoItemsMap.get(page.getPageId()).getDistance());
                                 appObject.setLatitude(page.getCoordinates().get(0).getLatitude());
                                 appObject.setLongitude(page.getCoordinates().get(0).getLongitude());
-                                appObject.setThumbnail(page.getThumbnail().getSource());
-                                appObject.setUrl(page.getThumbnail().getSource());
+                                final WikiThumbnail thumbonail = page.getThumbnail();
+                                final String thumSource = thumbonail != null ? thumbonail.getSource() : null;
+                                appObject.setThumbnail(thumSource);
+                                appObject.setUrl(thumSource);
+                                appObject.setPageId(page.getPageId());
                                 results.add(appObject);
                             }
 
                             // TODO here add callback invocation with result
+
+                            callback.callback(WikiStatus.SUCCESS, results);
 
                         }
                     });
@@ -280,10 +305,11 @@ public class WikiUtils {
             "&pithumbsize=144" +
             "&pilimit=50" +
             "&wbptterms=description" +
-            "&pageids=" + StringUtils.join(pageIds, "|"), JSONObject.class, new AjaxCallback<JSONObject>() {
+            "&pageids=" + StringUtils.join(pageIds, "|") +
+            "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
-                if (status.getCode() != 200) {
+                if (status.getCode() == 200) {
                     try {
                         callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
                     } catch (Throwable t) {
