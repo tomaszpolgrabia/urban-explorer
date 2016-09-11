@@ -46,6 +46,7 @@ public class HomeFragment extends Fragment implements LocationListener {
     private String locationProvider;
     private boolean locationServicesActivated = false;
     private AQuery aq;
+    private boolean initialized = false;
 
     private View inflatedView;
     private TextView pageSizeWidget;
@@ -123,38 +124,13 @@ public class HomeFragment extends Fragment implements LocationListener {
 
                 if (firstVisibleItem <= 0) {
                     // scrolled to the top
+                    Log.v(CLASS_TAG, "Scrolled to the top");
                 }
 
                 if (firstVisibleItem + visibleItemCount >= totalItemCount) {
+                    Log.v(CLASS_TAG, "Scrolled to the bottom");
                     // scrolled to the bottom
-                    Location location = locationService.getLastKnownLocation(locationProvider);
-                    PanoramioUtils.fetchPanoramioImages(
-                        getActivity(),
-                        location.getLatitude(),
-                        location.getLongitude(),
-                        fetchRadiusX(),
-                        fetchRadiusY(),
-                        (long)(firstVisibleItem + visibleItemCount),
-                        fetchLocationPageSize(),
-                        new PanoramioResponseCallback() {
-                            @Override
-                            public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
-                                if (status != PanoramioResponseStatus.SUCCESS) {
-                                    return;
-                                }
-
-                                PanoramioAdapter adapter = (PanoramioAdapter) locations.getAdapter();
-                                adapter.addAll(images);
-
-                                // TODO loading on end scroll should now working
-                                // TODO we can remove pagination
-                                // TODO we can think about removing first items also and last if the number
-                                // TODO of items exceeds the limit (to save the memory)
-
-                            }
-                        }
-
-                    );
+                    fetchAdditionalPhotos(firstVisibleItem, visibleItemCount);
 
                 }
 
@@ -254,7 +230,59 @@ public class HomeFragment extends Fragment implements LocationListener {
             }
         });
 
+        initialized = true;
+
+        fetchAdditionalPhotos(0, 10);
+        // FIXME hardcoded values
+
         return inflatedView;
+    }
+
+    private void fetchAdditionalPhotos(int firstVisibleItem, int visibleItemCount) {
+        if (!initialized) {
+            Log.v(CLASS_TAG, "Fetching additional photos blocked till system is initialized");
+            return;
+        }
+
+        Log.v(CLASS_TAG, "Fetching additional photos");
+        Location location = locationService.getLastKnownLocation(locationProvider);
+        PanoramioUtils.fetchPanoramioImages(
+            getActivity(),
+            location.getLatitude(),
+            location.getLongitude(),
+            fetchRadiusX(),
+            fetchRadiusY(),
+            (long)(firstVisibleItem + visibleItemCount),
+            fetchLocationPageSize(),
+            new PanoramioResponseCallback() {
+                @Override
+                public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
+                    Log.v(CLASS_TAG, "Fetched with status: " + status + ", images: " + images + ", count: " +
+                        imagesCount);
+                    if (status != PanoramioResponseStatus.SUCCESS) {
+                        return;
+                    }
+
+                    PanoramioAdapter adapter = (PanoramioAdapter) locations.getAdapter();
+                    if (adapter != null) {
+                        adapter.addAll(images);
+                    } else {
+                        locations.setAdapter(new PanoramioAdapter(getActivity(),
+                            R.layout.location_item,
+                            images));
+                    }
+
+                    // TODO loading on end scroll should now working
+                    // TODO we can remove pagination
+                    // TODO we can think about removing first items also and last if the number
+                    // TODO of items exceeds the limit (to save the memory)
+
+                    Log.v(CLASS_TAG, "Finished loading additional photos");
+
+                }
+            }
+
+        );
     }
 
     private void fetchPanoramioLocations() {
@@ -288,7 +316,8 @@ public class HomeFragment extends Fragment implements LocationListener {
     }
 
     private Long fetchLocationPageSize() {
-        return NumberUtils.safeParseLong(pageSizeWidget.getText());
+        final CharSequence sPageSize = pageSizeWidget != null ? pageSizeWidget.getText() : null;
+        return NumberUtils.safeParseLong(sPageSize);
     }
 
     private Long fetchLocationPageId() {
