@@ -1,6 +1,8 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -43,7 +45,7 @@ public class PanoramioShowerFragment extends Fragment {
             return inflatedView;
         }
 
-        PanoramioImageInfo imageInfo = (PanoramioImageInfo) arguments.getSerializable(PANORAMIO_PHOTO_ARG_KEY);
+        final PanoramioImageInfo imageInfo = (PanoramioImageInfo) arguments.getSerializable(PANORAMIO_PHOTO_ARG_KEY);
 
         if (imageInfo != null) {
             ImageLoader.getInstance().displayImage(
@@ -65,6 +67,16 @@ public class PanoramioShowerFragment extends Fragment {
 
             photoLocation = (TextView)inflatedView.findViewById(R.id.photo_location);
             photoLocation.setText(imageInfo.getLatitude() + "," + imageInfo.getLongitude());
+            photoLocation.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                            Uri.parse("http://maps.google.com/maps?daddr=" + imageInfo.getLatitude() + "," +
+                                    imageInfo.getLongitude()));
+                    startActivity(intent);
+                    return true;
+                }
+            });
 
         }
 

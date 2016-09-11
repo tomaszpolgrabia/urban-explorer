@@ -16,10 +16,12 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.widget.Toast;
+import com.crashlytics.android.Crashlytics;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import io.fabric.sdk.android.Fabric;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
@@ -92,6 +94,8 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
         gestureDetector = new GestureDetectorCompat(this, this);
         locationCallback = new StandardLocationListener();
         initLocalication();
+        Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
+        Fabric.with(fabric);
     }
 
     @Override
@@ -151,6 +155,14 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+        if (e1 == null) {
+            return false;
+        }
+
+        if (e2 == null) {
+            return false;
+        }
 
         float diffx = e2.getX() - e1.getX();
         float diffy = e2.getY() - e1.getY();
