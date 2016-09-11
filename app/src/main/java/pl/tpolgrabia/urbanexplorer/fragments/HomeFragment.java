@@ -40,7 +40,6 @@ public class HomeFragment extends Fragment  {
     private Long pageId = 1L;
     private Semaphore loading = new Semaphore(1, true);
     private List<PanoramioImageInfo> photos = new ArrayList<>();
-    private boolean photosInitialized = false;
     private String locationProvider;
     private boolean noMorePhotos = false;
 
@@ -140,35 +139,7 @@ public class HomeFragment extends Fragment  {
             }
         });
 
-        //        getActivity().findViewById(R.id.update_places).setOnClickListener(
-//            new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    Location location = locationService.getLastKnownLocation(locationProvider);
-//                    aq.ajax("https://maps.googleapis.com/maps/api/place/nearbysearch/output?" +
-//                        "key=" + AppConstants.GOOGLE_API_KEY
-//                        + "&location=" + location.getLatitude() + "," + location.getLongitude()
-//                        + "&radius" + safeParseDouble(aq.id(R.id.location_range).getText())
-//                        + "&rankby=distance",
-//                        JSONObject.class,
-//                        new AjaxCallback<JSONObject>() {
-//                            @Override
-//                            public void callback(String url, JSONObject object, AjaxStatus status) {
-//                                object
-//                            }
-//                        });
-//                }
-//            }
-//        );
-
         initialized = true;
-
-//        try {
-//            fetchAdditionalPhotos(0, PANORAMIA_BULK_DATA_SIZE);
-//        } catch (InterruptedException e) {
-//            Log.e(CLASS_TAG, "Acquiring lock interrupted", e);
-//        }
-        // FIXME hardcoded values
 
         return inflatedView;
     }
@@ -242,27 +213,18 @@ public class HomeFragment extends Fragment  {
                     } else {
                         adapter.addAll(images);
                     }
-                    // locations.setSelection(photos.size() - 1 - PANORAMIA_BULK_DATA_SIZE);
 
-                    // TODO loading on end scroll should now working
-                    // TODO we can remove pagination
                     // TODO we can think about removing first items also and last if the number
                     // TODO of items exceeds the limit (to save the memory)
 
                     Log.v(CLASS_TAG, "Finished Fetching additional photos count: " + photos.size());
 
-                    photosInitialized = true;
                     loading.release();
 
                 }
             }
 
         );
-    }
-
-    private void fetchPanoramioLocations() {
-
-        fetchPanoramioPhotos();
     }
 
     private void fetchPanoramioPhotos() {
