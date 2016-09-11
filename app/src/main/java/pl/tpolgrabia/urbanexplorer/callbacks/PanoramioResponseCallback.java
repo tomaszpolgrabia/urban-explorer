@@ -1,6 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.callbacks;
 
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
+
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 
 import java.util.List;
 

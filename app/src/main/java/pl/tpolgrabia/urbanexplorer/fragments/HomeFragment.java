@@ -1,16 +1,10 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
-
-import android.content.Intent;
+import android.content.Context;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,35 +15,24 @@ import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
-import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
+import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static android.content.Context.LOCATION_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment implements LocationListener {
+public class HomeFragment extends Fragment  {
 
     private static final String CLASS_TAG = HomeFragment.class.getSimpleName();
-    private static final long MIN_TIME = 60000;
-    private static final float MIN_DISTANCE = 100;
-    private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
-    private static final String LOCATIONS_LIST_IMAGE_SIZE = "medium";
-    private static final String LOCATIONS_ORDER = "popularity";
+
     private static final int PANORAMIA_BULK_DATA_SIZE = 10;
-    private boolean gpsLocationEnabled;
-    private boolean networkLocationEnabled;
-    private boolean locationEnabled;
     private LocationManager locationService;
-    private String locationProvider;
-    private boolean locationServicesActivated = false;
     private AQuery aq;
     private boolean initialized = false;
 
@@ -58,6 +41,8 @@ public class HomeFragment extends Fragment implements LocationListener {
     private Semaphore loading = new Semaphore(1, true);
     private List<PanoramioImageInfo> photos = new ArrayList<>();
     private boolean photosInitialized = false;
+    private String locationProvider;
+    private boolean noMorePhotos = false;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -67,18 +52,21 @@ public class HomeFragment extends Fragment implements LocationListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         aq = new AQuery(getActivity());
-
-        locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-
-        checkLocationSourceAvailability();
-
-        if (!locationEnabled) {
-            Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivityForResult(locationSettingsIntent, LOCATION_SETTINGS_REQUEST_ID);
-            return;
-        }
-
-        // loading.release();
+        MainActivity mainActivity = ((MainActivity) getActivity());
+        mainActivity.getLocationCallback()
+            .addCallback(new StandardLocationListenerCallback() {
+                @Override
+                public void callback(Location location) {
+                    noMorePhotos = false;
+                    photos = new ArrayList<>();
+                    updateLocationInfo();
+                    try {
+                        fetchAdditionalPhotos();
+                    } catch (InterruptedException e) {
+                        Log.e(CLASS_TAG, "Failed trying acquring lock to load photos", e);
+                    }
+                }
+            });
 
     }
 
@@ -173,8 +161,6 @@ public class HomeFragment extends Fragment implements LocationListener {
 //            }
 //        );
 
-        locations = (ListView)inflatedView.findViewById(R.id.locations);
-
         initialized = true;
 
 //        try {
@@ -188,6 +174,11 @@ public class HomeFragment extends Fragment implements LocationListener {
     }
 
     private void fetchAdditionalPhotos() throws InterruptedException {
+
+        if (noMorePhotos) {
+            Log.v(CLASS_TAG, "No more photos - last query was zero result");
+            return;
+        }
 
         if (!initialized) {
             Log.v(CLASS_TAG, "Fetching additional photos blocked till system is initialized");
@@ -245,6 +236,7 @@ public class HomeFragment extends Fragment implements LocationListener {
                     ListView locations = (ListView) getView().findViewById(R.id.locations);
                     ArrayAdapter<PanoramioImageInfo> adapter = (ArrayAdapter<PanoramioImageInfo>) locations.getAdapter();
                     photos.addAll(images);
+                    noMorePhotos = images.isEmpty();
                     if (adapter == null) {
                         locations.setAdapter(new PanoramioAdapter(getActivity(), R.id.list_item, images));
                     } else {
@@ -270,7 +262,11 @@ public class HomeFragment extends Fragment implements LocationListener {
 
     private void fetchPanoramioLocations() {
 
-        final Location location = locationService.getLastKnownLocation(locationProvider);
+        fetchPanoramioPhotos();
+    }
+
+    private void fetchPanoramioPhotos() {
+        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
         PanoramioUtils.fetchPanoramioImages(
@@ -313,88 +309,25 @@ public class HomeFragment extends Fragment implements LocationListener {
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        Log.i(CLASS_TAG, "Location provider changed: " + location);
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
-        TextView locationInfo = (TextView) getActivity().findViewById(R.id.locationInfo);
-        locationInfo.setText("Location: (" + lat + "," + lng + ")");
-        if (!photosInitialized) {
-            try {
-                fetchAdditionalPhotos();
-            } catch (InterruptedException e) {
-                Log.e(CLASS_TAG, "Failed acquirng loading lock", e);
-            }
-        }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        // Log.i(CLASS_TAG, "Location provider status changed")
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        Log.i(CLASS_TAG, "Provider " + provider + " enabled");
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Log.i(CLASS_TAG, "Provider " + provider + " disabled");
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
-
-        if (locationProvider != null) {
-            locationService.requestLocationUpdates(locationProvider,
-                MIN_TIME,
-                MIN_DISTANCE,
-                this);
-            locationServicesActivated = true;
-            Toast.makeText(getActivity(), "Location resumed", Toast.LENGTH_LONG).show();
-        }
+        locationProvider = LocationUtils.getDefaultLocation(getActivity());
+        updateLocationInfo();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (locationServicesActivated) {
-            locationService.removeUpdates(this);
-        }
-    }
-
-    private void checkLocationSourceAvailability() {
-        gpsLocationEnabled = locationService.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        networkLocationEnabled = locationService.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        locationEnabled = gpsLocationEnabled || networkLocationEnabled;
-        if (gpsLocationEnabled) {
-            locationProvider = LocationManager.GPS_PROVIDER;
+    public void updateLocationInfo() {
+        final View view = getView();
+        if (view == null) {
+            Log.wtf(CLASS_TAG, "Fragment has no view");
             return;
         }
-
-        if (networkLocationEnabled) {
-            locationProvider = LocationManager.NETWORK_PROVIDER;
-            return;
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        switch (requestCode) {
-            case LOCATION_SETTINGS_REQUEST_ID:
-                checkLocationSourceAvailability();
-                if (!locationEnabled) {
-                    // sadly, nothing to do except from notifing user that program is not enable working
-                    Toast.makeText(getActivity(), "Sorry location services are not working." +
-                            " Program cannot work properly - check location settings to allow program working correctly",
-                        Toast.LENGTH_LONG).show();
-                }
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
+        TextView locationInfo = (TextView) view.findViewById(R.id.locationInfo);
+        locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        Log.v(CLASS_TAG, "Current location: " + currLocation + ", locationInfo: " + locationInfo);
+        if (currLocation != null && locationInfo != null) {
+            // update home fragment's location info
+            locationInfo.setText("Location: " + currLocation.getLatitude() + "," + currLocation.getLongitude());
         }
     }
 }

@@ -1,7 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,7 @@ import com.androidquery.AQuery;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 
 import java.util.List;
 
