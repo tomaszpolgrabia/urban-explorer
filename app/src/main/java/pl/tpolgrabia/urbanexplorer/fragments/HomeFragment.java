@@ -4,13 +4,13 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.androidquery.AQuery;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
@@ -33,15 +33,14 @@ public class HomeFragment extends Fragment  {
 
     private static final int PANORAMIA_BULK_DATA_SIZE = 10;
     private LocationManager locationService;
-    private AQuery aq;
     private boolean initialized = false;
 
     private View inflatedView;
-    private Long pageId = 1L;
-    private Semaphore loading = new Semaphore(1, true);
-    private List<PanoramioImageInfo> photos = new ArrayList<>();
+    private Long pageId;
+    private Semaphore loading;
+    private List<PanoramioImageInfo> photos;
     private String locationProvider;
-    private boolean noMorePhotos = false;
+    private boolean noMorePhotos;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -50,7 +49,21 @@ public class HomeFragment extends Fragment  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        aq = new AQuery(getActivity());
+        Log.v(CLASS_TAG, "onCreate");
+        pageId = 1L;
+        loading = new Semaphore(1, true);
+        photos = new ArrayList<>();
+        noMorePhotos = false;
+
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        initLocationCallback();
+    }
+
+    private void initLocationCallback() {
         MainActivity mainActivity = ((MainActivity) getActivity());
         mainActivity.getLocationCallback()
             .addCallback(new StandardLocationListenerCallback() {
@@ -66,7 +79,6 @@ public class HomeFragment extends Fragment  {
                     }
                 }
             });
-
     }
 
     private Double safeParseDouble(CharSequence text) {
@@ -273,6 +285,7 @@ public class HomeFragment extends Fragment  {
     @Override
     public void onResume() {
         super.onResume();
+        Log.v(CLASS_TAG, "onResume");
         locationProvider = LocationUtils.getDefaultLocation(getActivity());
         updateLocationInfo();
     }
@@ -292,4 +305,24 @@ public class HomeFragment extends Fragment  {
             locationInfo.setText("Location: " + currLocation.getLatitude() + "," + currLocation.getLongitude());
         }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.v(CLASS_TAG, "onPause");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.v(CLASS_TAG, "onDestroy");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Log.v(CLASS_TAG, "Saving state");
+    }
+
 }

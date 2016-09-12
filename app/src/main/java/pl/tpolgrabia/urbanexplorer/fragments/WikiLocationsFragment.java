@@ -72,6 +72,13 @@ public class WikiLocationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+
+                if (location == null) {
+                    Log.i(CLASS_TAG, "Sorry, location is still not available");
+                    Toast.makeText(getActivity(), "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Editable search_limit = ((EditText) inflatedView.findViewById(R.id.wiki_search_limit)).getText();
                 Editable radius_limit = ((EditText) inflatedView.findViewById(R.id.wiki_search_radius)).getText();
 

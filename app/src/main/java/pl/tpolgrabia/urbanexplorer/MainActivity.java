@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,6 +41,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     private static final int WIKI_FRAGMENT_ID = 1;
     private static final double MAX_FRAGMENT_ID = WIKI_FRAGMENT_ID;
     private static final double MIN_FRAGMENT_ID = HOME_FRAGMENT_ID;
+    private static final String FRAG_ID = "FRAG_ID";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private float SWIPE_THRESHOLD = 50;
@@ -67,7 +69,11 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(CLASS_TAG, "onCreate");
         setContentView(R.layout.activity_main);
+
+        currentFragmentId = 0;
+
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.navbar);
 //        setSupportActionBar(toolbar);
 
@@ -84,10 +90,10 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         ImageLoader.getInstance().init(config);
 
-        getSupportFragmentManager()
-            .beginTransaction()
-            .replace(R.id.fragments, new HomeFragment())
-            .commit();
+//        getSupportFragmentManager()
+//            .beginTransaction()
+//            .replace(R.id.fragments, new HomeFragment())
+//            .commit();
 
         // lLinearLayout locations = (LinearLayout) findViewById(R.id.locations);
         // locations.setOnTouchListener(new OnSwipeTouchListener);
@@ -96,6 +102,13 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
         initLocalication();
         Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
         Fabric.with(fabric);
+
+        Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(FRAG_ID) : null;
+        Log.v(CLASS_TAG, "Restored orig frag id: " + fragId);
+        currentFragmentId = fragId == null ? 0 : fragId;
+        Log.v(CLASS_TAG, "Set final frag id: " + fragId);
+        switchFragment();
+
     }
 
     @Override
@@ -303,7 +316,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     @Override
     protected void onResume() {
         super.onResume();
-
+        Log.v(CLASS_TAG, "onResume");
         if (locationProvider != null) {
             locationService.requestLocationUpdates(locationProvider,
                 AppConstants.MIN_TIME,
@@ -317,9 +330,16 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     @Override
     protected void onPause() {
         super.onPause();
+        Log.v(CLASS_TAG, "onPause");
         if (locationServicesActivated) {
             locationService.removeUpdates(locationCallback);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.v(CLASS_TAG, "onDestroy");
     }
 
     @Override
@@ -339,4 +359,14 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
                 super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.v(CLASS_TAG, "1 Saving current fragment id: " + currentFragmentId);
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(FRAG_ID, currentFragmentId);
+        Log.v(CLASS_TAG, "2 Saving current fragment id: " + currentFragmentId);
+    }
+
 }
