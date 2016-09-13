@@ -50,7 +50,8 @@
 
         <TextView android:id="@+id/photo_location"
                   android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
+                  android:layout_height="wrap_content"
+                  android:textColor="@color/blue" />
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package pl.tpolgrabia.urbanexplorer.dto;
+package pl.tpolgrabia.urbanexplorer.dto.panoramio;
 
 import java.io.Serializable;
 import java.util.List;

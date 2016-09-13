@@ -38,6 +38,7 @@
 
     </LinearLayout>
 
+
     <ListView
             android:id="@+id/locations"
             android:layout_width="match_parent"
@@ -46,42 +47,6 @@
 
     </ListView>
 
-    <TextView android:id="@+id/locations_result_info"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:gravity="center"/>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:gravity="center">
-        <ImageView android:id="@+id/prev"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:background="@drawable/nav_left"/>
-
-        <EditText
-                android:id="@+id/locations_page_id"
-                android:layout_width="40dp"
-                android:gravity="center"
-                android:layout_height="match_parent"
-                android:text="1"/>
-
-        <EditText
-                android:id="@+id/locations_page_size"
-                android:layout_width="40dp"
-                android:gravity="center"
-                android:layout_height="match_parent"
-                android:text="10"/>
-
-        <ImageView android:id="@+id/next"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:background="@drawable/nav_right"/>
-    </LinearLayout>
-
-    <Button android:id="@+id/update_places"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Fetch interesting places" />
 
 </LinearLayout>

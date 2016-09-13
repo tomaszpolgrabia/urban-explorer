@@ -1,15 +1,21 @@
 package pl.tpolgrabia.urbanexplorer.utils;
 
+import android.content.Context;
+import android.util.Log;
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioMapLocation;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioResponse;
+import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioMapLocation;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioResponse;
 import pl.tpolgrabia.urbanexplorer.exceptions.PanoramioResponseNotExpected;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +24,64 @@ import java.util.List;
  */
 public class PanoramioUtils {
 
-    private static SimpleDateFormat panoramioDateFormatter = new SimpleDateFormat("dd MMMMMMMMMMMMMM yyyy");
+    private static final String CLASS_TAG = PanoramioUtils.class.getSimpleName();
+
+    private static final String LOCATIONS_LIST_IMAGE_SIZE = "medium";
+    private static final String LOCATIONS_ORDER = "popularity";
+
+    public static void fetchPanoramioImages(
+        Context ctx,
+        Double lat,
+        Double lon,
+        Double radiusX,
+        Double radiusY,
+        Long offset,
+        Long count,
+        final PanoramioResponseCallback callback) {
+        AQuery aq = new AQuery(ctx);
+        final String aqQuery = "http://www.panoramio.com/map/get_panoramas.php?" +
+            "set=public" +
+            "&from=" + offset +
+            "&to="   + (offset + count) +
+            "&minx=" + (lon - radiusX) +
+            "&miny=" + (lat - radiusY) +
+            "&maxx=" + (lon + radiusX) +
+            "&maxy=" + (lat + radiusX) +
+            "&size=" + LOCATIONS_LIST_IMAGE_SIZE +
+            "&order=" + LOCATIONS_ORDER +
+            "&mapfilter=true";
+        Log.d(CLASS_TAG, "Query: " + aqQuery);
+        aq.ajax(aqQuery,
+            JSONObject.class,
+            new AjaxCallback<JSONObject>() {
+                @Override
+                public void callback(String url, JSONObject object, AjaxStatus status) {
+                    try {
+                        Log.d(CLASS_TAG, "Query code: " + status.getCode()
+                            + ", error: " + status.getError() + ", message: " + status.getMessage());
+                        if (object == null) {
+                            return;
+                        }
+
+                        List<PanoramioImageInfo> photosInfos;
+                        try {
+                            photosInfos = PanoramioUtils.fetchPanoramioImagesFromResponse(object.getJSONArray("photos"));
+                        } catch (ParseException e) {
+                            Log.w(CLASS_TAG, "Parse exception", e);
+                            photosInfos = new ArrayList<>();
+                        }
+
+                        Long photosCount = PanoramioUtils.fetchPanoramioImagesCountFromResponse(object);
+                        callback.callback(PanoramioResponseStatus.SUCCESS,
+                            photosInfos,
+                            photosCount);
+
+                    } catch (JSONException e) {
+                        Log.w(CLASS_TAG, "Json not supported format", e);
+                    }
+                }
+            });
+    }
 
     public static PanoramioImageInfo fetchPanoramioDto(JSONObject photo) throws JSONException, ParseException {
         PanoramioImageInfo info = new PanoramioImageInfo();

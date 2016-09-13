@@ -1,6 +1,11 @@
 package pl.tpolgrabia.urbanexplorer;
 
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -10,11 +15,16 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.widget.Toast;
+import com.crashlytics.android.Crashlytics;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import pl.tpolgrabia.urbanexplorer.dto.PanoramioImageInfo;
+import io.fabric.sdk.android.Fabric;
+import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
+import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
@@ -24,6 +34,7 @@ import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
 public class MainActivity extends ActionBarActivity implements GestureDetector.OnGestureListener {
 
+    private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
     private static final String CLASS_TAG = MainActivity.class.getSimpleName();
     private static final String PHOTO_BACKSTACK = "PHOTO_BACKSTACK";
     private static final float SWIPE_VELOCITY_THRESHOLD = 20;
@@ -31,15 +42,39 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     private static final int WIKI_FRAGMENT_ID = 1;
     private static final double MAX_FRAGMENT_ID = WIKI_FRAGMENT_ID;
     private static final double MIN_FRAGMENT_ID = HOME_FRAGMENT_ID;
+    private static final String FRAG_ID = "FRAG_ID";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private float SWIPE_THRESHOLD = 50;
     private int currentFragmentId = 0;
+    private LocationManager locationService;
+    private StandardLocationListener locationCallback;
+
+    private boolean gpsLocationEnabled;
+    private boolean networkLocationEnabled;
+    private boolean locationEnabled;
+    private String locationProvider;
+    private boolean locationServicesActivated = false;
+
+
+    public StandardLocationListener getLocationCallback() {
+        return locationCallback;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(CLASS_TAG, "onCreate");
         setContentView(R.layout.activity_main);
+
+        currentFragmentId = 0;
+
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.navbar);
 //        setSupportActionBar(toolbar);
 
@@ -56,15 +91,28 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         ImageLoader.getInstance().init(config);
 
-        getSupportFragmentManager()
-            .beginTransaction()
-            .add(R.id.fragments, new HomeFragment())
-            .commit();
+//        getSupportFragmentManager()
+//            .beginTransaction()
+//            .replace(R.id.fragments, new HomeFragment())
+//            .commit();
 
+        // lLinearLayout locations = (LinearLayout) findViewById(R.id.locations);
 
 
         // LinearLayout locations = (LinearLayout) findViewById(R.id.locations);
         // locations.setOnTouchListener(new OnSwipeTouchListener);
+        gestureDetector = new GestureDetectorCompat(this, this);
+        locationCallback = new StandardLocationListener();
+        initLocalication();
+        Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
+        Fabric.with(fabric);
+
+        Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(FRAG_ID) : null;
+        Log.v(CLASS_TAG, "Restored orig frag id: " + fragId);
+        currentFragmentId = fragId == null ? 0 : fragId;
+        Log.v(CLASS_TAG, "Set final frag id: " + fragId);
+        switchFragment();
+
         updateSwipeHandler();
     }
 
@@ -126,6 +174,14 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
+        if (e1 == null) {
+            return false;
+        }
+
+        if (e2 == null) {
+            return false;
+        }
+
         float diffx = e2.getX() - e1.getX();
         float diffy = e2.getY() - e1.getY();
         Log.d(CLASS_TAG, "Flinging... diffx: " + diffx + " diffy" + diffy
@@ -181,7 +237,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     }
 
     private void swipeLeft() {
-        currentFragmentId = (int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1);
+        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
         switchFragment();
     }
 
@@ -223,7 +279,111 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     }
 
     private void swipeRight() {
-        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
+        currentFragmentId = (int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1);
         switchFragment();
     }
+
+    private void initLocalication() {
+        if (checkForLocalicatonEnabled()) return;
+
+        final Context ctx = this;
+
+        locationCallback.addCallback(new StandardLocationListenerCallback() {
+            @Override
+            public void callback(Location location) {
+                double lat = location.getLatitude();
+                double lng = location.getLongitude();
+                // getSupportFragmentManager().findFragmentById(R.id.wiki_)
+                // TextView locationInfo = (TextView) findViewById(R.id.locationInfo);
+                // locationInfo.setText("Location: (" + lat + "," + lng + ")");
+                Toast.makeText(ctx, "Location: (" + lat + "," + lng + ")", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private boolean checkForLocalicatonEnabled() {
+
+        locationService = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        checkLocationSourceAvailability();
+
+        if (!locationEnabled) {
+            Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(locationSettingsIntent, LOCATION_SETTINGS_REQUEST_ID);
+            return true;
+        }
+        return false;
+    }
+
+    private void checkLocationSourceAvailability() {
+        gpsLocationEnabled = locationService.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        networkLocationEnabled = locationService.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        locationEnabled = gpsLocationEnabled || networkLocationEnabled;
+        if (gpsLocationEnabled) {
+            locationProvider = LocationManager.GPS_PROVIDER;
+            return;
+        }
+
+        if (networkLocationEnabled) {
+            locationProvider = LocationManager.NETWORK_PROVIDER;
+            return;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.v(CLASS_TAG, "onResume");
+        if (locationProvider != null) {
+            locationService.requestLocationUpdates(locationProvider,
+                AppConstants.MIN_TIME,
+                AppConstants.MIN_DISTANCE,
+                locationCallback);
+            locationServicesActivated = true;
+            Toast.makeText(this, "Location resumed", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.v(CLASS_TAG, "onPause");
+        if (locationServicesActivated) {
+            locationService.removeUpdates(locationCallback);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.v(CLASS_TAG, "onDestroy");
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        switch (requestCode) {
+            case LOCATION_SETTINGS_REQUEST_ID:
+                checkLocationSourceAvailability();
+                if (!locationEnabled) {
+                    // sadly, nothing to do except from notifing user that program is not enable working
+                    Toast.makeText(this, "Sorry location services are not working." +
+                            " Program cannot work properly - check location settings to allow program working correctly",
+                        Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.v(CLASS_TAG, "1 Saving current fragment id: " + currentFragmentId);
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(FRAG_ID, currentFragmentId);
+        Log.v(CLASS_TAG, "2 Saving current fragment id: " + currentFragmentId);
+    }
+
 }
