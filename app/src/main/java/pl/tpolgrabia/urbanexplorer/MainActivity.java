@@ -28,16 +28,17 @@ import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
+import pl.tpolgrabia.urbanexplorer.handlers.SwipeHandler;
 import pl.tpolgrabia.urbanexplorer.utils.ImageLoaderUtils;
+import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
-public class MainActivity extends ActionBarActivity implements GestureDetector.OnGestureListener {
+public class MainActivity extends ActionBarActivity {
 
     private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
     private static final String CLASS_TAG = MainActivity.class.getSimpleName();
     private static final String PHOTO_BACKSTACK = "PHOTO_BACKSTACK";
-    private static final float SWIPE_VELOCITY_THRESHOLD = 20;
     private static final int HOME_FRAGMENT_ID = 0;
     private static final int WIKI_FRAGMENT_ID = 1;
     private static final double MAX_FRAGMENT_ID = WIKI_FRAGMENT_ID;
@@ -45,16 +46,11 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     private static final String FRAG_ID = "FRAG_ID";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
-    private float SWIPE_THRESHOLD = 50;
     private int currentFragmentId = 0;
-    private LocationManager locationService;
     private StandardLocationListener locationCallback;
 
-    private boolean gpsLocationEnabled;
-    private boolean networkLocationEnabled;
-    private boolean locationEnabled;
-    private String locationProvider;
     private boolean locationServicesActivated = false;
+    private GestureDetector.OnGestureListener swipeHandler;
 
 
     public StandardLocationListener getLocationCallback() {
@@ -75,9 +71,6 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         currentFragmentId = 0;
 
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.navbar);
-//        setSupportActionBar(toolbar);
-
         // UNIVERSAL IMAGE LOADER SETUP
         DisplayImageOptions defaultOptions = ImageLoaderUtils.createDefaultOptions();
 
@@ -91,17 +84,8 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         ImageLoader.getInstance().init(config);
 
-//        getSupportFragmentManager()
-//            .beginTransaction()
-//            .replace(R.id.fragments, new HomeFragment())
-//            .commit();
-
-        // lLinearLayout locations = (LinearLayout) findViewById(R.id.locations);
-
-
-        // LinearLayout locations = (LinearLayout) findViewById(R.id.locations);
-        // locations.setOnTouchListener(new OnSwipeTouchListener);
-        gestureDetector = new GestureDetectorCompat(this, this);
+        swipeHandler = new SwipeHandler(this);
+        gestureDetector = new GestureDetectorCompat(this, swipeHandler);
         locationCallback = new StandardLocationListener();
         initLocalication();
         Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
@@ -120,7 +104,6 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.settings:
-                // TODO show settings fragment
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -144,101 +127,6 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         ctx.commit();
 
-    }
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-        if (e1 == null) {
-            return false;
-        }
-
-        if (e2 == null) {
-            return false;
-        }
-
-        float diffx = e2.getX() - e1.getX();
-        float diffy = e2.getY() - e1.getY();
-        Log.d(CLASS_TAG, "Flinging... diffx: " + diffx + " diffy" + diffy
-        + ", velocityx: " + velocityX + ", velocityY: " + velocityY);
-
-        if (Math.abs(diffx) > Math.abs(diffy)) {
-            // horizontal moves
-            if (Math.abs(diffx) < SWIPE_THRESHOLD) {
-                return true;
-            }
-
-            if (Math.abs(velocityX) < SWIPE_VELOCITY_THRESHOLD) {
-                return true;
-            }
-
-            if (diffx > 0) {
-                // swipe right
-                swipeRight();
-            } else {
-                // swipe left
-                swipeLeft();
-            }
-
-        } else {
-            // vertical moves
-
-            if (Math.abs(diffy) < SWIPE_THRESHOLD) {
-                return true;
-            }
-
-            if (Math.abs(velocityY) < SWIPE_VELOCITY_THRESHOLD) {
-                return true;
-            }
-
-            if (diffy > 0) {
-                // swipe down
-                swipeDown();
-            } else {
-                // swipe up
-                swipeUp();
-            }
-        }
-
-        return true;
-    }
-
-    private void swipeDown() {
-
-    }
-
-    private void swipeUp() {
-
-    }
-
-    private void swipeLeft() {
-        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
-        switchFragment();
     }
 
     private void switchFragment() {
@@ -275,10 +163,16 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
                 gestureDetector.onTouchEvent(ev);
             }
         });
-        gestureDetector = new GestureDetectorCompat(this, this);
+        swipeHandler = new SwipeHandler(this);
+        gestureDetector = new GestureDetectorCompat(this, swipeHandler);
     }
 
-    private void swipeRight() {
+    public void swipeLeft() {
+        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
+        switchFragment();
+    }
+
+    public void swipeRight() {
         currentFragmentId = (int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1);
         switchFragment();
     }
@@ -293,9 +187,6 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
             public void callback(Location location) {
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
-                // getSupportFragmentManager().findFragmentById(R.id.wiki_)
-                // TextView locationInfo = (TextView) findViewById(R.id.locationInfo);
-                // locationInfo.setText("Location: (" + lat + "," + lng + ")");
                 Toast.makeText(ctx, "Location: (" + lat + "," + lng + ")", Toast.LENGTH_SHORT).show();
             }
         });
@@ -303,11 +194,8 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
     private boolean checkForLocalicatonEnabled() {
 
-        locationService = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        checkLocationSourceAvailability();
-
-        if (!locationEnabled) {
+        final String locationProvider = LocationUtils.getDefaultLocation(this);
+        if (locationProvider == null) {
             Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivityForResult(locationSettingsIntent, LOCATION_SETTINGS_REQUEST_ID);
             return true;
@@ -315,26 +203,13 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
         return false;
     }
 
-    private void checkLocationSourceAvailability() {
-        gpsLocationEnabled = locationService.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        networkLocationEnabled = locationService.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        locationEnabled = gpsLocationEnabled || networkLocationEnabled;
-        if (gpsLocationEnabled) {
-            locationProvider = LocationManager.GPS_PROVIDER;
-            return;
-        }
-
-        if (networkLocationEnabled) {
-            locationProvider = LocationManager.NETWORK_PROVIDER;
-            return;
-        }
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
         Log.v(CLASS_TAG, "onResume");
+        String locationProvider = LocationUtils.getDefaultLocation(this);
         if (locationProvider != null) {
+            LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.requestLocationUpdates(locationProvider,
                 AppConstants.MIN_TIME,
                 AppConstants.MIN_DISTANCE,
@@ -349,6 +224,7 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
         super.onPause();
         Log.v(CLASS_TAG, "onPause");
         if (locationServicesActivated) {
+            LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.removeUpdates(locationCallback);
         }
     }
@@ -364,8 +240,8 @@ public class MainActivity extends ActionBarActivity implements GestureDetector.O
 
         switch (requestCode) {
             case LOCATION_SETTINGS_REQUEST_ID:
-                checkLocationSourceAvailability();
-                if (!locationEnabled) {
+                String locationProvider = LocationUtils.getDefaultLocation(this);
+                if (locationProvider == null) {
                     // sadly, nothing to do except from notifing user that program is not enable working
                     Toast.makeText(this, "Sorry location services are not working." +
                             " Program cannot work properly - check location settings to allow program working correctly",
