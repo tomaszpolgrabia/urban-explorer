@@ -133,10 +133,12 @@ public class MainActivity extends ActionBarActivity {
         switch (currentFragmentId) {
             case HOME_FRAGMENT_ID:
                 // switch to home fragment
+                setTitle("Panoramio search");
                 Log.d(CLASS_TAG, "Switching to home fragment");
                 switchFragment(new HomeFragment());
                 break;
             case WIKI_FRAGMENT_ID:
+                setTitle("Wiki search");
                 // switch to wiki fragment
                 Log.d(CLASS_TAG, "Switching to wiki fragment");
                 switchFragment(new WikiLocationsFragment());

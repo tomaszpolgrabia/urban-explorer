@@ -36,9 +36,4 @@
 
     </ListView>
 
-    <Button android:id="@+id/wiki_fetch_places"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Fetch wiki places in the neighbourhood"/>
-
 </LinearLayout>
