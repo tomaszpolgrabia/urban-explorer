@@ -8,6 +8,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,7 +41,7 @@ public class WikiLocationsFragment extends Fragment {
 
 
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
-    private static final double WIKI_DEF_RADIUS = 10000.0;
+    private static final double WIKI_DEF_RADIUS = 10.0;
     private static final long WIKI_DEF_LIMIT = 100;
     private LocationManager locationService;
     private TextView currentLocation;
@@ -72,11 +73,16 @@ public class WikiLocationsFragment extends Fragment {
     }
 
     private void fetchWikiLocations() {
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
+            return;
+        }
+        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
             Log.i(CLASS_TAG, "Sorry, location is still not available");
-            Toast.makeText(getActivity(), "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -85,7 +91,7 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        WikiUtils.fetchAppData(getActivity(),
+        WikiUtils.fetchAppData(activity,
             location.getLatitude(),
             location.getLongitude(),
             fetchRadiusLimit(),
@@ -95,7 +101,7 @@ public class WikiLocationsFragment extends Fragment {
                 public void callback(WikiStatus status, final List<WikiAppObject> appObjects) {
                     // handling here wiki locations
                     if (status != WikiStatus.SUCCESS) {
-                        Toast.makeText(getActivity(), "Sorry, currently we have problem with interfacing wiki" +
+                        Toast.makeText(activity, "Sorry, currently we have problem with interfacing wiki" +
                             ": " + status + ". Try again later", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -104,7 +110,7 @@ public class WikiLocationsFragment extends Fragment {
 
                     ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
                     locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
-                    locations.setAdapter(new WikiLocationsAdapter(getActivity(), appObjects));
+                    locations.setAdapter(new WikiLocationsAdapter(activity, appObjects));
                 }
             }
         );
@@ -131,7 +137,12 @@ public class WikiLocationsFragment extends Fragment {
     }
 
     public void updateLocationInfo() {
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
+            return;
+        }
+        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         if (location != null) {
             currentLocation.setText("Your current location: ("
                 + location.getLatitude()

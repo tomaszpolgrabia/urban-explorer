@@ -179,7 +179,7 @@ public class WikiUtils {
             "?action=query" +
             "&list=geosearch" +
             "&gscoord=" + latitude + "%7C" + longitude +
-            "&gsradius=" + radius +
+            "&gsradius=" + String.format("%.2f", radius) +
             "&gslimit=" + limit +
             "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override

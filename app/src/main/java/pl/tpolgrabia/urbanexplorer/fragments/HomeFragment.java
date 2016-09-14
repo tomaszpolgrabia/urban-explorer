@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +43,6 @@ public class HomeFragment extends Fragment  {
     private Long pageId;
     private Semaphore loading;
     private List<PanoramioImageInfo> photos;
-    private String locationProvider;
     private boolean noMorePhotos;
 
     public HomeFragment() {
@@ -171,22 +171,23 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
-        if (locationProvider == null) {
-            Log.i(CLASS_TAG, "Location providers not available");
-            Toast.makeText(getActivity(), "Location provicers not available", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         if (getView() == null) {
             Log.v(CLASS_TAG, "Application still not initialized");
             return;
         }
 
-        final Location location = locationService.getLastKnownLocation(locationProvider);
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
+            return;
+        }
+
+        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
             Log.i(CLASS_TAG, "Location still not available");
-            Toast.makeText(getActivity(), "Location still not available", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Location still not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -198,12 +199,10 @@ public class HomeFragment extends Fragment  {
 
 
         int offset = photos.size();
-
         Log.v(CLASS_TAG, "Fetching additional photos offset: " + offset + ", count: " + PANORAMIA_BULK_DATA_SIZE);
-        Log.d(CLASS_TAG, "Fetching location using " + locationProvider + " provider");
 
         PanoramioUtils.fetchPanoramioImages(
-            getActivity(),
+            activity,
             location.getLatitude(),
             location.getLongitude(),
             fetchRadiusX(),
@@ -224,7 +223,7 @@ public class HomeFragment extends Fragment  {
                     photos.addAll(images);
                     noMorePhotos = images.isEmpty();
                     if (adapter == null) {
-                        locations.setAdapter(new PanoramioAdapter(getActivity(), R.id.list_item, images));
+                        locations.setAdapter(new PanoramioAdapter(activity, R.id.list_item, images));
                     } else {
                         adapter.addAll(images);
                     }
@@ -243,11 +242,17 @@ public class HomeFragment extends Fragment  {
     }
 
     private void fetchPanoramioPhotos() {
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Log.w(CLASS_TAG, "Activity shouldn't be null. It isn't headless fragment");
+            return;
+        }
+
+        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
         PanoramioUtils.fetchPanoramioImages(
-            getActivity(),
+            activity,
             location.getLatitude(),
             location.getLongitude(),
             radiusX,
@@ -261,7 +266,7 @@ public class HomeFragment extends Fragment  {
                     Long start = (pageId - 1) * pageSize + 1;
                     Long end = pageId * pageSize;
 
-                    ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(getActivity(),
+                    ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(activity,
                         R.layout.location_item,
                         images);
                     ListView locations = (ListView)getView().findViewById(R.id.locations);
@@ -299,7 +304,6 @@ public class HomeFragment extends Fragment  {
     public void onResume() {
         super.onResume();
         Log.v(CLASS_TAG, "onResume");
-        locationProvider = LocationUtils.getDefaultLocation(getActivity());
         updateLocationInfo();
     }
 
@@ -310,8 +314,13 @@ public class HomeFragment extends Fragment  {
             return;
         }
         TextView locationInfo = (TextView) view.findViewById(R.id.locationInfo);
-        locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-        Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Log.w(CLASS_TAG, "Activity should'nt be null. No headless fragment");
+            return;
+        }
+        locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         Log.v(CLASS_TAG, "Current location: " + currLocation + ", locationInfo: " + locationInfo);
         if (currLocation != null && locationInfo != null) {
             // update home fragment's location info

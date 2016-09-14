@@ -248,7 +248,7 @@ public class MainActivity extends ActionBarActivity {
             String.valueOf(AppConstants.GPS_LOCATION_UPDATE_FREQ));
 
         Log.d(CLASS_TAG, "Pref GPS location update frequency " + prefGpsUpdateFreq);
-        return NumberUtils.safeParseLong(prefGpsUpdateFreq);
+        return Math.round(NumberUtils.safeParseDouble(prefGpsUpdateFreq)* 60.0 * 1000.0);
     }
 
     @Override
