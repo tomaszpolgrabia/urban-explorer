@@ -9,4 +9,6 @@ public class AppConstants {
     public static final float MIN_DISTANCE = 100;
     public static final float PAMNORAMIO_DEF_RADIUSX = 0.05f;
     public static final float PAMNORAMIO_DEF_RADIUSY = 0.05f;
+    public static final long GPS_LOCATION_UPDATE_FREQ = 15000;
+    public static final float GPS_LOCATION_DISTANCE_FREQ = MIN_DISTANCE;
 }

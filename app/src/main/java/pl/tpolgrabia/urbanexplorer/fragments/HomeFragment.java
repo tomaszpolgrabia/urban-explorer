@@ -289,7 +289,7 @@ public class HomeFragment extends Fragment  {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         final String pref_panoramio_radiusy = sharedPreferences.getString(
             "pref_panoramio_radiusy",
-            String.valueOf(AppConstants.PAMNORAMIO_DEF_RADIUSX));
+            String.valueOf(AppConstants.PAMNORAMIO_DEF_RADIUSY));
         Log.d(CLASS_TAG, "Panoramio radiusy pref equals " + pref_panoramio_radiusy);
         return Double.parseDouble(
             pref_panoramio_radiusy);

@@ -32,4 +32,18 @@ public class NumberUtils {
             return null;
         }
     }
+
+    public static Float safeParseFloat(String s) {
+        if (s == null || "".equals(s.trim())) {
+            return null;
+        }
+
+        String trimmed = s.trim();
+
+        try {
+            return Double.parseDouble(trimmed);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

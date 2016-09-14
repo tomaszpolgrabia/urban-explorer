@@ -2,9 +2,11 @@ package pl.tpolgrabia.urbanexplorer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -30,6 +32,7 @@ import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorer.handlers.SwipeHandler;
 import pl.tpolgrabia.urbanexplorer.utils.ImageLoaderUtils;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
@@ -221,11 +224,31 @@ public class MainActivity extends ActionBarActivity {
         if (locationProvider != null) {
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.requestLocationUpdates(locationProvider,
-                AppConstants.MIN_TIME,
-                AppConstants.MIN_DISTANCE,
+                fetchGpsUpdateFreq(),
+                fetchGpsDistanceFreq(),
                 locationCallback);
             locationServicesActivated = true;
         }
+    }
+
+    private Float fetchGpsDistanceFreq() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String prefDistanceUpdateFreq = sharedPreferences.getString(
+            "pref_gps_distance_freq",
+            String.valueOf(AppConstants.GPS_LOCATION_DISTANCE_FREQ));
+
+        Log.d(CLASS_TAG, "Pref GPS distance update frequency " + prefDistanceUpdateFreq);
+        return NumberUtils.safeParseFloat(prefDistanceUpdateFreq);
+    }
+
+    private Long fetchGpsUpdateFreq() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String prefGpsUpdateFreq = sharedPreferences.getString(
+            "pref_gps_update_freq",
+            String.valueOf(AppConstants.GPS_LOCATION_UPDATE_FREQ));
+
+        Log.d(CLASS_TAG, "Pref GPS location update frequency " + prefGpsUpdateFreq);
+        return NumberUtils.safeParseLong(prefGpsUpdateFreq);
     }
 
     @Override
@@ -251,10 +274,8 @@ public class MainActivity extends ActionBarActivity {
             case LOCATION_SETTINGS_REQUEST_ID:
                 String locationProvider = LocationUtils.getDefaultLocation(this);
                 if (locationProvider == null) {
-                    // sadly, nothing to do except from notifing user that program is not enable working
-//                    Toast.makeText(this, "Sorry location services are not working." +
-//                            " Program cannot work properly - check location settings to allow program working correctly",
-//                        Toast.LENGTH_LONG).show();
+
+                    // launching settings activity to allow the user switching on location service
 
                     Intent intent = new Intent(this, SettingsActivity.class);
                     startActivity(intent);

@@ -41,4 +41,25 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            android:title="GPS tracking settings"
+            android:key="pref_gps_settings">
+
+        <EditTextPreference
+                android:key="pref_gps_update_freq"
+                android:title="GPS update frequency"
+                android:summary="Update time of GPS location in minutes"
+                android:defaultValue="15.0"
+                android:inputType="numberDecimal" />
+
+        <EditTextPreference
+                android:key="pref_gps_distance_freq"
+                android:title="GPS distance frequency"
+                android:summary="Update distance of GPS location in meters"
+                android:defaultValue="100.0"
+                android:inputType="numberDecimal" />
+
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
