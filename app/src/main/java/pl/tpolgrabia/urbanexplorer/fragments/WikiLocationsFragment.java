@@ -1,10 +1,9 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
-import android.content.Intent;
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -15,12 +14,11 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
-import org.json.JSONException;
 import org.json.JSONObject;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
+import pl.tpolgrabia.urbanexplorer.callbacks.FetchWikiLocationsCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
@@ -42,7 +40,6 @@ public class WikiLocationsFragment extends Fragment {
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
     private LocationManager locationService;
     private TextView currentLocation;
-    private Button fetchPlaces;
 
     public WikiLocationsFragment() {
         // Required empty public constructor
@@ -107,47 +104,7 @@ public class WikiLocationsFragment extends Fragment {
                     // TODO on success
 
                     ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
-                    locations.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                        @Override
-                        public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-//                                    WikiPage item = response.getPages().get(position);
-//                                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-//                                            Uri.parse(item.get);
-//                                    startActivity(intent);
-                            final WikiAppObject item = appObjects.get(position);
-                            new AQuery(getActivity()).ajax(
-                                "https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids="
-                                    + item.getPageId() + "&inprop=url&format=json",
-                                JSONObject.class,
-                                new AjaxCallback<JSONObject>() {
-                                    @Override
-                                    public void callback(String url, JSONObject object, AjaxStatus status) {
-                                        if (status.getCode() != 200) {
-                                            Toast.makeText(getActivity(),
-                                                "Sorry, network error code: " + status.getCode(),
-                                                Toast.LENGTH_LONG)
-                                                .show();
-                                            return;
-                                        }
-
-
-                                        try {
-                                            String wikiUrl = object.getJSONObject("query")
-                                                .getJSONObject("pages")
-                                                .getJSONObject(item.getPageId().toString())
-                                                .getString("fullurl");
-                                            Intent intent = new Intent(Intent.ACTION_VIEW,
-                                                Uri.parse(wikiUrl));
-                                            startActivity(intent);
-                                        } catch (JSONException e) {
-                                            Log.e(CLASS_TAG, "Error", e);
-                                        }
-                                    }
-                                }
-                            );
-                            return false;
-                        }
-                    });
+                    locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
                     locations.setAdapter(new WikiLocationsAdapter(getActivity(), appObjects));
                 }
             }
@@ -164,7 +121,10 @@ public class WikiLocationsFragment extends Fragment {
     public void updateLocationInfo() {
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
         if (location != null) {
-            currentLocation.setText("Location: " + location.getLatitude() + "," + location.getLongitude());
+            currentLocation.setText("Your current location: ("
+                + location.getLatitude()
+                + ","
+                + location.getLongitude() + ")");
         }
     }
 
@@ -172,4 +132,5 @@ public class WikiLocationsFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
+
 }

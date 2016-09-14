@@ -1,9 +1,11 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
@@ -273,13 +276,23 @@ public class HomeFragment extends Fragment  {
     }
 
     private Double fetchRadiusX() {
-        final TextView radiusxTextView = (TextView) inflatedView.findViewById(R.id.location_xrange);
-        return safeParseDouble(radiusxTextView.getText());
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String pref_panoramio_radiusx = sharedPreferences.getString(
+            "pref_panoramio_radiusx",
+            String.valueOf(AppConstants.PAMNORAMIO_DEF_RADIUSX));
+        Log.d(CLASS_TAG, "Panoramio radiusx pref equals " + pref_panoramio_radiusx);
+        return Double.parseDouble(
+            pref_panoramio_radiusx);
     }
 
     private Double fetchRadiusY() {
-        final TextView radiusyTextView = (TextView) inflatedView.findViewById(R.id.location_yrange);
-        return safeParseDouble(radiusyTextView.getText());
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String pref_panoramio_radiusy = sharedPreferences.getString(
+            "pref_panoramio_radiusy",
+            String.valueOf(AppConstants.PAMNORAMIO_DEF_RADIUSX));
+        Log.d(CLASS_TAG, "Panoramio radiusy pref equals " + pref_panoramio_radiusy);
+        return Double.parseDouble(
+            pref_panoramio_radiusy);
     }
 
     @Override
@@ -302,7 +315,10 @@ public class HomeFragment extends Fragment  {
         Log.v(CLASS_TAG, "Current location: " + currLocation + ", locationInfo: " + locationInfo);
         if (currLocation != null && locationInfo != null) {
             // update home fragment's location info
-            locationInfo.setText("Location: " + currLocation.getLatitude() + "," + currLocation.getLongitude());
+            locationInfo.setText("Your current location: ("
+                + currLocation.getLatitude()
+                + "," +
+                currLocation.getLongitude() + ")");
         }
     }
 

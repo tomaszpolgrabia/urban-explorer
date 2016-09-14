@@ -11,34 +11,6 @@
             android:layout_height="wrap_content"
             android:text="@string/location_info"/>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal">
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/location_xrange"/>
-
-        <EditText android:id="@+id/location_xrange"
-                  android:layout_width="0dp"
-                  android:layout_height="wrap_content"
-                  android:inputType="numberDecimal"
-                  android:layout_weight="1"
-                  android:text="0.05"/>
-
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="@string/location_yrange"/>
-
-        <EditText android:id="@+id/location_yrange"
-                  android:layout_width="0dp"
-                  android:layout_height="wrap_content"
-                  android:inputType="numberDecimal"
-                  android:layout_weight="1"
-                  android:text="0.05"/>
-
-    </LinearLayout>
-
-
     <ListView
             android:id="@+id/locations"
             android:layout_width="match_parent"

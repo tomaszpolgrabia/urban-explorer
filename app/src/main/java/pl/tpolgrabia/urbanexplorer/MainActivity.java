@@ -252,9 +252,12 @@ public class MainActivity extends ActionBarActivity {
                 String locationProvider = LocationUtils.getDefaultLocation(this);
                 if (locationProvider == null) {
                     // sadly, nothing to do except from notifing user that program is not enable working
-                    Toast.makeText(this, "Sorry location services are not working." +
-                            " Program cannot work properly - check location settings to allow program working correctly",
-                        Toast.LENGTH_LONG).show();
+//                    Toast.makeText(this, "Sorry location services are not working." +
+//                            " Program cannot work properly - check location settings to allow program working correctly",
+//                        Toast.LENGTH_LONG).show();
+
+                    Intent intent = new Intent(this, SettingsActivity.class);
+                    startActivity(intent);
                 }
                 break;
             default:

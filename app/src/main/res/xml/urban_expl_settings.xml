@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Panoramio search settings"
+        android:key="pref_panoramio_settings">
+
+        <EditTextPreference
+                android:key="pref_panoramio_radiusx"
+                android:title="Radius X"
+                android:summary="Radius X"
+                android:defaultValue="0.05"
+                android:inputType="numberDecimal" />
+
+        <EditTextPreference
+                android:key="pref_panoramio_radiusy"
+                android:title="Radius Y"
+                android:summary="Radius Y"
+                android:defaultValue="0.05"
+                android:inputType="numberDecimal" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="Wiki search settings"
+            android:key="pref_wiki_settings">
+
+        <EditTextPreference
+                android:key="pref_wiki_radius"
+                android:title="Wiki search radius"
+                android:summary="Wiki search radius[km]"
+                android:defaultValue="10.0"
+                android:inputType="numberDecimal" />
+
+        <EditTextPreference
+                android:key="pref_wiki_limit"
+                android:title="Wiki search results limit"
+                android:summary="Limit of wiki results"
+                android:defaultValue="100"
+                android:inputType="number" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -170,7 +170,7 @@ public class WikiUtils {
         }
 
         AQuery aq = new AQuery(ctx);
-        aq.ajax("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=52.2181737%7C21.1530673&gsradius=10000&gslimit=10&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
+        aq.ajax("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=" + latitude + "%7C" + longitude + "&gsradius=10000&gslimit=" + limit + "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 Log.v(CLASS_TAG, "Finished waiting for " + url
@@ -324,4 +324,14 @@ public class WikiUtils {
     }
 
 
+    public static void fetchSingleWikiInfoItemAndRunWikiPage(Context ctx,
+                                                             Long pageId,
+                                                             AjaxCallback<JSONObject> callback) {
+        new AQuery(ctx).ajax(
+            "https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids="
+                + pageId + "&inprop=url&format=json",
+            JSONObject.class,
+            callback
+        );
+    }
 }
