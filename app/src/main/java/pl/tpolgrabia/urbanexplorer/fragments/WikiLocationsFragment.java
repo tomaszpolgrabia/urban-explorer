@@ -2,9 +2,11 @@ package pl.tpolgrabia.urbanexplorer.fragments;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.util.Log;
@@ -38,6 +40,8 @@ public class WikiLocationsFragment extends Fragment {
 
 
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
+    private static final double WIKI_DEF_RADIUS = 10000.0;
+    private static final long WIKI_DEF_LIMIT = 100;
     private LocationManager locationService;
     private TextView currentLocation;
 
@@ -81,16 +85,11 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        Editable search_limit = ((EditText) getView().findViewById(R.id.wiki_search_limit)).getText();
-        Editable radius_limit = ((EditText) getView().findViewById(R.id.wiki_search_radius)).getText();
-
-
         WikiUtils.fetchAppData(getActivity(),
             location.getLatitude(),
             location.getLongitude(),
-            NumberUtils.safeParseDouble(search_limit != null ? search_limit.toString() : null),
-            NumberUtils.safeParseLong(
-                radius_limit != null ? radius_limit.toString() : null),
+            fetchRadiusLimit(),
+            fetchSearchLimit(),
             new WikiAppResponseCallback() {
                 @Override
                 public void callback(WikiStatus status, final List<WikiAppObject> appObjects) {
@@ -109,6 +108,19 @@ public class WikiLocationsFragment extends Fragment {
                 }
             }
         );
+    }
+
+    private Double fetchRadiusLimit() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String prefWikiRadius = sharedPreferences.getString("pref_wiki_radius", String.valueOf(WIKI_DEF_RADIUS));
+        Log.d(CLASS_TAG, "Pref wiki radius limit " + prefWikiRadius);
+        return NumberUtils.safeParseDouble(prefWikiRadius)*1000.0; // in m, settings are in km unit
+    }
+    private Long fetchSearchLimit() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String prefWikiResultsLimit = sharedPreferences.getString("pref_wiki_limit", String.valueOf(WIKI_DEF_LIMIT));
+        Log.d(CLASS_TAG, "Pref wiki search results limit " + prefWikiResultsLimit);
+        return NumberUtils.safeParseLong(prefWikiResultsLimit);
     }
 
     @Override

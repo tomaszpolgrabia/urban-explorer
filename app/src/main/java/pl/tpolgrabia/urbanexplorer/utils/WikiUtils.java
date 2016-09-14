@@ -161,6 +161,11 @@ public class WikiUtils {
                                                   Long limit,
                                                   final WikiGeoResponseCallback callback) {
 
+        Log.d(CLASS_TAG, "Latitude: " + latitude +
+            ", longitude: " + longitude +
+            ", radius: " + radius +
+            ", limit: " + limit);
+
         if (radius == null) {
             radius = WIKI_STD_RADIUS;
         }
@@ -170,7 +175,13 @@ public class WikiUtils {
         }
 
         AQuery aq = new AQuery(ctx);
-        aq.ajax("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=" + latitude + "%7C" + longitude + "&gsradius=10000&gslimit=" + limit + "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
+        aq.ajax("https://en.wikipedia.org/w/api.php" +
+            "?action=query" +
+            "&list=geosearch" +
+            "&gscoord=" + latitude + "%7C" + longitude +
+            "&gsradius=" + radius +
+            "&gslimit=" + limit +
+            "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 Log.v(CLASS_TAG, "Finished waiting for " + url
@@ -230,6 +241,11 @@ public class WikiUtils {
                                     final Double radius,
                                     final Long limit,
                                     final WikiAppResponseCallback callback) {
+
+        Log.d(CLASS_TAG, "Latitude: " + latitude
+        + ", longitude: " + longitude
+        + ", radius: " + radius
+        + ", limit: " + limit);
 
         fetchGeoSearchWikiMetadata(ctx, latitude, longitude, radius, limit, new WikiGeoResponseCallback() {
             @Override
