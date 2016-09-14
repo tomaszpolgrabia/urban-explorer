@@ -41,7 +41,7 @@ public class NumberUtils {
         String trimmed = s.trim();
 
         try {
-            return Double.parseDouble(trimmed);
+            return Float.parseFloat(trimmed);
         } catch (NumberFormatException e) {
             return null;
         }
