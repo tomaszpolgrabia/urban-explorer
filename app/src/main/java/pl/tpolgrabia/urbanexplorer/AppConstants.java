@@ -11,4 +11,14 @@ public class AppConstants {
     public static final float PAMNORAMIO_DEF_RADIUSY = 0.05f;
     public static final long GPS_LOCATION_UPDATE_FREQ = 15000;
     public static final float GPS_LOCATION_DISTANCE_FREQ = MIN_DISTANCE;
+    public static final String PREF_HTTP_PROXY_HOST_KEY = "pref_proxy_host";
+    public static final String DEF_HTTP_PROXY_HOST = "localhost";
+    public static final String PREF_HTTP_PROXY_PORT_KEY = "pref_proxy_port";
+    public static final String DEF_HTTP_PROXY_PORT = "8123";
+    public static final String PREF_HTTP_PROXY_USER_KEY = "pref_proxy_user";
+    public static final String DEF_HTTP_PROXY_USER = null;
+    public static final String PREF_HTTP_PROXY_PASSWORD_KEY = "pref_proxy_pass";
+    public static final String DEF_HTTP_PROXY_PASSWORD = null;
+    public static final String PREF_HTTP_PROXY_ENABLED_KEY = "pref_proxy_enabled";
+    public static final boolean DEF_HTTP_PROXY_ENABLED = false;
 }

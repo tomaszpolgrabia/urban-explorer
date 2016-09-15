@@ -13,6 +13,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class PanoramioAdapter extends ArrayAdapter<PanoramioImageInfo> {
 
     public PanoramioAdapter(FragmentActivity activity, int location_item, List<PanoramioImageInfo> photosDescriptions) {
         super(activity, location_item, photosDescriptions);
-        aq = new AQuery(activity);
+        aq = NetUtils.createProxyAQueryInstance(activity);
     }
 
     @Override

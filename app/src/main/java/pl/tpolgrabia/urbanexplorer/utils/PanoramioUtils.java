@@ -38,7 +38,7 @@ public class PanoramioUtils {
         Long offset,
         Long count,
         final PanoramioResponseCallback callback) {
-        AQuery aq = new AQuery(ctx);
+        AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
         final String aqQuery = "http://www.panoramio.com/map/get_panoramas.php?" +
             "set=public" +
             "&from=" + offset +

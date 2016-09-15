@@ -62,4 +62,46 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            android:title="Network proxy settings"
+            android:key="pref_proxy_settings">
+
+        <CheckBoxPreference
+            android:key="pref_proxy_enabled"
+            android:title="Proxy enabled"
+            android:summary="Proxy enabled" />
+
+        <EditTextPreference
+                android:key="pref_proxy_host"
+                android:title="Proxy host"
+                android:summary="Proxy host"
+                android:defaultValue="localhost"
+                android:dependency="pref_proxy_enabled" />
+
+        <EditTextPreference
+                android:key="pref_proxy_port"
+                android:title="Proxy port"
+                android:summary="Proxy port"
+                android:defaultValue="8123"
+                android:inputType="number"
+                android:dependency="pref_proxy_enabled" />
+
+        <EditTextPreference
+                android:key="pref_proxy_user"
+                android:title="Proxy user"
+                android:summary="Proxy user"
+                android:defaultValue=""
+                android:dependency="pref_proxy_enabled" />
+
+        <EditTextPreference
+                android:key="pref_proxy_pass"
+                android:title="Proxy password"
+                android:summary="Proxy password"
+                android:defaultValue=""
+                android:inputType="textPassword"
+                android:dependency="pref_proxy_enabled" />
+
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

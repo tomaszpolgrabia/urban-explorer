@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.*;
 import android.widget.Toast;
+import com.androidquery.util.AQUtility;
 import com.crashlytics.android.Crashlytics;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -32,6 +33,7 @@ import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorer.handlers.SwipeHandler;
 import pl.tpolgrabia.urbanexplorer.utils.ImageLoaderUtils;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
@@ -46,6 +48,7 @@ public class MainActivity extends ActionBarActivity {
     private static final double MAX_FRAGMENT_ID = WIKI_FRAGMENT_ID;
     private static final double MIN_FRAGMENT_ID = HOME_FRAGMENT_ID;
     private static final String FRAG_ID = "FRAG_ID";
+    private static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private int currentFragmentId = 0;
@@ -53,7 +56,7 @@ public class MainActivity extends ActionBarActivity {
 
     private boolean locationServicesActivated = false;
     private GestureDetector.OnGestureListener swipeHandler;
-
+    private PanoramioImageInfo photoInfo;
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
@@ -70,6 +73,9 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         Log.v(CLASS_TAG, "onCreate");
         setContentView(R.layout.activity_main);
+        AQUtility.setDebug(true);
+
+        NetUtils.setGlobalProxyAuth(this);
 
         currentFragmentId = 0;
 
@@ -114,7 +120,7 @@ public class MainActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.settings:
                 final Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, MainActivity.SETTINGS_ID_INTENT_REQUEST_ID, new Bundle());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -122,6 +128,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void switchToPhoto(PanoramioImageInfo photoInfo) {
+        this.photoInfo = photoInfo;
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
         PanoramioShowerFragment panoramioShower = new PanoramioShowerFragment();
@@ -280,6 +287,9 @@ public class MainActivity extends ActionBarActivity {
                     Intent intent = new Intent(this, SettingsActivity.class);
                     startActivity(intent);
                 }
+                break;
+            case SETTINGS_ID_INTENT_REQUEST_ID:
+                NetUtils.setGlobalProxyAuth(this);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

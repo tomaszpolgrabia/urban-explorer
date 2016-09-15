@@ -41,7 +41,8 @@ public class WikiUtils {
                                        final Long resultsLimit,
                                        final Long radiusLimit,
                                        final WikiResponseCallback callback) {
-        final AQuery aq = new AQuery(ctx);
+        final AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
+
         aq.ajax("TODO", JSONObject.class, new AjaxCallback<JSONObject>(){
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
@@ -174,7 +175,7 @@ public class WikiUtils {
             limit = WIKI_STD_LIMIT;
         }
 
-        AQuery aq = new AQuery(ctx);
+        AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
         aq.ajax("https://en.wikipedia.org/w/api.php" +
             "?action=query" +
             "&list=geosearch" +
@@ -312,7 +313,7 @@ public class WikiUtils {
     }
 
     public static void fetchPageInfos(Context ctx, List<Long> pageIds, final WikiResponseCallback callback) {
-        AQuery aq = new AQuery(ctx);
+        AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
         aq.ajax("https://en.wikipedia.org/w/api.php" +
             "?action=query" +
             "&prop=coordinates%7Cpageimages%7Cpageterms" +
@@ -343,7 +344,7 @@ public class WikiUtils {
     public static void fetchSingleWikiInfoItemAndRunWikiPage(Context ctx,
                                                              Long pageId,
                                                              AjaxCallback<JSONObject> callback) {
-        new AQuery(ctx).ajax(
+        NetUtils.createProxyAQueryInstance(ctx).ajax(
             "https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids="
                 + pageId + "&inprop=url&format=json",
             JSONObject.class,

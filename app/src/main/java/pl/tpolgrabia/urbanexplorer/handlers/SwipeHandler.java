@@ -12,7 +12,7 @@ public class SwipeHandler implements GestureDetector.OnGestureListener {
     private static final String CLASS_TAG = SwipeHandler.class.getSimpleName();
     private final MainActivity activity;
     private static final float SWIPE_THRESHOLD = 50;
-    private static final float SWIPE_VELOCITY_THRESHOLD = 20;
+    private static final float SWIPE_VELOCITY_THRESHOLD = 10;
 
     public SwipeHandler(MainActivity activity) {
         this.activity = activity;

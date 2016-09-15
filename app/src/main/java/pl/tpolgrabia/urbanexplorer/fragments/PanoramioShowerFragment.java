@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,4 +84,13 @@ public class PanoramioShowerFragment extends Fragment {
         return inflatedView;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        FragmentActivity acc = getActivity();
+        if (acc != null) {
+            MainActivity mainActivity = (MainActivity)acc;
+        }
+    }
 }
