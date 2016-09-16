@@ -36,6 +36,8 @@ public class HomeFragment extends Fragment  {
     private static final String CLASS_TAG = HomeFragment.class.getSimpleName();
 
     private static final int PANORAMIA_BULK_DATA_SIZE = 10;
+    public static final String TAG = HomeFragment.class.getSimpleName();
+    public static final int FRAG_ID = 1;
     private LocationManager locationService;
     private boolean initialized = false;
 
@@ -241,7 +243,8 @@ public class HomeFragment extends Fragment  {
         );
     }
 
-    private void fetchPanoramioPhotos() {
+    public void fetchPanoramioPhotos() {
+        Log.v(CLASS_TAG, "Fetch panoramio photos");
         final FragmentActivity activity = getActivity();
         if (activity == null) {
             Log.w(CLASS_TAG, "Activity shouldn't be null. It isn't headless fragment");
@@ -249,6 +252,11 @@ public class HomeFragment extends Fragment  {
         }
 
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
+        if (location == null) {
+            Log.i(CLASS_TAG, "Location is still not available");
+            Toast.makeText(getActivity(), "Location is still not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Double radiusX = fetchRadiusX();
         Double radiusY = fetchRadiusY();
         PanoramioUtils.fetchPanoramioImages(
@@ -308,6 +316,7 @@ public class HomeFragment extends Fragment  {
     }
 
     public void updateLocationInfo() {
+        Log.v(CLASS_TAG, "Update locations info");
         final View view = getView();
         if (view == null) {
             Log.wtf(CLASS_TAG, "Fragment has no view");

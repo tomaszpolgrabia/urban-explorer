@@ -122,6 +122,24 @@ public class MainActivity extends ActionBarActivity {
                 final Intent intent = new Intent(this, SettingsActivity.class);
                 startActivityForResult(intent, MainActivity.SETTINGS_ID_INTENT_REQUEST_ID, new Bundle());
                 return true;
+            case R.id.refresh:
+                switch (currentFragmentId) {
+                    case HOME_FRAGMENT_ID:
+                        HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
+                            .findFragmentByTag(HomeFragment.TAG);
+                        homeFragment.fetchPanoramioPhotos();
+                        break;
+                    case WIKI_FRAGMENT_ID:
+                        WikiLocationsFragment wikiLocationsFragment = (WikiLocationsFragment)
+                            getSupportFragmentManager()
+                            .findFragmentByTag(WikiLocationsFragment.TAG);
+                        wikiLocationsFragment.fetchWikiLocations();
+                        break;
+                    default:
+                        Log.w(CLASS_TAG, "Unknown current fragment ID");
+                        break;
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -153,23 +171,24 @@ public class MainActivity extends ActionBarActivity {
                 // switch to home fragment
                 setTitle("Panoramio search");
                 Log.d(CLASS_TAG, "Switching to home fragment");
-                switchFragment(new HomeFragment());
+                final HomeFragment fragment = new HomeFragment();
+                switchFragment(fragment, HomeFragment.TAG);
                 break;
             case WIKI_FRAGMENT_ID:
                 setTitle("Wiki search");
                 // switch to wiki fragment
                 Log.d(CLASS_TAG, "Switching to wiki fragment");
-                switchFragment(new WikiLocationsFragment());
+                switchFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
                 break;
         }
 
     }
 
-    private void switchFragment(Fragment fragment) {
+    private void switchFragment(Fragment fragment, String tag) {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        ctx.replace(R.id.fragments, fragment);
+        ctx.replace(R.id.fragments, fragment, tag);
         ctx.addToBackStack(null);
         ctx.commit();
         updateSwipeHandler();

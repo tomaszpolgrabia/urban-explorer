@@ -43,6 +43,7 @@ public class WikiLocationsFragment extends Fragment {
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
     private static final double WIKI_DEF_RADIUS = 10.0;
     private static final long WIKI_DEF_LIMIT = 100;
+    public static final String TAG = WikiLocationsFragment.class.getSimpleName();
     private LocationManager locationService;
     private TextView currentLocation;
 
@@ -72,7 +73,8 @@ public class WikiLocationsFragment extends Fragment {
         return inflatedView;
     }
 
-    private void fetchWikiLocations() {
+    public void fetchWikiLocations() {
+        Log.v(CLASS_TAG, "Fetch wiki locations");
         final FragmentActivity activity = getActivity();
         if (activity == null) {
             Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
