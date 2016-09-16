@@ -1,6 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.adapters;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,22 +26,25 @@ public class WikiLocationsAdapter extends ArrayAdapter<WikiAppObject> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View inflatedView;
-        if (convertView != null) {
-            // reusing old view
-            inflatedView = convertView;
-        } else {
-            inflatedView = inflater.inflate(R.layout.wiki_locations_item,parent,false);
-        }
+        View itemView;
+        // reusing old view
+        itemView = convertView != null ? convertView : inflater.inflate(R.layout.wiki_locations_item, parent, false);
 
         WikiAppObject wikiPage = getItem(position);
+        if (wikiPage.getPageId() != null && wikiPage.getPageId().equals(itemView.getTag())) {
+            // all data were previously loaded
+            return itemView;
+        }
 
+
+        itemView.setTag(wikiPage.getPageId());
         // wiki page image preview
-        ImageView imgPreview = (ImageView) inflatedView.findViewById(R.id.wiki_locs_item_img_preview);
+        ImageView imgPreview = (ImageView) itemView.findViewById(R.id.wiki_locs_item_img_preview);
         String url = wikiPage.getThumbnail() != null ? wikiPage.getThumbnail() : null;
 
-        TextView locDistanceInfo = (TextView) inflatedView.findViewById(R.id.wiki_locs_item_distance);
+        TextView locDistanceInfo = (TextView) itemView.findViewById(R.id.wiki_locs_item_distance);
         locDistanceInfo.setText("" + wikiPage.getDistance() / 1000.0 + " km");
+        imgPreview.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
 
         if (url != null) {
             ImageLoader.getInstance().displayImage(
@@ -50,10 +54,10 @@ public class WikiLocationsAdapter extends ArrayAdapter<WikiAppObject> {
         }
 
         // wiki page title
-        TextView pageTitle = (TextView) inflatedView.findViewById(R.id.wiki_locs_item_title);
+        TextView pageTitle = (TextView) itemView.findViewById(R.id.wiki_locs_item_title);
         pageTitle.setText(wikiPage.getTitle());
 
 
-        return inflatedView;
+        return itemView;
     }
 }

@@ -1,6 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,13 +32,21 @@ public class PanoramioAdapter extends ArrayAdapter<PanoramioImageInfo> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View itemView = inflater.inflate(R.layout.location_item, parent, false);
+        View itemView = convertView != null ? convertView : inflater.inflate(R.layout.location_item, parent, false);
+        final PanoramioImageInfo item = getItem(position);
+
+        if (item.getPhotoId() != null && item.getPhotoId().equals(itemView.getTag())) {
+            // if it is the the same object f.e. add new objects to the collection (without the slide)
+            // the refresh makes blinking without this
+            return itemView;
+        }
+
         TextView locDesc = (TextView) itemView.findViewById(R.id.location_description);
-        locDesc.setText(getItem(position).getPhotoTitle());
-        final String photoUrl = getItem(position).getPhotoFileUrl();
+        itemView.setTag(item.getPhotoId());
+        locDesc.setText(item.getPhotoTitle());
+        final String photoUrl = item.getPhotoFileUrl();
         ImageView photoImg = (ImageView) itemView.findViewById(R.id.photo_img);
-        // photoImg.setImageBitmap(bm);
-        // photoImg.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_launcher));
+        photoImg.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
         ImageLoader.getInstance().displayImage(photoUrl, photoImg, MainActivity.options);
         return itemView;
     }
