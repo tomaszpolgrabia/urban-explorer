@@ -130,6 +130,8 @@ public class MainActivity extends ActionBarActivity {
         if (sharedPrefs.getBoolean(FIRST_TIME_LAUNCH, true)) {
             Toast.makeText(this, "To interact with any list itemm press long the item. When thgre is no results" +
                 ", please, click refresh in the menu", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "To change panoramio / wiki search views swipe left or right",
+                Toast.LENGTH_LONG).show();
             SharedPreferences.Editor editor = sharedPrefs.edit();
             editor.putBoolean(FIRST_TIME_LAUNCH, false);
             editor.commit();
