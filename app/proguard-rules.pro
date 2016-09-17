@@ -18,4 +18,6 @@
 
 -keepattributes Signature
 -keepattributes InnerClasses
--dontwarn ch.qos.logback.core.net.*
+-dontwarn ch.qos.logback.core.net.**
+-assumenosideeffects class ch.qos.logback.** { *; }
+-assumenosideeffects class org.slf4j.** { *; }
