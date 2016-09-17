@@ -223,6 +223,9 @@ public class HomeFragment extends Fragment  {
                     ListView locations = (ListView) getView().findViewById(R.id.locations);
                     ArrayAdapter<PanoramioImageInfo> adapter = (ArrayAdapter<PanoramioImageInfo>) locations.getAdapter();
                     photos.addAll(images);
+                    if (photos.isEmpty()) {
+                        Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
+                    }
                     noMorePhotos = images.isEmpty();
                     if (adapter == null) {
                         locations.setAdapter(new PanoramioAdapter(activity, R.id.list_item, images));
@@ -277,8 +280,18 @@ public class HomeFragment extends Fragment  {
                     ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(activity,
                         R.layout.location_item,
                         images);
+
+                    if (images.isEmpty()) {
+                        Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
+                    }
                     ListView locations = (ListView)getView().findViewById(R.id.locations);
                     locations.setAdapter(adapter);
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    if (mainActivity == null) {
+                        return;
+                    }
+
+                    mainActivity.hideProgress();
                 }
             }
         );

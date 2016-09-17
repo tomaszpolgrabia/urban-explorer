@@ -113,6 +113,16 @@ public class WikiLocationsFragment extends Fragment {
                     ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
                     locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
                     locations.setAdapter(new WikiLocationsAdapter(activity, appObjects));
+                    if (appObjects.isEmpty()) {
+                        Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
+                    }
+
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    if (mainActivity == null) {
+                        return;
+                    }
+
+                    mainActivity.hideProgress();
                 }
             }
         );

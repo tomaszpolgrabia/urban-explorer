@@ -1,5 +1,6 @@
 package pl.tpolgrabia.urbanexplorer;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -49,6 +50,8 @@ public class MainActivity extends ActionBarActivity {
     private static final double MIN_FRAGMENT_ID = HOME_FRAGMENT_ID;
     private static final String FRAG_ID = "FRAG_ID";
     private static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
+    private static final String PHOTO_INFO = "PHOTO_INFO";
+    private static final String FIRST_TIME_LAUNCH = "FIRST_TIME_LAUNCH_KEY";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private int currentFragmentId = 0;
@@ -57,10 +60,20 @@ public class MainActivity extends ActionBarActivity {
     private boolean locationServicesActivated = false;
     private GestureDetector.OnGestureListener swipeHandler;
     private PanoramioImageInfo photoInfo;
+    private ProgressDialog progressDlg;
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
     }
+
+    public void showProgress() {
+        progressDlg.show();
+    }
+
+    public void hideProgress() {
+        progressDlg.dismiss();
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -78,6 +91,7 @@ public class MainActivity extends ActionBarActivity {
         NetUtils.setGlobalProxyAuth(this);
 
         currentFragmentId = 0;
+        progressDlg = new ProgressDialog(this);
 
         // UNIVERSAL IMAGE LOADER SETUP
         DisplayImageOptions defaultOptions = ImageLoaderUtils.createDefaultOptions();
@@ -103,9 +117,19 @@ public class MainActivity extends ActionBarActivity {
         Log.v(CLASS_TAG, "Restored orig frag id: " + fragId);
         currentFragmentId = fragId == null ? 0 : fragId;
         Log.v(CLASS_TAG, "Set final frag id: " + fragId);
+        photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(PHOTO_INFO) : null;
         switchFragment();
 
         updateSwipeHandler();
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPrefs.getBoolean(FIRST_TIME_LAUNCH, true)) {
+            Toast.makeText(this, "To interact with any list itemm press long the item. When thgre is no results" +
+                ", please, click refresh in the menu", Toast.LENGTH_LONG).show();
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putBoolean(FIRST_TIME_LAUNCH, false);
+            editor.commit();
+        }
     }
 
     @Override
@@ -123,6 +147,8 @@ public class MainActivity extends ActionBarActivity {
                 startActivityForResult(intent, MainActivity.SETTINGS_ID_INTENT_REQUEST_ID, new Bundle());
                 return true;
             case R.id.refresh:
+                progressDlg.setMessage("Refreshing results");
+                progressDlg.show();
                 switch (currentFragmentId) {
                     case HOME_FRAGMENT_ID:
                         HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
@@ -143,6 +169,10 @@ public class MainActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void resetPhotoInfo() {
+        this.photoInfo = null;
     }
 
     public void switchToPhoto(PanoramioImageInfo photoInfo) {
@@ -321,6 +351,7 @@ public class MainActivity extends ActionBarActivity {
         Log.v(CLASS_TAG, "1 Saving current fragment id: " + currentFragmentId);
         super.onSaveInstanceState(outState);
         outState.putSerializable(FRAG_ID, currentFragmentId);
+        outState.putSerializable(PHOTO_INFO, photoInfo);
         Log.v(CLASS_TAG, "2 Saving current fragment id: " + currentFragmentId);
     }
 

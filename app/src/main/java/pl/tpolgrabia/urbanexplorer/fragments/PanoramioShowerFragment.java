@@ -91,6 +91,7 @@ public class PanoramioShowerFragment extends Fragment {
         FragmentActivity acc = getActivity();
         if (acc != null) {
             MainActivity mainActivity = (MainActivity)acc;
+            mainActivity.resetPhotoInfo();
         }
     }
 }
