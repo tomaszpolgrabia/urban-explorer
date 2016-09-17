@@ -9,11 +9,12 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
@@ -34,6 +35,7 @@ import java.util.concurrent.Semaphore;
 public class HomeFragment extends Fragment  {
 
     private static final String CLASS_TAG = HomeFragment.class.getSimpleName();
+    private static final Logger lg = LoggerFactory.getLogger(HomeFragment.class);
 
     private static final int PANORAMIA_BULK_DATA_SIZE = 10;
     public static final String TAG = HomeFragment.class.getSimpleName();
@@ -54,7 +56,7 @@ public class HomeFragment extends Fragment  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(CLASS_TAG, "onCreate");
+        lg.trace("onCreate");
         pageId = 1L;
         loading = new Semaphore(1, true);
         photos = new ArrayList<>();
@@ -80,7 +82,7 @@ public class HomeFragment extends Fragment  {
                     try {
                         fetchAdditionalPhotos();
                     } catch (InterruptedException e) {
-                        Log.e(CLASS_TAG, "Failed trying acquring lock to load photos", e);
+                        lg.error("Failed trying acquring lock to load photos", e);
                     }
                 }
             });
@@ -94,7 +96,7 @@ public class HomeFragment extends Fragment  {
         try {
             return Double.parseDouble(text.toString());
         } catch (NumberFormatException e) {
-            Log.w(CLASS_TAG, "Wrong number format", e);
+            lg.warn("Wrong number format", e);
             return null;
         }
     }
@@ -134,15 +136,15 @@ public class HomeFragment extends Fragment  {
 
                     if (firstVisibleItem <= 0) {
                         // scrolled to the top
-                        Log.v(CLASS_TAG, "Scrolled to the top");
+                        lg.trace("Scrolled to the top");
                     }
 
                     if (firstVisibleItem + visibleItemCount >= totalItemCount) {
-                        Log.v(CLASS_TAG, "Scrolled to the bottom");
+                        lg.trace("Scrolled to the bottom");
                         // scrolled to the bottom
                         final View fragView = getView();
                         if (fragView == null) {
-                            Log.v(CLASS_TAG, "Frag still not initialized");
+                            lg.trace("Frag still not initialized");
                             return;
                         }
                         fetchAdditionalPhotos();
@@ -150,7 +152,7 @@ public class HomeFragment extends Fragment  {
                     }
 
                 } catch (InterruptedException e) {
-                    Log.e(CLASS_TAG, "Aquiring lock interrupted exception", e);
+                    lg.error("Aquiring lock interrupted exception", e);
                 }
 
             }
@@ -164,44 +166,44 @@ public class HomeFragment extends Fragment  {
     private void fetchAdditionalPhotos() throws InterruptedException {
 
         if (noMorePhotos) {
-            Log.v(CLASS_TAG, "No more photos - last query was zero result");
+            lg.trace("No more photos - last query was zero result");
             return;
         }
 
         if (!initialized) {
-            Log.v(CLASS_TAG, "Fetching additional photos blocked till system is initialized");
+            lg.trace("Fetching additional photos blocked till system is initialized");
             return;
         }
 
 
         if (getView() == null) {
-            Log.v(CLASS_TAG, "Application still not initialized");
+            lg.trace("Application still not initialized");
             return;
         }
 
         final FragmentActivity activity = getActivity();
         if (activity == null) {
-            Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
+            lg.trace("Activity shouldn't be null. No headless fragment");
             return;
         }
 
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
-            Log.i(CLASS_TAG, "Location still not available");
+            lg.info("Location still not available");
             Toast.makeText(activity, "Location still not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.v(CLASS_TAG, "Fetching additional photos. Trying loading acquirng lock");
+        lg.trace("Fetching additional photos. Trying loading acquirng lock");
         if (!loading.tryAcquire()) {
-            Log.v(CLASS_TAG, "Fetching additional photos. Loading in progress");
+            lg.info("Fetching additional photos. Loading in progress");
             return;
         }
 
 
         int offset = photos.size();
-        Log.v(CLASS_TAG, "Fetching additional photos offset: " + offset + ", count: " + PANORAMIA_BULK_DATA_SIZE);
+        lg.debug("Fetching additional photos offset: {}, count: {}", offset, PANORAMIA_BULK_DATA_SIZE);
 
         PanoramioUtils.fetchPanoramioImages(
             activity,
@@ -214,8 +216,7 @@ public class HomeFragment extends Fragment  {
             new PanoramioResponseCallback() {
                 @Override
                 public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
-                    Log.v(CLASS_TAG, "Fetched with status: " + status + ", images: " + images + ", count: " +
-                        imagesCount);
+                    lg.debug("Fetched with status: {}, images: {}, count: {}", status, images, imagesCount);
                     if (status != PanoramioResponseStatus.SUCCESS) {
                         return;
                     }
@@ -236,7 +237,7 @@ public class HomeFragment extends Fragment  {
                     // TODO we can think about removing first items also and last if the number
                     // TODO of items exceeds the limit (to save the memory)
 
-                    Log.v(CLASS_TAG, "Finished Fetching additional photos count: " + photos.size());
+                    lg.debug("Finished Fetching additional photos count: {}", photos.size());
 
                     loading.release();
 
@@ -247,16 +248,16 @@ public class HomeFragment extends Fragment  {
     }
 
     public void fetchPanoramioPhotos() {
-        Log.v(CLASS_TAG, "Fetch panoramio photos");
+        lg.trace("Fetch panoramio photos");
         final FragmentActivity activity = getActivity();
         if (activity == null) {
-            Log.w(CLASS_TAG, "Activity shouldn't be null. It isn't headless fragment");
+            lg.warn("Activity shouldn't be null. It isn't headless fragment");
             return;
         }
 
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         if (location == null) {
-            Log.i(CLASS_TAG, "Location is still not available");
+            lg.info("Location is still not available");
             Toast.makeText(getActivity(), "Location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -306,7 +307,7 @@ public class HomeFragment extends Fragment  {
         final String pref_panoramio_radiusx = sharedPreferences.getString(
             "pref_panoramio_radiusx",
             String.valueOf(AppConstants.PAMNORAMIO_DEF_RADIUSX));
-        Log.d(CLASS_TAG, "Panoramio radiusx pref equals " + pref_panoramio_radiusx);
+        lg.debug("Panoramio radiusx pref equals {}", pref_panoramio_radiusx);
         return Double.parseDouble(
             pref_panoramio_radiusx);
     }
@@ -316,7 +317,7 @@ public class HomeFragment extends Fragment  {
         final String pref_panoramio_radiusy = sharedPreferences.getString(
             "pref_panoramio_radiusy",
             String.valueOf(AppConstants.PAMNORAMIO_DEF_RADIUSY));
-        Log.d(CLASS_TAG, "Panoramio radiusy pref equals " + pref_panoramio_radiusy);
+        lg.debug("Panoramio radiusy pref equals {}", pref_panoramio_radiusy);
         return Double.parseDouble(
             pref_panoramio_radiusy);
     }
@@ -325,26 +326,26 @@ public class HomeFragment extends Fragment  {
     public void onResume() {
         super.onResume();
         getActivity().setTitle("Panoramio search");
-        Log.v(CLASS_TAG, "onResume");
+        lg.trace("onResume");
         updateLocationInfo();
     }
 
     public void updateLocationInfo() {
-        Log.v(CLASS_TAG, "Update locations info");
+        lg.trace("Update locations info");
         final View view = getView();
         if (view == null) {
-            Log.wtf(CLASS_TAG, "Fragment has no view");
+            lg.warn("Fragment has no view");
             return;
         }
         TextView locationInfo = (TextView) view.findViewById(R.id.locationInfo);
         final FragmentActivity activity = getActivity();
         if (activity == null) {
-            Log.w(CLASS_TAG, "Activity should'nt be null. No headless fragment");
+            lg.warn("Activity should'nt be null. No headless fragment");
             return;
         }
         locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
-        Log.v(CLASS_TAG, "Current location: " + currLocation + ", locationInfo: " + locationInfo);
+        lg.trace("Current location: {}, locationInfo: {}", currLocation, locationInfo);
         if (currLocation != null && locationInfo != null) {
             // update home fragment's location info
             locationInfo.setText("Your current location: ("
@@ -357,20 +358,20 @@ public class HomeFragment extends Fragment  {
     @Override
     public void onPause() {
         super.onPause();
-        Log.v(CLASS_TAG, "onPause");
+        lg.trace("onPause");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.v(CLASS_TAG, "onDestroy");
+        lg.trace("onDestroy");
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Log.v(CLASS_TAG, "Saving state");
+        lg.trace("Saving state");
     }
 
 }
