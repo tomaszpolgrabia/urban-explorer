@@ -90,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate");
         setContentView(R.layout.activity_main);
-        AQUtility.setDebug(true);
+        AQUtility.setDebug(false);
 
         NetUtils.setGlobalProxyAuth(this);
 
@@ -114,8 +114,7 @@ public class MainActivity extends ActionBarActivity {
         gestureDetector = new GestureDetectorCompat(this, swipeHandler);
         locationCallback = new StandardLocationListener();
         initLocalication();
-        Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
-        Fabric.with(fabric);
+        Fabric.with(this, new Crashlytics());
 
         Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(FRAG_ID) : null;
         lg.trace("Restored orig frag id:  {}", fragId);
