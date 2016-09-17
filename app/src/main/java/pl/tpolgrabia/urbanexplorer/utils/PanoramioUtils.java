@@ -1,13 +1,14 @@
 package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
-import android.util.Log;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
@@ -24,6 +25,7 @@ import java.util.List;
  */
 public class PanoramioUtils {
 
+    private static final Logger lg = LoggerFactory.getLogger(PanoramioUtils.class);
     private static final String CLASS_TAG = PanoramioUtils.class.getSimpleName();
 
     private static final String LOCATIONS_LIST_IMAGE_SIZE = "medium";
@@ -50,15 +52,15 @@ public class PanoramioUtils {
             "&size=" + LOCATIONS_LIST_IMAGE_SIZE +
             "&order=" + LOCATIONS_ORDER +
             "&mapfilter=true";
-        Log.d(CLASS_TAG, "Query: " + aqQuery);
+        lg.debug("Query URL: {}", aqQuery);
         aq.ajax(aqQuery,
             JSONObject.class,
             new AjaxCallback<JSONObject>() {
                 @Override
                 public void callback(String url, JSONObject object, AjaxStatus status) {
                     try {
-                        Log.d(CLASS_TAG, "Query code: " + status.getCode()
-                            + ", error: " + status.getError() + ", message: " + status.getMessage());
+                        lg.debug("Query code: {}, error: {}, message: {}, object: {}",
+                            status.getCode(), status.getError(), status.getMessage(), object);
                         if (object == null) {
                             return;
                         }
@@ -67,7 +69,7 @@ public class PanoramioUtils {
                         try {
                             photosInfos = PanoramioUtils.fetchPanoramioImagesFromResponse(object.getJSONArray("photos"));
                         } catch (ParseException e) {
-                            Log.w(CLASS_TAG, "Parse exception", e);
+                            lg.warn("Parse exception", e);
                             photosInfos = new ArrayList<>();
                         }
 
@@ -77,7 +79,7 @@ public class PanoramioUtils {
                             photosCount);
 
                     } catch (JSONException e) {
-                        Log.w(CLASS_TAG, "Json not supported format", e);
+                        lg.warn("Json not supported format", e);
                     }
                 }
             });

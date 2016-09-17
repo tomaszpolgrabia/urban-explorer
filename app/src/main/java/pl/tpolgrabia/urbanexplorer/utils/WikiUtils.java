@@ -1,7 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -10,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
@@ -27,6 +28,7 @@ import java.util.*;
  * Created by tpolgrabia on 28.08.16.
  */
 public class WikiUtils {
+    private static final Logger lg = LoggerFactory.getLogger(WikiUtils.class);
     private static final String CLASS_TAG = WikiUtils.class.getSimpleName();
     private static final String WIKI_FORMAT = "json";
     private static final long WIKI_MIN_RADIUS = 10L;
@@ -68,7 +70,7 @@ public class WikiUtils {
                             try {
                                 callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
                             } catch (JSONException e) {
-                                Log.e(CLASS_TAG, "JSon error: " + object.toString(), e);
+                                lg.error("JSon error: {}", object, e);
                             }
                         } else {
                             callback.callback(WikiStatus.NETWORK_ERROR, null);
@@ -162,10 +164,7 @@ public class WikiUtils {
                                                   Long limit,
                                                   final WikiGeoResponseCallback callback) {
 
-        Log.d(CLASS_TAG, "Latitude: " + latitude +
-            ", longitude: " + longitude +
-            ", radius: " + radius +
-            ", limit: " + limit);
+        lg.debug("Latitude: {}, longitude: {}, radius: {}, limit: {}", latitude, longitude, radius, limit);
 
         if (radius == null) {
             radius = WIKI_STD_RADIUS;
@@ -185,19 +184,19 @@ public class WikiUtils {
             "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
-                Log.v(CLASS_TAG, "Finished waiting for " + url
-                    + " with status " + status.getCode() + ":" + status.getMessage()
-                    + " and response:  " + object);
+                lg.trace("Finished waiting for {} with status {}:{} and response: {}",
+                    url, status.getCode(), status.getMessage(), object);
+
                 if (status.getCode() == 200) {
                     try {
                         callback.callback(WikiStatus.SUCCESS, fetchWikiGeoResponse(object));
                     } catch (Throwable t) {
-                        Log.e(CLASS_TAG, "General error during fetching", t);
+                        lg.error("General error during fetching", t);
                         callback.callback(WikiStatus.GENERAL_ERROR, null);
                     }
                 } else {
-                    Log.e(CLASS_TAG, "Couldn't fetch wiki metadata " +  object
-                        + ", status: " + status.getCode() + ": " + status.getMessage() + " from url: " + url);
+                    lg.error("Couldn't fetch wiki metadata {}, status: {}:{} from url: {}",
+                        object, status.getCode(), status.getMessage(), url);
                     callback.callback(WikiStatus.NETWORK_ERROR, null);
                 }
                 super.callback(url, object, status);
@@ -243,16 +242,14 @@ public class WikiUtils {
                                     final Long limit,
                                     final WikiAppResponseCallback callback) {
 
-        Log.d(CLASS_TAG, "Latitude: " + latitude
-        + ", longitude: " + longitude
-        + ", radius: " + radius
-        + ", limit: " + limit);
+        lg.debug("Latitude: {}, longitude: {}, radius: {}, limit: {}",
+            latitude, longitude, radius, limit);
 
         fetchGeoSearchWikiMetadata(ctx, latitude, longitude, radius, limit, new WikiGeoResponseCallback() {
             @Override
             public void callback(WikiStatus status, WikiGeoResponse response) {
 
-                Log.v(CLASS_TAG, "Fetching finished with status: " + status + " and values: " + response);
+                lg.trace("Fetching finished with status: {} and values: {}", status, response);
 
                 if (status != WikiStatus.SUCCESS) {
                     Toast.makeText(ctx, "Sorry, couldn't fetch wiki metadata", Toast.LENGTH_SHORT).show();
@@ -330,7 +327,7 @@ public class WikiUtils {
                     try {
                         callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
                     } catch (Throwable t) {
-                        Log.e(CLASS_TAG, "General error", t);
+                        lg.error("General error", t);
                         callback.callback(WikiStatus.GENERAL_ERROR, null);
                     }
                 } else {

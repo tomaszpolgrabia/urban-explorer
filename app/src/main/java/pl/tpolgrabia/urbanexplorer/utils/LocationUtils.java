@@ -2,7 +2,6 @@ package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
 import android.location.LocationManager;
-import android.util.Log;
 
 /**
  * Created by tpolgrabia on 28.08.16.
