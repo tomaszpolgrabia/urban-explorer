@@ -21,3 +21,5 @@
 -dontwarn ch.qos.logback.core.net.**
 -assumenosideeffects class ch.qos.logback.** { *; }
 -assumenosideeffects class org.slf4j.** { *; }
+-keep class com.crashlytics.** { *; }
+-dontwarn com.crashlytics.**
