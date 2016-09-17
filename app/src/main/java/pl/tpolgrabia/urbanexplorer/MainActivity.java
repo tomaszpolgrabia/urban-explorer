@@ -61,6 +61,7 @@ public class MainActivity extends ActionBarActivity {
     private GestureDetector.OnGestureListener swipeHandler;
     private PanoramioImageInfo photoInfo;
     private ProgressDialog progressDlg;
+    private int oldFragmentId = 0;
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
@@ -216,6 +217,27 @@ public class MainActivity extends ActionBarActivity {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
+        Log.v(CLASS_TAG, "old fragment id: " + oldFragmentId + ", current fragment id: " + currentFragmentId);
+        if (oldFragmentId != currentFragmentId) {
+            if (currentFragmentId < oldFragmentId) {
+                // slide left animation
+                Log.v(CLASS_TAG, "sliding left animation");
+                ctx.setCustomAnimations(
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_right);
+            } else {
+                // slide right animation
+                Log.v(CLASS_TAG, "sliding right animation");
+                ctx.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_right,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_left);
+            }
+        }
+
         ctx.replace(R.id.fragments, fragment, tag);
         ctx.addToBackStack(null);
         ctx.commit();
@@ -235,12 +257,17 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void swipeLeft() {
-        currentFragmentId = (int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1);
+        changeCurrentFragId((int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1));
         switchFragment();
     }
 
+    private void changeCurrentFragId(int nextFragmentId) {
+        oldFragmentId = currentFragmentId;
+        currentFragmentId = nextFragmentId;
+    }
+
     public void swipeRight() {
-        currentFragmentId = (int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1);
+        changeCurrentFragId((int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1));
         switchFragment();
     }
 
@@ -350,6 +377,12 @@ public class MainActivity extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         outState.putSerializable(FRAG_ID, currentFragmentId);
         outState.putSerializable(PHOTO_INFO, photoInfo);
+
+//        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        SharedPreferences.Editor editor = sharedPrefs.edit();
+//        editor.putInt(FRAG_ID, currentFragmentId);
+//        editor.commit();
+
         Log.v(CLASS_TAG, "2 Saving current fragment id: " + currentFragmentId);
     }
 
