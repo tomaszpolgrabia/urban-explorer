@@ -1,7 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
@@ -9,15 +8,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.text.Editable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import org.json.JSONObject;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
@@ -39,7 +37,7 @@ import static android.content.Context.LOCATION_SERVICE;
  */
 public class WikiLocationsFragment extends Fragment {
 
-
+    private static final Logger lg = LoggerFactory.getLogger(WikiLocationsFragment.class);
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
     private static final double WIKI_DEF_RADIUS = 10.0;
     private static final long WIKI_DEF_LIMIT = 100;
@@ -74,22 +72,22 @@ public class WikiLocationsFragment extends Fragment {
     }
 
     public void fetchWikiLocations() {
-        Log.v(CLASS_TAG, "Fetch wiki locations");
+        lg.trace("Fetch wiki locations");
         final FragmentActivity activity = getActivity();
         if (activity == null) {
-            Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
+            lg.warn("Activity shouldn't be null. No headless fragment");
             return;
         }
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
-            Log.i(CLASS_TAG, "Sorry, location is still not available");
+            lg.info("Sorry, location is still not available");
             Toast.makeText(activity, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (getView() == null) {
-            Log.i(CLASS_TAG, "Wiki view is not yet initialized");
+            lg.info("Wiki view is not yet initialized");
             return;
         }
 
@@ -131,13 +129,13 @@ public class WikiLocationsFragment extends Fragment {
     private Double fetchRadiusLimit() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         final String prefWikiRadius = sharedPreferences.getString("pref_wiki_radius", String.valueOf(WIKI_DEF_RADIUS));
-        Log.d(CLASS_TAG, "Pref wiki radius limit " + prefWikiRadius);
+        lg.debug("Pref wiki radius limit {}", prefWikiRadius);
         return NumberUtils.safeParseDouble(prefWikiRadius)*1000.0; // in m, settings are in km unit
     }
     private Long fetchSearchLimit() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         final String prefWikiResultsLimit = sharedPreferences.getString("pref_wiki_limit", String.valueOf(WIKI_DEF_LIMIT));
-        Log.d(CLASS_TAG, "Pref wiki search results limit " + prefWikiResultsLimit);
+        lg.debug("Pref wiki search results limit {}", prefWikiResultsLimit);
         return NumberUtils.safeParseLong(prefWikiResultsLimit);
     }
 
@@ -152,7 +150,7 @@ public class WikiLocationsFragment extends Fragment {
     public void updateLocationInfo() {
         final FragmentActivity activity = getActivity();
         if (activity == null) {
-            Log.w(CLASS_TAG, "Activity shouldn't be null. No headless fragment");
+            lg.warn("Activity shouldn't be null. No headless fragment");
             return;
         }
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
