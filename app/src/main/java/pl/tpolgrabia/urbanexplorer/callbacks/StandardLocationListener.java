@@ -14,7 +14,6 @@ import java.util.List;
  */
 public class StandardLocationListener implements LocationListener {
     private static final Logger lg = LoggerFactory.getLogger(StandardLocationListener.class);
-    private static final String CLASS_TAG = StandardLocationListener.class.getSimpleName();
     private List<StandardLocationListenerCallback> locationChangedCallbacks = new ArrayList<>();
 
     @Override
