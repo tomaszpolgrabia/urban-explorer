@@ -144,6 +144,7 @@ public class WikiLocationsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        getActivity().setTitle("Wiki search");
         updateLocationInfo();
         fetchWikiLocations();
     }
