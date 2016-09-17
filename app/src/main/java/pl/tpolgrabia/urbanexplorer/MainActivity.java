@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.*;
 import android.widget.Toast;
 import com.androidquery.util.AQUtility;
@@ -24,6 +23,8 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import io.fabric.sdk.android.Fabric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
@@ -40,6 +41,8 @@ import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
 public class MainActivity extends ActionBarActivity {
+
+    private static final Logger lg = LoggerFactory.getLogger(MainActivity.class);
 
     private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
     private static final String CLASS_TAG = MainActivity.class.getSimpleName();
@@ -85,7 +88,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(CLASS_TAG, "onCreate");
+        lg.trace("onCreate");
         setContentView(R.layout.activity_main);
         AQUtility.setDebug(true);
 
@@ -115,9 +118,9 @@ public class MainActivity extends ActionBarActivity {
         Fabric.with(fabric);
 
         Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(FRAG_ID) : null;
-        Log.v(CLASS_TAG, "Restored orig frag id: " + fragId);
+        lg.trace("Restored orig frag id:  {}", fragId);
         currentFragmentId = fragId == null ? 0 : fragId;
-        Log.v(CLASS_TAG, "Set final frag id: " + fragId);
+        lg.trace("Set final frag id: {}", fragId);
         photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(PHOTO_INFO) : null;
         switchFragment();
 
@@ -163,7 +166,7 @@ public class MainActivity extends ActionBarActivity {
                         wikiLocationsFragment.fetchWikiLocations();
                         break;
                     default:
-                        Log.w(CLASS_TAG, "Unknown current fragment ID");
+                        lg.warn("Unknown current fragment ID");
                         break;
                 }
                 return true;
@@ -200,13 +203,13 @@ public class MainActivity extends ActionBarActivity {
         switch (currentFragmentId) {
             case HOME_FRAGMENT_ID:
                 // switch to home fragment
-                Log.d(CLASS_TAG, "Switching to home fragment");
+                lg.debug("Switching to home fragment");
                 final HomeFragment fragment = new HomeFragment();
                 switchFragment(fragment, HomeFragment.TAG);
                 break;
             case WIKI_FRAGMENT_ID:
                 // switch to wiki fragment
-                Log.d(CLASS_TAG, "Switching to wiki fragment");
+                lg.debug("Switching to wiki fragment");
                 switchFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
                 break;
         }
@@ -217,11 +220,11 @@ public class MainActivity extends ActionBarActivity {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        Log.v(CLASS_TAG, "old fragment id: " + oldFragmentId + ", current fragment id: " + currentFragmentId);
+        lg.trace("old fragment id: {}, current fragment id: {}", oldFragmentId, currentFragmentId);
         if (oldFragmentId != currentFragmentId) {
             if (currentFragmentId < oldFragmentId) {
                 // slide left animation
-                Log.v(CLASS_TAG, "sliding left animation");
+                lg.trace("sliding left animation");
                 ctx.setCustomAnimations(
                     R.anim.slide_in_left,
                     R.anim.slide_out_left,
@@ -229,7 +232,7 @@ public class MainActivity extends ActionBarActivity {
                     R.anim.slide_out_right);
             } else {
                 // slide right animation
-                Log.v(CLASS_TAG, "sliding right animation");
+                lg.trace("sliding right animation");
                 ctx.setCustomAnimations(
                     R.anim.slide_in_right,
                     R.anim.slide_out_right,
@@ -300,7 +303,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(CLASS_TAG, "onResume");
+        lg.trace("onResume");
         String locationProvider = LocationUtils.getDefaultLocation(this);
         if (locationProvider != null) {
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
@@ -318,7 +321,7 @@ public class MainActivity extends ActionBarActivity {
             "pref_gps_distance_freq",
             String.valueOf(AppConstants.GPS_LOCATION_DISTANCE_FREQ));
 
-        Log.d(CLASS_TAG, "Pref GPS distance update frequency " + prefDistanceUpdateFreq);
+        lg.debug("Pref GPS distance update frequency {}", prefDistanceUpdateFreq);
         return NumberUtils.safeParseFloat(prefDistanceUpdateFreq);
     }
 
@@ -328,14 +331,14 @@ public class MainActivity extends ActionBarActivity {
             "pref_gps_update_freq",
             String.valueOf(AppConstants.GPS_LOCATION_UPDATE_FREQ));
 
-        Log.d(CLASS_TAG, "Pref GPS location update frequency " + prefGpsUpdateFreq);
+        lg.debug("Pref GPS location update frequency {}", prefGpsUpdateFreq);
         return Math.round(NumberUtils.safeParseDouble(prefGpsUpdateFreq)* 60.0 * 1000.0);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.v(CLASS_TAG, "onPause");
+        lg.trace("onPause");
         if (locationServicesActivated) {
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.removeUpdates(locationCallback);
@@ -345,7 +348,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.v(CLASS_TAG, "onDestroy");
+        lg.trace("onDestroy");
     }
 
     @Override
@@ -373,7 +376,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.v(CLASS_TAG, "1 Saving current fragment id: " + currentFragmentId);
+        lg.trace("1 Saving current fragment id: {}", currentFragmentId);
         super.onSaveInstanceState(outState);
         outState.putSerializable(FRAG_ID, currentFragmentId);
         outState.putSerializable(PHOTO_INFO, photoInfo);
@@ -383,7 +386,7 @@ public class MainActivity extends ActionBarActivity {
 //        editor.putInt(FRAG_ID, currentFragmentId);
 //        editor.commit();
 
-        Log.v(CLASS_TAG, "2 Saving current fragment id: " + currentFragmentId);
+        lg.trace("2 Saving current fragment id: {}", currentFragmentId);
     }
 
 }
