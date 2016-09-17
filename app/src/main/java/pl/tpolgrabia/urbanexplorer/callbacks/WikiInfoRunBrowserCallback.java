@@ -2,12 +2,13 @@ package pl.tpolgrabia.urbanexplorer.callbacks;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.widget.Toast;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 
@@ -15,6 +16,7 @@ import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
  * Created by tpolgrabia on 14.09.16.
  */
 public class WikiInfoRunBrowserCallback extends AjaxCallback<JSONObject> {
+    private static final Logger lg = LoggerFactory.getLogger(WikiInfoRunBrowserCallback.class);
     private static final String CLASS_TAG = WikiInfoRunBrowserCallback.class.getSimpleName();
     private WikiLocationsFragment wikiLocationsFragment;
     private final WikiAppObject item;
@@ -44,7 +46,7 @@ public class WikiInfoRunBrowserCallback extends AjaxCallback<JSONObject> {
                 Uri.parse(wikiUrl));
             wikiLocationsFragment.startActivity(intent);
         } catch (JSONException e) {
-            Log.e(CLASS_TAG, "Error", e);
+            lg.error("JSON error", e);
         }
     }
 }

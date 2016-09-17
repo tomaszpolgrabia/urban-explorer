@@ -3,7 +3,6 @@ package pl.tpolgrabia.urbanexplorer.callbacks;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
-import android.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

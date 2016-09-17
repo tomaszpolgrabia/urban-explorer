@@ -1,14 +1,16 @@
 package pl.tpolgrabia.urbanexplorer.handlers;
 
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 
 /**
  * Created by tpolgrabia on 13.09.16.
  */
 public class SwipeHandler implements GestureDetector.OnGestureListener {
+    private static final Logger lg = LoggerFactory.getLogger(SwipeHandler.class);
     private static final String CLASS_TAG = SwipeHandler.class.getSimpleName();
     private final MainActivity activity;
     private static final float SWIPE_THRESHOLD = 50;
@@ -56,8 +58,8 @@ public class SwipeHandler implements GestureDetector.OnGestureListener {
 
         float diffx = e2.getX() - e1.getX();
         float diffy = e2.getY() - e1.getY();
-        Log.d(CLASS_TAG, "Flinging... diffx: " + diffx + " diffy" + diffy
-            + ", velocityx: " + velocityX + ", velocityY: " + velocityY);
+        lg.debug(CLASS_TAG, "Flinging... diffx: {} diffy: {}, velocityx: {}, velocityY: {}",
+            diffx, diffy, velocityX, velocityY);
 
         if (Math.abs(diffx) > Math.abs(diffy)) {
             // horizontal moves
