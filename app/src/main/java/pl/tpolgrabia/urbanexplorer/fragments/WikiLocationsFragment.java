@@ -14,21 +14,26 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.FetchWikiLocationsCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.utils.WikiAppResponseCallback;
 import pl.tpolgrabia.urbanexplorer.utils.WikiUtils;
 
+import java.io.*;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -58,7 +63,23 @@ public class WikiLocationsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate {}", System.identityHashCode(this));
         appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
-            : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WIKI_APP_OBJECTS);;
+            : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WIKI_APP_OBJECTS);
+
+        if (appObjects == null) {
+            try (InputStreamReader ir = new InputStreamReader(
+                new FileInputStream(
+                    new File(getActivity().getCacheDir(),
+                        AppConstants.WIKI_CACHE_FILENAME)))) {
+
+                WikiCacheDto dto = new Gson().fromJson(ir, WikiCacheDto.class);
+                appObjects = new ArrayList<>(dto.getAppObject());
+
+            } catch (FileNotFoundException e) {
+                lg.error("File not found", e);
+            } catch (IOException e) {
+                lg.error("I/O error", e);
+            }
+        }
     }
 
     @Override
@@ -228,5 +249,32 @@ public class WikiLocationsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         lg.trace("onDestroy {}", System.identityHashCode(this));
+
+        try (BufferedWriter bw = new BufferedWriter(
+            new OutputStreamWriter(
+                new FileOutputStream(
+                    new File(getActivity().getCacheDir(),
+                        AppConstants.WIKI_CACHE_FILENAME))))) {
+
+            WikiCacheDto dto = new WikiCacheDto();
+            dto.setAppObject(appObjects);
+            LocationManager locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
+            Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+            if (location != null) {
+                dto.setLongitude(location.getLongitude());
+                dto.setLatitude(location.getLatitude());
+                dto.setAltitude(location.getAltitude());
+            }
+
+            dto.setFetchedAt(new GregorianCalendar().getTime());
+            // FIXME should be a fetched time, not persist time
+
+            new Gson().toJson(bw);
+
+        } catch (FileNotFoundException e) {
+            lg.error("File not found", e);
+        } catch (IOException e) {
+            lg.error("I/O error", e);
+        }
     }
 }

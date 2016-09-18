@@ -25,4 +25,6 @@ public class AppConstants {
 
     public static final String PANORAMIO_BULK_SIZE_KEY = "pref_panoramio_bulk_size";
     public static final int PANORAMIO_BULK_SIZE_DEF_VALUE = 50;
+    public static final String PANORAMIO_CACHE_FILENAME = "panoramio-cache.dat";
+    public static final String WIKI_CACHE_FILENAME = "wiki-cache.dat";
 }

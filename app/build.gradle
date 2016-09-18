@@ -75,4 +75,5 @@ dependencies {
         // workaround issue #73
         exclude group: 'com.google.android', module: 'android'
     }
+    compile 'com.google.code.gson:gson:2.7'
 }

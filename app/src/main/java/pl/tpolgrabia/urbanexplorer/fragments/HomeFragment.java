@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -21,12 +23,14 @@ import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -140,6 +144,31 @@ public class HomeFragment extends Fragment  {
                     photos = new ArrayList<>();
                 }
             }
+        }
+
+        if (photos == null || photos.isEmpty()) {
+            // maybe we find something in our cache file
+            try (Reader br =
+                new InputStreamReader(
+                    new FileInputStream(
+                        new File(getActivity().getCacheDir(),
+                            AppConstants.PANORAMIO_CACHE_FILENAME)))) {
+                PanoramioCacheDto dto = new Gson().fromJson(new JsonReader(br), PanoramioCacheDto.class);
+                if (dto != null) {
+                    photos = new ArrayList<>(dto.getPanoramioImages());
+                    lg.trace("Photos size from I/O cache is {}", photos.size());
+                } else {
+                    lg.trace("Sorry, photos I/O cache is null");
+                }
+
+            } catch (FileNotFoundException e) {
+                lg.error("File not found", e);
+            } catch (IOException e) {
+                lg.error("I/O error", e);
+            } catch (Throwable t) {
+                lg.error("Throwable", t);
+            }
+            lg.trace("I've read photos from I/O cache");
         }
 
         locations.setAdapter(new PanoramioAdapter(getActivity(), R.layout.location_item, photos));
@@ -408,6 +437,33 @@ public class HomeFragment extends Fragment  {
     public void onDestroy() {
         super.onDestroy();
         lg.trace("onDestroy");
+
+        File cacheDir = getActivity().getCacheDir();
+        try (BufferedWriter br = new BufferedWriter(
+            new OutputStreamWriter(
+                new FileOutputStream(
+                    new File(cacheDir, AppConstants.PANORAMIO_CACHE_FILENAME))))) {
+
+            PanoramioCacheDto dto = new PanoramioCacheDto();
+            dto.setPanoramioImages(photos);
+            LocationManager locationService = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+            if (location != null) {
+                dto.setLongitude(location.getLongitude());
+                dto.setLatitude(location.getLatitude());
+                dto.setAltitude(location.getAltitude());
+            }
+
+            dto.setFetchedAt(new GregorianCalendar().getTime());
+            // FIXME this should be a fetch time, not persist time
+
+            new Gson().toJson(dto, br);
+
+        } catch (FileNotFoundException e) {
+            lg.error("File not found", e);
+        } catch (IOException e) {
+            lg.error("I/O Exception", e);
+        }
     }
 
     @Override
