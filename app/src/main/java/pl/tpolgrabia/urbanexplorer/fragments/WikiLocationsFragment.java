@@ -28,6 +28,7 @@ import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.utils.WikiAppResponseCallback;
 import pl.tpolgrabia.urbanexplorer.utils.WikiUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -42,13 +43,23 @@ public class WikiLocationsFragment extends Fragment {
     private static final double WIKI_DEF_RADIUS = 10.0;
     private static final long WIKI_DEF_LIMIT = 100;
     public static final String TAG = WikiLocationsFragment.class.getSimpleName();
+    private static final String WIKI_APP_OBJECTS = "WIKI_APP_OBJECTS";
     private LocationManager locationService;
     private TextView currentLocation;
+    private ArrayList<WikiAppObject> appObjects;
+    private int lastFetchSize = -1;
 
     public WikiLocationsFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        lg.trace("onCreate");
+        appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
+            : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WIKI_APP_OBJECTS);;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,7 +68,11 @@ public class WikiLocationsFragment extends Fragment {
         final View inflatedView = inflater.inflate(R.layout.fragment_wiki_locations, container, false);
         lg.trace("TAG: {}", getTag());
         for (Fragment frag : getFragmentManager().getFragments()) {
-            lg.trace("Fragment TAG {}", frag.getTag());
+            if (frag == null) {
+                lg.trace("Got null fragment");
+            } else {
+                lg.trace("Fragment TAG {}", frag.getTag());
+            }
         }
 
         locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
@@ -67,19 +82,41 @@ public class WikiLocationsFragment extends Fragment {
         mainActivity.getLocationCallback().addCallback(new StandardLocationListenerCallback() {
             @Override
             public void callback(Location location) {
+                lastFetchSize = -1;
+                appObjects = new ArrayList<>();
                 updateLocationInfo();
                 fetchWikiLocations();
             }
         });
+
+        ListView locations = (ListView) inflatedView.findViewById(R.id.wiki_places);
+        locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
+        locations.setAdapter(new WikiLocationsAdapter(getActivity(), appObjects));
 
         return inflatedView;
     }
 
     public void fetchWikiLocations() {
         lg.trace("Fetch wiki locations");
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+
+        if (lastFetchSize == 0) {
+            lg.trace("There is no results");
+            mainActivity.hideProgress();
+            return;
+        }
+
+        if (!appObjects.isEmpty()) {
+            lg.trace("There are fetched objects");
+            mainActivity.hideProgress();
+            return;
+        }
+
         final FragmentActivity activity = getActivity();
         if (activity == null) {
             lg.warn("Activity shouldn't be null. No headless fragment");
+            mainActivity.hideProgress();
             return;
         }
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
@@ -87,11 +124,13 @@ public class WikiLocationsFragment extends Fragment {
         if (location == null) {
             lg.info("Sorry, location is still not available");
             Toast.makeText(activity, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
+            mainActivity.hideProgress();
             return;
         }
 
         if (getView() == null) {
             lg.info("Wiki view is not yet initialized");
+            mainActivity.hideProgress();
             return;
         }
 
@@ -101,8 +140,12 @@ public class WikiLocationsFragment extends Fragment {
             fetchRadiusLimit(),
             fetchSearchLimit(),
             new WikiAppResponseCallback() {
+
                 @Override
-                public void callback(WikiStatus status, final List<WikiAppObject> appObjects) {
+                public void callback(WikiStatus status, final List<WikiAppObject> objects) {
+                    appObjects.clear();
+                    appObjects.addAll(objects);
+
                     // handling here wiki locations
                     if (status != WikiStatus.SUCCESS) {
                         Toast.makeText(activity, "Sorry, currently we have problem with interfacing wiki" +
@@ -115,7 +158,7 @@ public class WikiLocationsFragment extends Fragment {
                     ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
                     locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
                     locations.setAdapter(new WikiLocationsAdapter(activity, appObjects));
-                    if (appObjects.isEmpty()) {
+                    if (objects.isEmpty()) {
                         Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
                     }
 
@@ -171,4 +214,11 @@ public class WikiLocationsFragment extends Fragment {
         super.onPause();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        lg.trace("onSaveInstanceState");
+
+        outState.putSerializable(WIKI_APP_OBJECTS, appObjects);
+    }
 }

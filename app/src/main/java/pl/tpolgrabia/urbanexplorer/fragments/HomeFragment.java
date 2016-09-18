@@ -39,7 +39,6 @@ public class HomeFragment extends Fragment  {
 
     public static final String TAG = HomeFragment.class.getSimpleName();
     private static final String PHOTO_LIST = "PHOTO_LIST_KEY";
-    private LocationManager locationService;
     private boolean initialized = false;
 
     private View inflatedView;
@@ -50,7 +49,14 @@ public class HomeFragment extends Fragment  {
 
     public int getPanoramioBulkDataSize() {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        return sharedPrefs.getInt(AppConstants.PANORAMIO_BULK_SIZE_KEY, AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE);
+        final String sValue = sharedPrefs.getString(AppConstants.PANORAMIO_BULK_SIZE_KEY,
+            String.valueOf(AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE));
+        try {
+            return Integer.parseInt(sValue);
+        } catch (NumberFormatException e) {
+            lg.warn("Invalid panoramio bulk data size {}", sValue, e);
+            return AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE;
+        }
     }
 
     public HomeFragment() {
@@ -65,6 +71,7 @@ public class HomeFragment extends Fragment  {
         loading = new Semaphore(1, true);
         noMorePhotos = false;
 
+        updateLocationInfo();
     }
 
     @Override
@@ -97,7 +104,11 @@ public class HomeFragment extends Fragment  {
         // Inflate the layout for this fragment
         lg.trace("TAG: {}", getTag());
         for (Fragment frag : getFragmentManager().getFragments()) {
-            lg.trace("Fragment TAG {}", frag.getTag());
+            if (frag == null) {
+                lg.trace("Fragment is null");
+            } else {
+                lg.trace("Fragment TAG {}", frag.getTag());
+            }
         }
         inflatedView = inflater.inflate(R.layout.fragment_home, container, false);
         ListView locations = (ListView)inflatedView.findViewById(R.id.locations);
@@ -125,6 +136,9 @@ public class HomeFragment extends Fragment  {
                 final Serializable serializable = savedInstanceState.getSerializable(PHOTO_LIST);
                 lg.trace("Photo list serializable {}", serializable);
                 photos = (ArrayList<PanoramioImageInfo>) serializable;
+                if (photos == null) {
+                    photos = new ArrayList<>();
+                }
             }
         }
 
@@ -169,27 +183,12 @@ public class HomeFragment extends Fragment  {
 
             }
         });
+        ;
 
         return inflatedView;
     }
 
     private void fetchAdditionalPhotos() throws InterruptedException {
-
-        if (noMorePhotos) {
-            lg.trace("No more photos - last query was zero result");
-            return;
-        }
-
-        if (!initialized) {
-            lg.trace("Fetching additional photos blocked till system is initialized");
-            return;
-        }
-
-
-        if (getView() == null) {
-            lg.trace("Application still not initialized");
-            return;
-        }
 
         final FragmentActivity activity = getActivity();
         if (activity == null) {
@@ -197,11 +196,35 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
+        MainActivity mainActivity = (MainActivity)getActivity();
+
+        if (noMorePhotos) {
+            lg.trace("No more photos - last query was zero result");
+            mainActivity.hideProgress();
+            return;
+        }
+
+        if (!initialized) {
+            lg.trace("Fetching additional photos blocked till system is initialized");
+            mainActivity.hideProgress();
+            return;
+        }
+
+
+        if (getView() == null) {
+            lg.trace("Application still not initialized");
+            mainActivity.hideProgress();
+            return;
+        }
+
+
+        LocationManager locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
             lg.info("Location still not available");
             Toast.makeText(activity, "Location still not available", Toast.LENGTH_SHORT).show();
+            mainActivity.hideProgress();
             return;
         }
 
@@ -265,9 +288,13 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
+        MainActivity mainActivity = (MainActivity) getActivity();
+
+        LocationManager locationService = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         if (location == null) {
             lg.info("Location is still not available");
+            mainActivity.hideProgress();
             Toast.makeText(getActivity(), "Location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -351,7 +378,7 @@ public class HomeFragment extends Fragment  {
             lg.warn("Activity should'nt be null. No headless fragment");
             return;
         }
-        locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         lg.trace("Current location: {}, locationInfo: {}", currLocation, locationInfo);
         if (currLocation != null && locationInfo != null) {

@@ -207,6 +207,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void switchFragment() {
+
+        if (photoInfo != null) {
+            switchToPhoto(photoInfo);
+            return;
+        }
+
         switch (currentFragmentId) {
             case HOME_FRAGMENT_ID:
                 // switch to home fragment
