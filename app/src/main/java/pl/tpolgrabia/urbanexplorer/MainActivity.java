@@ -56,6 +56,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String PHOTO_INFO = "PHOTO_INFO";
     private static final String FIRST_TIME_LAUNCH = "FIRST_TIME_LAUNCH_KEY";
     private static final String MAIN_BACKSTACK = "MAIN_BACKSTACK_KEY";
+    private static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private int currentFragmentId = 0;
@@ -66,6 +67,7 @@ public class MainActivity extends ActionBarActivity {
     private PanoramioImageInfo photoInfo;
     private ProgressDialog progressDlg;
     private int oldFragmentId = 0;
+    private boolean savedConfiguration;
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
@@ -127,6 +129,7 @@ public class MainActivity extends ActionBarActivity {
         currentFragmentId = fragId == null ? 0 : fragId;
         lg.trace("Set final frag id: {}", fragId);
         photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(PHOTO_INFO) : null;
+        savedConfiguration = savedInstanceState != null ? savedInstanceState.getBoolean(SAVED_CONFIG_KEY) : false;
         switchFragment();
 
         updateSwipeHandler();
@@ -213,6 +216,12 @@ public class MainActivity extends ActionBarActivity {
 
     private void switchFragment() {
 
+        if (!savedConfiguration) {
+            photoInfo = null;
+        }
+
+        savedConfiguration = false;
+
         if (photoInfo != null) {
             switchToPhoto(photoInfo);
             return;
@@ -283,6 +292,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void swipeLeft() {
+        lg.debug("Swiped left");
         changeCurrentFragId((int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1));
         switchFragment();
     }
@@ -293,6 +303,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void swipeRight() {
+        lg.debug("Swiped right");
         changeCurrentFragId((int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1));
         switchFragment();
     }
@@ -336,6 +347,9 @@ public class MainActivity extends ActionBarActivity {
                 locationCallback);
             locationServicesActivated = true;
         }
+
+        savedConfiguration = false;
+        photoInfo = null;
     }
 
     private Float fetchGpsDistanceFreq() {
@@ -403,6 +417,7 @@ public class MainActivity extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         outState.putSerializable(FRAG_ID, currentFragmentId);
         outState.putSerializable(PHOTO_INFO, photoInfo);
+        outState.putBoolean(SAVED_CONFIG_KEY, true);
 
 //        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 //        SharedPreferences.Editor editor = sharedPrefs.edit();
