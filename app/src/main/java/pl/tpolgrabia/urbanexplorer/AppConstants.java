@@ -21,4 +21,7 @@ public class AppConstants {
     public static final String DEF_HTTP_PROXY_PASSWORD = null;
     public static final String PREF_HTTP_PROXY_ENABLED_KEY = "pref_proxy_enabled";
     public static final boolean DEF_HTTP_PROXY_ENABLED = false;
+
+    public static final String PANORAMIO_BULK_SIZE_KEY = "pref_panoramio_bulk_size";
+    public static final int PANORAMIO_BULK_SIZE_DEF_VALUE = 50;
 }

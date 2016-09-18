@@ -55,6 +55,10 @@ public class WikiLocationsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View inflatedView = inflater.inflate(R.layout.fragment_wiki_locations, container, false);
+        lg.trace("TAG: {}", getTag());
+        for (Fragment frag : getFragmentManager().getFragments()) {
+            lg.trace("Fragment TAG {}", frag.getTag());
+        }
 
         locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
         currentLocation = (TextView) inflatedView.findViewById(R.id.wiki_current_location);
