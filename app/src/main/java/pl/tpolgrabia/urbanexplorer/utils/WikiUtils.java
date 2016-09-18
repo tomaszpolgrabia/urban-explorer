@@ -175,13 +175,15 @@ public class WikiUtils {
         }
 
         AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
-        aq.ajax("https://en.wikipedia.org/w/api.php" +
+        final String queryUrl = "https://en.wikipedia.org/w/api.php" +
             "?action=query" +
             "&list=geosearch" +
             "&gscoord=" + latitude + "%7C" + longitude +
             "&gsradius=" + String.format("%.2f", radius) +
             "&gslimit=" + limit +
-            "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
+            "&format=json";
+        lg.trace("GeoSearch wiki API url: {}", queryUrl);
+        aq.ajax(queryUrl, JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 lg.trace("Finished waiting for {} with status {}:{} and response: {}",

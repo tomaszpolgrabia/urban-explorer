@@ -25,6 +25,7 @@ import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -34,20 +35,29 @@ import java.util.concurrent.Semaphore;
  */
 public class HomeFragment extends Fragment  {
 
-    private static final String CLASS_TAG = HomeFragment.class.getSimpleName();
     private static final Logger lg = LoggerFactory.getLogger(HomeFragment.class);
 
-    private static final int PANORAMIA_BULK_DATA_SIZE = 10;
     public static final String TAG = HomeFragment.class.getSimpleName();
-    public static final int FRAG_ID = 1;
-    private LocationManager locationService;
+    private static final String PHOTO_LIST = "PHOTO_LIST_KEY";
     private boolean initialized = false;
 
     private View inflatedView;
     private Long pageId;
     private Semaphore loading;
-    private List<PanoramioImageInfo> photos;
+    private ArrayList<PanoramioImageInfo> photos;
     private boolean noMorePhotos;
+
+    public int getPanoramioBulkDataSize() {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String sValue = sharedPrefs.getString(AppConstants.PANORAMIO_BULK_SIZE_KEY,
+            String.valueOf(AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE));
+        try {
+            return Integer.parseInt(sValue);
+        } catch (NumberFormatException e) {
+            lg.warn("Invalid panoramio bulk data size {}", sValue, e);
+            return AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE;
+        }
+    }
 
     public HomeFragment() {
         // Required empty public constructor
@@ -59,9 +69,9 @@ public class HomeFragment extends Fragment  {
         lg.trace("onCreate");
         pageId = 1L;
         loading = new Semaphore(1, true);
-        photos = new ArrayList<>();
         noMorePhotos = false;
 
+        updateLocationInfo();
     }
 
     @Override
@@ -88,23 +98,18 @@ public class HomeFragment extends Fragment  {
             });
     }
 
-    private Double safeParseDouble(CharSequence text) {
-        if (text == null) {
-            return null;
-        }
-
-        try {
-            return Double.parseDouble(text.toString());
-        } catch (NumberFormatException e) {
-            lg.warn("Wrong number format", e);
-            return null;
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        lg.trace("TAG: {}", getTag());
+        for (Fragment frag : getFragmentManager().getFragments()) {
+            if (frag == null) {
+                lg.trace("Fragment is null");
+            } else {
+                lg.trace("Fragment TAG {}", frag.getTag());
+            }
+        }
         inflatedView = inflater.inflate(R.layout.fragment_home, container, false);
         ListView locations = (ListView)inflatedView.findViewById(R.id.locations);
         final ListView finalLocations = locations;
@@ -118,6 +123,27 @@ public class HomeFragment extends Fragment  {
                 return false;
             }
         });
+
+        initialized = true;
+
+        lg.trace("Saved instance state {}", savedInstanceState);
+        if (photos == null) {
+            if (savedInstanceState == null) {
+                lg.trace("Saved instance state is null");
+                photos = new ArrayList<>();
+            }
+            else {
+                final Serializable serializable = savedInstanceState.getSerializable(PHOTO_LIST);
+                lg.trace("Photo list serializable {}", serializable);
+                photos = (ArrayList<PanoramioImageInfo>) serializable;
+                if (photos == null) {
+                    photos = new ArrayList<>();
+                }
+            }
+        }
+
+        locations.setAdapter(new PanoramioAdapter(getActivity(), R.layout.location_item, photos));
+        lg.trace("Photos initialized {}", photos);
 
         locations.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -157,29 +183,12 @@ public class HomeFragment extends Fragment  {
 
             }
         });
-
-        initialized = true;
+        ;
 
         return inflatedView;
     }
 
     private void fetchAdditionalPhotos() throws InterruptedException {
-
-        if (noMorePhotos) {
-            lg.trace("No more photos - last query was zero result");
-            return;
-        }
-
-        if (!initialized) {
-            lg.trace("Fetching additional photos blocked till system is initialized");
-            return;
-        }
-
-
-        if (getView() == null) {
-            lg.trace("Application still not initialized");
-            return;
-        }
 
         final FragmentActivity activity = getActivity();
         if (activity == null) {
@@ -187,11 +196,35 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
+        MainActivity mainActivity = (MainActivity)getActivity();
+
+        if (noMorePhotos) {
+            lg.trace("No more photos - last query was zero result");
+            mainActivity.hideProgress();
+            return;
+        }
+
+        if (!initialized) {
+            lg.trace("Fetching additional photos blocked till system is initialized");
+            mainActivity.hideProgress();
+            return;
+        }
+
+
+        if (getView() == null) {
+            lg.trace("Application still not initialized");
+            mainActivity.hideProgress();
+            return;
+        }
+
+
+        LocationManager locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
             lg.info("Location still not available");
             Toast.makeText(activity, "Location still not available", Toast.LENGTH_SHORT).show();
+            mainActivity.hideProgress();
             return;
         }
 
@@ -203,7 +236,7 @@ public class HomeFragment extends Fragment  {
 
 
         int offset = photos.size();
-        lg.debug("Fetching additional photos offset: {}, count: {}", offset, PANORAMIA_BULK_DATA_SIZE);
+        lg.debug("Fetching additional photos offset: {}, count: {}", offset, getPanoramioBulkDataSize());
 
         PanoramioUtils.fetchPanoramioImages(
             activity,
@@ -211,7 +244,7 @@ public class HomeFragment extends Fragment  {
             location.getLongitude(),
             fetchRadiusX(),
             fetchRadiusY(),
-            (long)(offset + PANORAMIA_BULK_DATA_SIZE),
+            (long)(offset),
             fetchLocationPageSize(),
             new PanoramioResponseCallback() {
                 @Override
@@ -255,9 +288,13 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
+        MainActivity mainActivity = (MainActivity) getActivity();
+
+        LocationManager locationService = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         if (location == null) {
             lg.info("Location is still not available");
+            mainActivity.hideProgress();
             Toast.makeText(getActivity(), "Location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -275,8 +312,6 @@ public class HomeFragment extends Fragment  {
                 @Override
                 public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
                     Long pageSize = fetchLocationPageSize();
-                    Long start = (pageId - 1) * pageSize + 1;
-                    Long end = pageId * pageSize;
 
                     ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(activity,
                         R.layout.location_item,
@@ -299,7 +334,7 @@ public class HomeFragment extends Fragment  {
     }
 
     private Long fetchLocationPageSize() {
-        return new Long(PANORAMIA_BULK_DATA_SIZE);
+        return new Long(getPanoramioBulkDataSize());
     }
 
     private Double fetchRadiusX() {
@@ -343,7 +378,7 @@ public class HomeFragment extends Fragment  {
             lg.warn("Activity should'nt be null. No headless fragment");
             return;
         }
-        locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
         lg.trace("Current location: {}, locationInfo: {}", currLocation, locationInfo);
         if (currLocation != null && locationInfo != null) {
@@ -372,6 +407,8 @@ public class HomeFragment extends Fragment  {
         super.onSaveInstanceState(outState);
 
         lg.trace("Saving state");
+        outState.putSerializable(PHOTO_LIST, photos);
+        lg.trace("Saved photos: {}", photos);
     }
 
 }

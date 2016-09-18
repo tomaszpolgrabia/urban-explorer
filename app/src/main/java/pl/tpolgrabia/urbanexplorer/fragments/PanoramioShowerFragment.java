@@ -24,6 +24,7 @@ public class PanoramioShowerFragment extends Fragment {
 
 
     public static final String PANORAMIO_PHOTO_ARG_KEY = "PANORAMIO_PHOTO_ARG_KEY";
+    public static final String TAG = "PANORAMIO_TAG";
     private TextView photoTitle;
     private TextView photoUploadDate;
     private TextView photoAuthor;
@@ -94,4 +95,5 @@ public class PanoramioShowerFragment extends Fragment {
             mainActivity.resetPhotoInfo();
         }
     }
+    
 }

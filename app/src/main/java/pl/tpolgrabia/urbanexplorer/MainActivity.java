@@ -55,6 +55,7 @@ public class MainActivity extends ActionBarActivity {
     private static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
     private static final String PHOTO_INFO = "PHOTO_INFO";
     private static final String FIRST_TIME_LAUNCH = "FIRST_TIME_LAUNCH_KEY";
+    private static final String MAIN_BACKSTACK = "MAIN_BACKSTACK_KEY";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private int currentFragmentId = 0;
@@ -90,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate");
         setContentView(R.layout.activity_main);
-        AQUtility.setDebug(true);
+        AQUtility.setDebug(false);
 
         NetUtils.setGlobalProxyAuth(this);
 
@@ -114,8 +115,7 @@ public class MainActivity extends ActionBarActivity {
         gestureDetector = new GestureDetectorCompat(this, swipeHandler);
         locationCallback = new StandardLocationListener();
         initLocalication();
-        Fabric fabric = new Fabric.Builder(this).debuggable(true).kits(new Crashlytics()).build();
-        Fabric.with(fabric);
+        Fabric.with(this, new Crashlytics());
 
         Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(FRAG_ID) : null;
         lg.trace("Restored orig frag id:  {}", fragId);
@@ -194,7 +194,12 @@ public class MainActivity extends ActionBarActivity {
             R.anim.slide_out_down,
             R.anim.slide_in_up,
             R.anim.slide_out_up);
-        ctx.replace(R.id.fragments, panoramioShower);
+        Fragment frag = fragmentManager.findFragmentByTag(PanoramioShowerFragment.TAG);
+        if (frag != null) {
+            ctx.replace(R.id.fragments, frag);
+        } else {
+            ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
+        }
         ctx.addToBackStack(PHOTO_BACKSTACK);
 
         ctx.commit();
@@ -202,6 +207,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void switchFragment() {
+
+        if (photoInfo != null) {
+            switchToPhoto(photoInfo);
+            return;
+        }
+
         switch (currentFragmentId) {
             case HOME_FRAGMENT_ID:
                 // switch to home fragment
@@ -243,8 +254,13 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        ctx.replace(R.id.fragments, fragment, tag);
-        ctx.addToBackStack(null);
+        Fragment frag = fragmentManager.findFragmentByTag(tag);
+        if (frag == null) {
+            ctx.replace(R.id.fragments, fragment, tag);
+        } else {
+            ctx.replace(R.id.fragments, frag);
+        }
+        ctx.addToBackStack(MAIN_BACKSTACK);
         ctx.commit();
         updateSwipeHandler();
     }

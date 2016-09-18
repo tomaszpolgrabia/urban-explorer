@@ -19,6 +19,13 @@
                 android:defaultValue="0.05"
                 android:inputType="numberDecimal" />
 
+        <EditTextPreference
+                android:key="pref_panoramio_bulk_size"
+                android:title="Radius Y"
+                android:summary="Radius Y"
+                android:defaultValue="50"
+                android:inputType="number" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
