@@ -175,6 +175,7 @@ public class MainActivity extends ActionBarActivity {
                         WikiLocationsFragment wikiLocationsFragment = (WikiLocationsFragment)
                             getSupportFragmentManager()
                             .findFragmentByTag(WikiLocationsFragment.TAG);
+                        wikiLocationsFragment.clearData();
                         wikiLocationsFragment.fetchWikiLocations();
                         break;
                     default:

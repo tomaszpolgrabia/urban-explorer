@@ -6,7 +6,7 @@ package pl.tpolgrabia.urbanexplorer;
 public class AppConstants {
     public static final String GOOGLE_API_KEY = "AIzaSyDAnmEK6cgovRrefUuYojL1pxPEbIBLZUw";
     public static final long MIN_TIME = 60000;
-    public static final AppStage RELEASE = AppStage.DEVELOPMENT;
+    public static final AppStage RELEASE = AppStage.FINAL;
     public static final float MIN_DISTANCE = 100;
     public static final float PAMNORAMIO_DEF_RADIUSX = 0.05f;
     public static final float PAMNORAMIO_DEF_RADIUSY = 0.05f;

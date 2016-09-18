@@ -117,6 +117,10 @@ public class WikiLocationsFragment extends Fragment {
         return inflatedView;
     }
 
+    public void clearData() {
+        appObjects.clear();
+    }
+
     public void fetchWikiLocations() {
         lg.trace("Fetch wiki locations");
 
