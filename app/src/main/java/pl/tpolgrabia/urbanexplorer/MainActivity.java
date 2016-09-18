@@ -40,6 +40,8 @@ import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
+import java.util.List;
+
 public class MainActivity extends ActionBarActivity {
 
     private static final Logger lg = LoggerFactory.getLogger(MainActivity.class);
@@ -245,11 +247,11 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    private void switchFragment(Fragment fragment, String tag) {
+    private void switchFragment(Fragment newFragment, String tag) {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        lg.trace("old fragment id: {}, current fragment id: {}", oldFragmentId, currentFragmentId);
+        lg.trace("old newFragment id: {}, current newFragment id: {}", oldFragmentId, currentFragmentId);
         if (oldFragmentId != currentFragmentId) {
             if (currentFragmentId < oldFragmentId) {
                 // slide left animation
@@ -270,11 +272,28 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        Fragment frag = fragmentManager.findFragmentByTag(tag);
-        if (frag == null) {
-            ctx.replace(R.id.fragments, fragment, tag);
+        final List<Fragment> fragments = fragmentManager.getFragments();
+        if (fragments != null) {
+            lg.trace("Available fragments {}", fragments.size());
+            for (Fragment frag : fragments) {
+                if (frag != null) {
+                    lg.trace("Available fragment with id: {}, tag: {}", frag.getId(), frag.getTag());
+                } else {
+                    lg.trace("Available null-fragment");
+                }
+            }
         } else {
-            ctx.replace(R.id.fragments, frag);
+            lg.trace("There are no fragments -> null");
+        }
+
+        lg.trace("Trying to search newFragment by tag {}", tag);
+        Fragment currFragment = fragmentManager.findFragmentByTag(tag);
+        if (currFragment == null) {
+            lg.trace("Using new newFragment: {}", System.identityHashCode(newFragment));
+            ctx.replace(R.id.fragments, newFragment, tag);
+        } else {
+            lg.trace("Reusing old newFragment: {}", System.identityHashCode(currFragment));
+            ctx.replace(R.id.fragments, currFragment);
         }
         // ctx.addToBackStack(MAIN_BACKSTACK);
         ctx.commit();
@@ -429,4 +448,17 @@ public class MainActivity extends ActionBarActivity {
         lg.trace("2 Saving current fragment id: {}", currentFragmentId);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        lg.trace("onStop {}", System.identityHashCode(this));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        lg.trace("onStart {}", System.identityHashCode(this));
+    }
 }

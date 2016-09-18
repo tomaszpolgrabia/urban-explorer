@@ -56,7 +56,7 @@ public class WikiLocationsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        lg.trace("onCreate");
+        lg.trace("onCreate {}", System.identityHashCode(this));
         appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
             : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WIKI_APP_OBJECTS);;
     }
@@ -99,6 +99,12 @@ public class WikiLocationsFragment extends Fragment {
     public void fetchWikiLocations() {
         lg.trace("Fetch wiki locations");
 
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            lg.warn("Activity shouldn't be null. No headless fragment");
+            return;
+        }
+
         MainActivity mainActivity = (MainActivity) getActivity();
 
         if (lastFetchSize == 0) {
@@ -113,12 +119,6 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        final FragmentActivity activity = getActivity();
-        if (activity == null) {
-            lg.warn("Activity shouldn't be null. No headless fragment");
-            mainActivity.hideProgress();
-            return;
-        }
         final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
 
         if (location == null) {
@@ -192,6 +192,7 @@ public class WikiLocationsFragment extends Fragment {
         getActivity().setTitle("Wiki search");
         updateLocationInfo();
         fetchWikiLocations();
+        lg.trace("onResume {}", System.identityHashCode(this));
     }
 
     public void updateLocationInfo() {
@@ -212,6 +213,7 @@ public class WikiLocationsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        lg.trace("onPause {}", System.identityHashCode(this));
     }
 
     @Override
@@ -220,5 +222,11 @@ public class WikiLocationsFragment extends Fragment {
         lg.trace("onSaveInstanceState");
 
         outState.putSerializable(WIKI_APP_OBJECTS, appObjects);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        lg.trace("onDestroy {}", System.identityHashCode(this));
     }
 }

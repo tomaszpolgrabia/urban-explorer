@@ -66,7 +66,7 @@ public class HomeFragment extends Fragment  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        lg.trace("onCreate");
+        lg.trace("onCreate {}", System.identityHashCode(this));
         pageId = 1L;
         loading = new Semaphore(1, true);
         noMorePhotos = false;
@@ -249,30 +249,38 @@ public class HomeFragment extends Fragment  {
             new PanoramioResponseCallback() {
                 @Override
                 public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
-                    lg.debug("Fetched with status: {}, images: {}, count: {}", status, images, imagesCount);
-                    if (status != PanoramioResponseStatus.SUCCESS) {
-                        return;
+                    try {
+                        lg.debug("Fetched with status: {}, images: {}, count: {}", status, images, imagesCount);
+                        if (status != PanoramioResponseStatus.SUCCESS) {
+                            return;
+                        }
+
+                        ListView locations = (ListView) getView().findViewById(R.id.locations);
+                        if (locations == null) {
+                            lg.trace("Empty locations");
+                            return;
+                        }
+                        ArrayAdapter<PanoramioImageInfo> adapter = (ArrayAdapter<PanoramioImageInfo>) locations.getAdapter();
+                        photos.addAll(images);
+                        if (photos.isEmpty()) {
+                            Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
+                        }
+                        noMorePhotos = images.isEmpty();
+                        if (adapter == null) {
+                            locations.setAdapter(new PanoramioAdapter(activity, R.id.list_item, images));
+                        } else {
+                            adapter.addAll(images);
+                        }
+
+                        // TODO we can think about removing first items also and last if the number
+                        // TODO of items exceeds the limit (to save the memory)
+
+                        lg.debug("Finished Fetching additional photos count: {}", photos.size());
+
+                    } finally {
+                        lg.trace("Releasing fetching lock");
+                        loading.release();
                     }
-
-                    ListView locations = (ListView) getView().findViewById(R.id.locations);
-                    ArrayAdapter<PanoramioImageInfo> adapter = (ArrayAdapter<PanoramioImageInfo>) locations.getAdapter();
-                    photos.addAll(images);
-                    if (photos.isEmpty()) {
-                        Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
-                    }
-                    noMorePhotos = images.isEmpty();
-                    if (adapter == null) {
-                        locations.setAdapter(new PanoramioAdapter(activity, R.id.list_item, images));
-                    } else {
-                        adapter.addAll(images);
-                    }
-
-                    // TODO we can think about removing first items also and last if the number
-                    // TODO of items exceeds the limit (to save the memory)
-
-                    lg.debug("Finished Fetching additional photos count: {}", photos.size());
-
-                    loading.release();
 
                 }
             }
@@ -411,4 +419,17 @@ public class HomeFragment extends Fragment  {
         lg.trace("Saved photos: {}", photos);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        lg.trace("onStop {}", System.identityHashCode(this));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        lg.trace("onStart {}", System.identityHashCode(this));
+    }
 }
