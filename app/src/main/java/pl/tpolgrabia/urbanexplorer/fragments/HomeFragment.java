@@ -116,14 +116,16 @@ public class HomeFragment extends Fragment  {
         initialized = true;
 
         lg.trace("Saved instance state {}", savedInstanceState);
-        if (savedInstanceState == null) {
-            lg.trace("Saved instance state is null");
-            photos = new ArrayList<>();
-        }
-        else {
-            final Serializable serializable = savedInstanceState.getSerializable(PHOTO_LIST);
-            lg.trace("Photo list serializable {}", serializable);
-            photos = (ArrayList<PanoramioImageInfo>) serializable;
+        if (photos == null) {
+            if (savedInstanceState == null) {
+                lg.trace("Saved instance state is null");
+                photos = new ArrayList<>();
+            }
+            else {
+                final Serializable serializable = savedInstanceState.getSerializable(PHOTO_LIST);
+                lg.trace("Photo list serializable {}", serializable);
+                photos = (ArrayList<PanoramioImageInfo>) serializable;
+            }
         }
 
         locations.setAdapter(new PanoramioAdapter(getActivity(), R.layout.location_item, photos));
