@@ -208,7 +208,9 @@ public class MainActivity extends ActionBarActivity {
         } else {
             ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
         }
-        ctx.addToBackStack(PHOTO_BACKSTACK);
+        if (!savedConfiguration) {
+            ctx.addToBackStack(PHOTO_BACKSTACK);
+        }
 
         ctx.commit();
 
@@ -219,8 +221,6 @@ public class MainActivity extends ActionBarActivity {
         if (!savedConfiguration) {
             photoInfo = null;
         }
-
-        savedConfiguration = false;
 
         if (photoInfo != null) {
             switchToPhoto(photoInfo);
@@ -240,6 +240,8 @@ public class MainActivity extends ActionBarActivity {
                 switchFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
                 break;
         }
+
+        savedConfiguration = false;
 
     }
 
@@ -274,7 +276,7 @@ public class MainActivity extends ActionBarActivity {
         } else {
             ctx.replace(R.id.fragments, frag);
         }
-        ctx.addToBackStack(MAIN_BACKSTACK);
+        // ctx.addToBackStack(MAIN_BACKSTACK);
         ctx.commit();
         updateSwipeHandler();
     }
