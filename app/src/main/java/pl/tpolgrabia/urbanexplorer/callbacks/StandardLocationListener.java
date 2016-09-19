@@ -28,7 +28,7 @@ public class StandardLocationListener implements LocationListener {
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        lg.debug("Location provider status changed");
+        lg.debug("Location provider {} status  has changed to {} with {}", provider, status, extras);
     }
 
     @Override
