@@ -270,12 +270,13 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
 
             WikiCacheDto dto = new WikiCacheDto();
             dto.setAppObject(appObjects);
-            LocationManager locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-            Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
-            if (location != null) {
-                dto.setLongitude(location.getLongitude());
-                dto.setLatitude(location.getLatitude());
-                dto.setAltitude(location.getAltitude());
+            if (getActivity() != null) {
+                Location location = NetUtils.getLastKnownLocation(getActivity());
+                if (location != null) {
+                    dto.setLongitude(location.getLongitude());
+                    dto.setLatitude(location.getLatitude());
+                    dto.setAltitude(location.getAltitude());
+                }
             }
 
             dto.setFetchedAt(new GregorianCalendar().getTime());

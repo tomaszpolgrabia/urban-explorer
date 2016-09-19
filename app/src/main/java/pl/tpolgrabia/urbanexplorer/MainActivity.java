@@ -103,10 +103,9 @@ public class MainActivity extends ActionBarActivity {
         photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(AppConstants.PHOTO_INFO) : null;
         savedConfiguration = savedInstanceState != null ? savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY) : false;
 
-        if (HelperUtils.checkForLocalicatonEnabled(this)) return;
         switchFragment();
         updateSwipeHandler();
-        HelperUtils.firstTimeNotification(this);
+        if (HelperUtils.checkForLocalicatonEnabled(this)) return;
     }
 
     @Override
@@ -151,12 +150,14 @@ public class MainActivity extends ActionBarActivity {
         final String tag = fragTags.get(currFrag);
         if (tag == null) {
             lg.warn("Unknown fragment id");
+            hideProgress();
             return;
         }
 
         final Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
         if (fragment == null) {
             lg.warn("There is no fragment with the given tag");
+            hideProgress();
             return;
         }
 
@@ -300,6 +301,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         savedConfiguration = false;
+        HelperUtils.firstTimeNotification(this);
     }
 
     @Override
