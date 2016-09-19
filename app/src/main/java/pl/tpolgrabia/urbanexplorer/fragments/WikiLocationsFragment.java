@@ -26,10 +26,7 @@ import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
-import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
-import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
-import pl.tpolgrabia.urbanexplorer.utils.WikiAppResponseCallback;
-import pl.tpolgrabia.urbanexplorer.utils.WikiUtils;
+import pl.tpolgrabia.urbanexplorer.utils.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -144,7 +141,7 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
+        final Location location = NetUtils.getLastKnownLocation(activity);
 
         if (location == null) {
             lg.info("Sorry, location is still not available");
@@ -226,7 +223,7 @@ public class WikiLocationsFragment extends Fragment {
             lg.warn("Activity shouldn't be null. No headless fragment");
             return;
         }
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
+        final Location location = NetUtils.getLastKnownLocation(activity);
         if (location != null) {
             currentLocation.setText("Your current location: ("
                 + location.getLatitude()

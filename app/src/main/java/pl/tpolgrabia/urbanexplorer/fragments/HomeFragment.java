@@ -26,6 +26,7 @@ import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
 import java.io.*;
@@ -248,7 +249,7 @@ public class HomeFragment extends Fragment  {
 
 
         LocationManager locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
+        final Location location = NetUtils.getLastKnownLocation(activity);
 
         if (location == null) {
             lg.info("Location still not available");
@@ -328,7 +329,7 @@ public class HomeFragment extends Fragment  {
         MainActivity mainActivity = (MainActivity) getActivity();
 
         LocationManager locationService = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        final Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
+        final Location location = NetUtils.getLastKnownLocation(activity);
         if (location == null) {
             lg.info("Location is still not available");
             mainActivity.hideProgress();
@@ -415,8 +416,7 @@ public class HomeFragment extends Fragment  {
             lg.warn("Activity should'nt be null. No headless fragment");
             return;
         }
-        LocationManager locationService = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        Location currLocation = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(activity));
+        Location currLocation = NetUtils.getLastKnownLocation(activity);
         lg.trace("Current location: {}, locationInfo: {}", currLocation, locationInfo);
         if (currLocation != null && locationInfo != null) {
             // update home fragment's location info
@@ -446,8 +446,8 @@ public class HomeFragment extends Fragment  {
 
             PanoramioCacheDto dto = new PanoramioCacheDto();
             dto.setPanoramioImages(photos);
-            LocationManager locationService = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-            Location location = locationService.getLastKnownLocation(LocationUtils.getDefaultLocation(getActivity()));
+
+            Location location = NetUtils.getLastKnownLocation(getActivity());
             if (location != null) {
                 dto.setLongitude(location.getLongitude());
                 dto.setLatitude(location.getLatitude());

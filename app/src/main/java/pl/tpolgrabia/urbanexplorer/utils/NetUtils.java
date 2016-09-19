@@ -2,6 +2,8 @@ package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import com.androidquery.AQuery;
 import org.slf4j.Logger;
@@ -91,4 +93,18 @@ public class NetUtils {
                         AppConstants.DEF_HTTP_PROXY_ENABLED);
     }
 
+    public static Location getLastKnownLocation(Context ctx) {
+        String locationProvider = LocationUtils.getDefaultLocation(ctx);
+
+        if (locationProvider == null) {
+            lg.info("Location not available");
+            return null;
+        }
+
+        return getSystemService(ctx).getLastKnownLocation(locationProvider);
+    }
+
+    private static LocationManager getSystemService(Context ctx) {
+        return (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+    }
 }
