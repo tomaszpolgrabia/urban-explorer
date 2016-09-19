@@ -171,6 +171,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void switchToPhoto(PanoramioImageInfo photoInfo) {
         this.photoInfo = photoInfo;
+        this.currFrag = MainActivityState.PANORAMIO_SHOWER;
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
         PanoramioShowerFragment panoramioShower = new PanoramioShowerFragment();
