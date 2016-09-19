@@ -22,6 +22,7 @@ import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.FetchWikiLocationsCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.ProviderStatusCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
@@ -104,6 +105,16 @@ public class WikiLocationsFragment extends Fragment {
                 appObjects = new ArrayList<>();
                 updateLocationInfo();
                 fetchWikiLocations();
+            }
+        });
+
+        mainActivity.getLocationCallback().addProviderCallback(new ProviderStatusCallback() {
+            @Override
+            public void callback(String provider, boolean enabled) {
+                if (enabled) {
+                    lg.trace("Handling provider enabling - refreshing wiki listing");
+                    fetchWikiLocations();
+                }
             }
         });
 

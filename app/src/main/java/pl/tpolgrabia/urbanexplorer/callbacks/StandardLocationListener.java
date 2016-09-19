@@ -15,6 +15,8 @@ import java.util.List;
 public class StandardLocationListener implements LocationListener {
     private static final Logger lg = LoggerFactory.getLogger(StandardLocationListener.class);
     private List<StandardLocationListenerCallback> locationChangedCallbacks = new ArrayList<>();
+    private List<ProviderStatusCallback>
+            providerStatusCallbacks = new ArrayList<>();
 
     @Override
     public void onLocationChanged(Location location) {
@@ -32,18 +34,38 @@ public class StandardLocationListener implements LocationListener {
     @Override
     public void onProviderEnabled(String provider) {
         lg.info("Provider {} enabled", provider);
+
+        for (ProviderStatusCallback callback : providerStatusCallbacks){
+            callback.callback(provider, true);
+        }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
         lg.info("Provider {} disabled", provider);
+
+        for (ProviderStatusCallback callback : providerStatusCallbacks){
+            callback.callback(provider, false);
+        }
     }
 
     public void addCallback(StandardLocationListenerCallback callback) {
+        lg.trace("Location added callback");
         locationChangedCallbacks.add(callback);
     }
 
     public boolean removeCallback(StandardLocationListenerCallback callback) {
+        lg.trace("Location removed callback");
         return locationChangedCallbacks.remove(callback);
+    }
+
+    public void addProviderCallback(ProviderStatusCallback callback) {
+        lg.trace("Provider added callback");
+        providerStatusCallbacks.add(callback);
+    }
+
+    public void removeProviderCallback(ProviderStatusCallback callback) {
+        lg.trace("Provider removed calback");
+        providerStatusCallbacks.remove(callback);
     }
 }

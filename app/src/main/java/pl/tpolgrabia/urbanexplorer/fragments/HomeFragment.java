@@ -22,10 +22,10 @@ import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
+import pl.tpolgrabia.urbanexplorer.callbacks.ProviderStatusCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
-import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
@@ -101,6 +101,16 @@ public class HomeFragment extends Fragment  {
                     }
                 }
             });
+        mainActivity.getLocationCallback()
+                .addProviderCallback(new ProviderStatusCallback() {
+                    @Override
+                    public void callback(String provider, boolean enabled) {
+                        if (enabled) {
+                            lg.trace("Handling provider enabling - refreshing panoramio listing");
+                            fetchPanoramioPhotos();
+                        }
+                    }
+                });
     }
 
     @Override
@@ -328,7 +338,6 @@ public class HomeFragment extends Fragment  {
 
         MainActivity mainActivity = (MainActivity) getActivity();
 
-        LocationManager locationService = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         final Location location = NetUtils.getLastKnownLocation(activity);
         if (location == null) {
             lg.info("Location is still not available");
