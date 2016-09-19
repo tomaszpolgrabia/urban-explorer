@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity {
     private GestureDetector.OnGestureListener swipeHandler;
     private PanoramioImageInfo photoInfo;
     private ProgressDialog progressDlg;
-    private MainActivityState oldFragmentId = MainActivityState.PANORAMIO
+    private MainActivityState oldFrag = MainActivityState.PANORAMIO_SHOWER;
     private boolean savedConfiguration;
 
     private static final Map<Integer, String> fragTags = new HashMap<>();
@@ -78,7 +78,7 @@ public class MainActivity extends ActionBarActivity {
         lg.trace("onCreate");
         setContentView(R.layout.activity_main);
 
-        HelperUtils.initErrorAndDebugHanlers();
+        HelperUtils.initErrorAndDebugHanlers(this);
         NetUtils.setGlobalProxyAuth(this);
 
         currFrag = MainActivityState.PANORAMIO;
@@ -198,9 +198,12 @@ public class MainActivity extends ActionBarActivity {
 
     private void switchFragment() {
 
+        if (currFrag == oldFrag) {
+            return;
+        }
+
         if (!savedConfiguration) {
             photoInfo = null;
-            currFrag = MainActivityState.PANORAMIO;
         }
 
         switch (currFrag) {
@@ -228,9 +231,9 @@ public class MainActivity extends ActionBarActivity {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        lg.trace("old newFragment id: {}, current newFragment id: {}", oldFragmentId, currFrag);
+        lg.trace("old newFragment id: {}, current newFragment id: {}", oldFrag, currFrag);
 
-        HelperUtils.appendEffectToTransition(ctx, oldFragmentId, currFrag);
+        HelperUtils.appendEffectToTransition(ctx, oldFrag, currFrag);
         HelperUtils.traceAllAvailableFragments(fragmentManager);
 
         lg.trace("Trying to search newFragment by tag {}", tag);
@@ -261,18 +264,22 @@ public class MainActivity extends ActionBarActivity {
 
     public void swipeLeft() {
         lg.debug("Swiped left");
-        changeCurrentFragId((int)Math.max(AppConstants.MIN_FRAGMENT_ID, currFrag -1));
+        changeCurrentFragId(currFrag.prev());
         switchFragment();
     }
 
     private void changeCurrentFragId(MainActivityState nextFragmentId) {
-        oldFragmentId = currFrag;
+        if (nextFragmentId == null) {
+            oldFrag = currFrag;
+            return;
+        }
+        oldFrag = currFrag;
         currFrag = nextFragmentId;
     }
 
     public void swipeRight() {
         lg.debug("Swiped right");
-        changeCurrentFragId((int)Math.min(AppConstants.MAX_FRAGMENT_ID, currFrag +1));
+        changeCurrentFragId(currFrag.next());
         switchFragment();
     }
 

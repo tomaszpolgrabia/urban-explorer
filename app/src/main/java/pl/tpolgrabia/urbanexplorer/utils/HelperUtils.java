@@ -74,6 +74,10 @@ public class HelperUtils {
     }
 
     public static void appendEffectToTransition(FragmentTransaction ctx, MainActivityState old, MainActivityState curr) {
+        if (old.getOrder() == -1 || curr.getOrder() == -1) {
+            return;
+        }
+
         if (old != curr) {
             if (curr.getOrder() < old.getOrder()) {
                 // slide left animation

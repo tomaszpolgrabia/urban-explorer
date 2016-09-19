@@ -49,7 +49,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
     private static final String WIKI_APP_OBJECTS = "WIKI_APP_OBJECTS";
     private LocationManager locationService;
     private TextView currentLocation;
-    private ArrayList<WikiAppObject> appObjects;
+    private ArrayList<WikiAppObject> appObjects = new ArrayList<>();
     private int lastFetchSize = -1;
 
     public WikiLocationsFragment() {

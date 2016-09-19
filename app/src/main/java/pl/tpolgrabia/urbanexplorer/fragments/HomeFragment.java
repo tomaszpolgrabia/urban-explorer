@@ -295,7 +295,13 @@ public class HomeFragment extends Fragment implements Refreshable {
                             return;
                         }
 
-                        ListView locations = (ListView) getView().findViewById(R.id.locations);
+                        final View view = getView();
+                        if (view == null) {
+                            lg.debug("View still not initialized");
+                            return;
+                        }
+
+                        ListView locations = (ListView) view.findViewById(R.id.locations);
                         if (locations == null) {
                             lg.trace("Empty locations");
                             return;

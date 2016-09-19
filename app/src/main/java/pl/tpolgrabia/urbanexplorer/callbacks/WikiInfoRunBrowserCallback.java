@@ -2,6 +2,7 @@ package pl.tpolgrabia.urbanexplorer.callbacks;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
@@ -44,7 +45,13 @@ public class WikiInfoRunBrowserCallback extends AjaxCallback<JSONObject> {
                 .getString("fullurl");
             Intent intent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(wikiUrl));
-            wikiLocationsFragment.startActivity(intent);
+            FragmentActivity activity = wikiLocationsFragment.getActivity();
+            if (activity == null) {
+                lg.debug("Fragment is not attached to activity");
+                return;
+            }
+
+            activity.startActivity(intent);
         } catch (JSONException e) {
             lg.error("JSON error", e);
         }
