@@ -1,73 +1,56 @@
 package pl.tpolgrabia.urbanexplorer;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
-import android.widget.Toast;
-import com.androidquery.util.AQUtility;
-import com.crashlytics.android.Crashlytics;
-import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import io.fabric.sdk.android.Fabric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
-import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
+import pl.tpolgrabia.urbanexplorer.fragments.Refreshable;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorer.handlers.SwipeHandler;
-import pl.tpolgrabia.urbanexplorer.utils.ImageLoaderUtils;
+import pl.tpolgrabia.urbanexplorer.utils.HelperUtils;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
-import pl.tpolgrabia.urbanexplorer.utils.NumberUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends ActionBarActivity {
 
     private static final Logger lg = LoggerFactory.getLogger(MainActivity.class);
 
-    private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
-    private static final String PHOTO_BACKSTACK = "PHOTO_BACKSTACK";
-    private static final int HOME_FRAGMENT_ID = 0;
-    private static final int WIKI_FRAGMENT_ID = 1;
-    private static final double MAX_FRAGMENT_ID = WIKI_FRAGMENT_ID;
-    private static final double MIN_FRAGMENT_ID = HOME_FRAGMENT_ID;
-    private static final String FRAG_ID = "FRAG_ID";
-    private static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
-    private static final String PHOTO_INFO = "PHOTO_INFO";
-    private static final String FIRST_TIME_LAUNCH = "FIRST_TIME_LAUNCH_KEY";
-    private static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
     private int currentFragmentId = 0;
     private StandardLocationListener locationCallback;
-
     private boolean locationServicesActivated = false;
     private GestureDetector.OnGestureListener swipeHandler;
     private PanoramioImageInfo photoInfo;
     private ProgressDialog progressDlg;
     private int oldFragmentId = 0;
     private boolean savedConfiguration;
+
+    private static final Map<Integer, String> fragTags = new HashMap<>();
+
+    static {
+        fragTags.put(AppConstants.HOME_FRAGMENT_ID, HomeFragment.TAG);
+        fragTags.put(AppConstants.WIKI_FRAGMENT_ID, WikiLocationsFragment.TAG);
+    }
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
@@ -94,9 +77,7 @@ public class MainActivity extends ActionBarActivity {
         lg.trace("onCreate");
         setContentView(R.layout.activity_main);
 
-        AQUtility.setDebug(AppConstants.RELEASE != AppStage.FINAL
-            && AppConstants.RELEASE != AppStage.RELEASE_CANDIDATE);
-
+        HelperUtils.initErrorAndDebugHanlers();
         NetUtils.setGlobalProxyAuth(this);
 
         currentFragmentId = 0;
@@ -104,47 +85,24 @@ public class MainActivity extends ActionBarActivity {
         progressDlg.setCancelable(false);
 
         // UNIVERSAL IMAGE LOADER SETUP
-        DisplayImageOptions defaultOptions = ImageLoaderUtils.createDefaultOptions();
-
-        options = defaultOptions;
-
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
-            this)
-            .defaultDisplayImageOptions(defaultOptions)
-            .memoryCache(new WeakMemoryCache())
-            .discCacheSize(100 * 1024 * 1024).build();
-
-        ImageLoader.getInstance().init(config);
+        HelperUtils.initUniversalDownloader(this);
 
         swipeHandler = new SwipeHandler(this);
         gestureDetector = new GestureDetectorCompat(this, swipeHandler);
         locationCallback = new StandardLocationListener();
-        initLocalication();
-        if (AppConstants.RELEASE == AppStage.FINAL
-            || AppConstants.RELEASE == AppStage.RELEASE_CANDIDATE) {
-            Fabric.with(this, new Crashlytics());
-        }
 
-        Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(FRAG_ID) : null;
+        // init fragments
+        Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(AppConstants.FRAG_ID) : null;
         lg.trace("Restored orig frag id:  {}", fragId);
         currentFragmentId = fragId == null ? 0 : fragId;
         lg.trace("Set final frag id: {}", fragId);
-        photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(PHOTO_INFO) : null;
-        savedConfiguration = savedInstanceState != null ? savedInstanceState.getBoolean(SAVED_CONFIG_KEY) : false;
+        photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(AppConstants.PHOTO_INFO) : null;
+        savedConfiguration = savedInstanceState != null ? savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY) : false;
+
+        if (HelperUtils.checkForLocalicatonEnabled(this)) return;
         switchFragment();
-
         updateSwipeHandler();
-
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPrefs.getBoolean(FIRST_TIME_LAUNCH, true)) {
-            Toast.makeText(this, "To interact with any list itemm press long the item. When thgre is no results" +
-                ", please, click refresh in the menu", Toast.LENGTH_LONG).show();
-            Toast.makeText(this, "To change panoramio / wiki search views swipe left or right",
-                Toast.LENGTH_LONG).show();
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            editor.putBoolean(FIRST_TIME_LAUNCH, false);
-            editor.commit();
-        }
+        HelperUtils.firstTimeNotification(this);
     }
 
     @Override
@@ -159,7 +117,7 @@ public class MainActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.settings:
                 final Intent intent = new Intent(this, SettingsActivity.class);
-                startActivityForResult(intent, MainActivity.SETTINGS_ID_INTENT_REQUEST_ID, new Bundle());
+                startActivityForResult(intent, AppConstants.SETTINGS_ID_INTENT_REQUEST_ID, new Bundle());
                 return true;
             case R.id.refresh:
                 progressDlg.setMessage("Refreshing results");
@@ -172,23 +130,21 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void refreshFragment() {
-        switch (currentFragmentId) {
-            case HOME_FRAGMENT_ID:
-                HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
-                    .findFragmentByTag(HomeFragment.TAG);
-                homeFragment.fetchPanoramioPhotos();
-                break;
-            case WIKI_FRAGMENT_ID:
-                WikiLocationsFragment wikiLocationsFragment = (WikiLocationsFragment)
-                    getSupportFragmentManager()
-                    .findFragmentByTag(WikiLocationsFragment.TAG);
-                wikiLocationsFragment.clearData();
-                wikiLocationsFragment.fetchWikiLocations();
-                break;
-            default:
-                lg.warn("Unknown current fragment ID");
-                break;
+        final String tag = fragTags.get(currentFragmentId);
+        if (tag == null) {
+            lg.warn("Unknown fragment id");
+            return;
         }
+
+        final Fragment fragment = getSupportFragmentManager().findFragmentByTag(tag);
+        if (fragment == null) {
+            lg.warn("There is no fragment with the given tag");
+            return;
+        }
+
+        Refreshable refreshable = (Refreshable) fragment;
+        refreshable.refresh();
+
     }
 
     public void resetPhotoInfo() {
@@ -215,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
             ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
         }
         if (!savedConfiguration) {
-            ctx.addToBackStack(PHOTO_BACKSTACK);
+            ctx.addToBackStack(AppConstants.PHOTO_BACKSTACK);
         }
 
         ctx.commit();
@@ -234,13 +190,13 @@ public class MainActivity extends ActionBarActivity {
         }
 
         switch (currentFragmentId) {
-            case HOME_FRAGMENT_ID:
+            case AppConstants.HOME_FRAGMENT_ID:
                 // switch to home fragment
                 lg.debug("Switching to home fragment");
                 final HomeFragment fragment = new HomeFragment();
                 switchFragment(fragment, HomeFragment.TAG);
                 break;
-            case WIKI_FRAGMENT_ID:
+            case AppConstants.WIKI_FRAGMENT_ID:
                 // switch to wiki fragment
                 lg.debug("Switching to wiki fragment");
                 switchFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
@@ -256,39 +212,9 @@ public class MainActivity extends ActionBarActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
         lg.trace("old newFragment id: {}, current newFragment id: {}", oldFragmentId, currentFragmentId);
-        if (oldFragmentId != currentFragmentId) {
-            if (currentFragmentId < oldFragmentId) {
-                // slide left animation
-                lg.trace("sliding left animation");
-                ctx.setCustomAnimations(
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_right);
-            } else {
-                // slide right animation
-                lg.trace("sliding right animation");
-                ctx.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_right,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_left);
-            }
-        }
 
-        final List<Fragment> fragments = fragmentManager.getFragments();
-        if (fragments != null) {
-            lg.trace("Available fragments {}", fragments.size());
-            for (Fragment frag : fragments) {
-                if (frag != null) {
-                    lg.trace("Available fragment with id: {}, tag: {}", frag.getId(), frag.getTag());
-                } else {
-                    lg.trace("Available null-fragment");
-                }
-            }
-        } else {
-            lg.trace("There are no fragments -> null");
-        }
+        HelperUtils.appendEffectToTransition(ctx, oldFragmentId, currentFragmentId);
+        HelperUtils.traceAllAvailableFragments(fragmentManager);
 
         lg.trace("Trying to search newFragment by tag {}", tag);
         Fragment currFragment = fragmentManager.findFragmentByTag(tag);
@@ -318,7 +244,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void swipeLeft() {
         lg.debug("Swiped left");
-        changeCurrentFragId((int)Math.max(MIN_FRAGMENT_ID, currentFragmentId-1));
+        changeCurrentFragId((int)Math.max(AppConstants.MIN_FRAGMENT_ID, currentFragmentId-1));
         switchFragment();
     }
 
@@ -329,38 +255,8 @@ public class MainActivity extends ActionBarActivity {
 
     public void swipeRight() {
         lg.debug("Swiped right");
-        changeCurrentFragId((int)Math.min(MAX_FRAGMENT_ID, currentFragmentId+1));
+        changeCurrentFragId((int)Math.min(AppConstants.MAX_FRAGMENT_ID, currentFragmentId+1));
         switchFragment();
-    }
-
-    private void initLocalication() {
-        if (checkForLocalicatonEnabled()) return;
-
-        final Context ctx = this;
-
-        locationCallback.addCallback(new StandardLocationListenerCallback() {
-            @Override
-            public void callback(Location location) {
-                double lat = location.getLatitude();
-                double lng = location.getLongitude();
-                Toast.makeText(ctx, "Location: (" + lat + "," + lng + ")", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private boolean checkForLocalicatonEnabled() {
-
-        lg.trace("Check for location enabled");
-        final String locationProvider = LocationUtils.getDefaultLocation(this);
-        lg.debug("Location provider {}", locationProvider);
-        if (locationProvider == null) {
-            lg.debug("Location provider is null. Prompting for enabling location services");
-            Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivityForResult(locationSettingsIntent, LOCATION_SETTINGS_REQUEST_ID);
-            return true;
-        }
-
-        return false;
     }
 
     @Override
@@ -368,11 +264,12 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
         lg.trace("onResume");
         String locationProvider = LocationUtils.getDefaultLocation(this);
+
         if (locationProvider != null) {
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.requestLocationUpdates(locationProvider,
-                fetchGpsUpdateFreq(),
-                fetchGpsDistanceFreq(),
+                HelperUtils.fetchGpsUpdateFreq(this),
+                HelperUtils.fetchGpsDistanceFreq(this),
                 locationCallback);
             locationServicesActivated = true;
         }
@@ -381,30 +278,11 @@ public class MainActivity extends ActionBarActivity {
         photoInfo = null;
     }
 
-    private Float fetchGpsDistanceFreq() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String prefDistanceUpdateFreq = sharedPreferences.getString(
-            "pref_gps_distance_freq",
-            String.valueOf(AppConstants.GPS_LOCATION_DISTANCE_FREQ));
-
-        lg.debug("Pref GPS distance update frequency {}", prefDistanceUpdateFreq);
-        return NumberUtils.safeParseFloat(prefDistanceUpdateFreq);
-    }
-
-    private Long fetchGpsUpdateFreq() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String prefGpsUpdateFreq = sharedPreferences.getString(
-            "pref_gps_update_freq",
-            String.valueOf(AppConstants.GPS_LOCATION_UPDATE_FREQ));
-
-        lg.debug("Pref GPS location update frequency {}", prefGpsUpdateFreq);
-        return Math.round(NumberUtils.safeParseDouble(prefGpsUpdateFreq)* 60.0 * 1000.0);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
         lg.trace("onPause");
+
         if (locationServicesActivated) {
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.removeUpdates(locationCallback);
@@ -419,12 +297,11 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         switch (requestCode) {
-            case LOCATION_SETTINGS_REQUEST_ID:
+            case HelperUtils.LOCATION_SETTINGS_REQUEST_ID:
                 refreshFragment();
                 break;
-            case SETTINGS_ID_INTENT_REQUEST_ID:
+            case AppConstants.SETTINGS_ID_INTENT_REQUEST_ID:
                 NetUtils.setGlobalProxyAuth(this);
                 break;
             default:
@@ -435,31 +312,23 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        lg.trace("1 Saving current fragment id: {}", currentFragmentId);
         super.onSaveInstanceState(outState);
-        outState.putSerializable(FRAG_ID, currentFragmentId);
-        outState.putSerializable(PHOTO_INFO, photoInfo);
-        outState.putBoolean(SAVED_CONFIG_KEY, true);
-
-//        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-//        SharedPreferences.Editor editor = sharedPrefs.edit();
-//        editor.putInt(FRAG_ID, currentFragmentId);
-//        editor.commit();
-
+        lg.trace("1 Saving current fragment id: {}", currentFragmentId);
+        outState.putSerializable(AppConstants.FRAG_ID, currentFragmentId);
+        outState.putSerializable(AppConstants.PHOTO_INFO, photoInfo);
+        outState.putBoolean(AppConstants.SAVED_CONFIG_KEY, true);
         lg.trace("2 Saving current fragment id: {}", currentFragmentId);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
         lg.trace("onStop {}", System.identityHashCode(this));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         lg.trace("onStart {}", System.identityHashCode(this));
     }
 }

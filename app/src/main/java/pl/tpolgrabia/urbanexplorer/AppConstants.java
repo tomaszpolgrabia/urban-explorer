@@ -27,4 +27,15 @@ public class AppConstants {
     public static final int PANORAMIO_BULK_SIZE_DEF_VALUE = 50;
     public static final String PANORAMIO_CACHE_FILENAME = "panoramio-cache.dat";
     public static final String WIKI_CACHE_FILENAME = "wiki-cache.dat";
+    public static final String PREF_GPS_UPDATE_FREQ = "pref_gps_update_freq";
+    public static final String PREF_GPS_DISTANCE_FREQ = "pref_gps_distance_freq";
+    public static final String PHOTO_BACKSTACK = "PHOTO_BACKSTACK";
+    static final int HOME_FRAGMENT_ID = 0;
+    static final double MIN_FRAGMENT_ID = HOME_FRAGMENT_ID;
+    static final int WIKI_FRAGMENT_ID = 1;
+    static final double MAX_FRAGMENT_ID = WIKI_FRAGMENT_ID;
+    static final String FRAG_ID = "FRAG_ID";
+    static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
+    static final String PHOTO_INFO = "PHOTO_INFO";
+    static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
 }

@@ -38,7 +38,7 @@ import java.util.concurrent.Semaphore;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment  {
+public class HomeFragment extends Fragment implements Refreshable {
 
     private static final Logger lg = LoggerFactory.getLogger(HomeFragment.class);
 
@@ -496,5 +496,10 @@ public class HomeFragment extends Fragment  {
         super.onStart();
 
         lg.trace("onStart {}", System.identityHashCode(this));
+    }
+
+    @Override
+    public void refresh() {
+        fetchPanoramioPhotos();
     }
 }

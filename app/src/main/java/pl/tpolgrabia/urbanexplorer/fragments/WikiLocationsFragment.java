@@ -39,7 +39,7 @@ import static android.content.Context.LOCATION_SERVICE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WikiLocationsFragment extends Fragment {
+public class WikiLocationsFragment extends Fragment implements Refreshable {
 
     private static final Logger lg = LoggerFactory.getLogger(WikiLocationsFragment.class);
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
@@ -288,5 +288,11 @@ public class WikiLocationsFragment extends Fragment {
         } catch (IOException e) {
             lg.error("I/O error", e);
         }
+    }
+
+    @Override
+    public void refresh() {
+        clearData();
+        fetchWikiLocations();
     }
 }
