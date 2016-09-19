@@ -47,7 +47,6 @@ public class MainActivity extends ActionBarActivity {
     private static final Logger lg = LoggerFactory.getLogger(MainActivity.class);
 
     private static final int LOCATION_SETTINGS_REQUEST_ID = 1;
-    private static final String CLASS_TAG = MainActivity.class.getSimpleName();
     private static final String PHOTO_BACKSTACK = "PHOTO_BACKSTACK";
     private static final int HOME_FRAGMENT_ID = 0;
     private static final int WIKI_FRAGMENT_ID = 1;
@@ -57,7 +56,6 @@ public class MainActivity extends ActionBarActivity {
     private static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
     private static final String PHOTO_INFO = "PHOTO_INFO";
     private static final String FIRST_TIME_LAUNCH = "FIRST_TIME_LAUNCH_KEY";
-    private static final String MAIN_BACKSTACK = "MAIN_BACKSTACK_KEY";
     private static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
@@ -103,6 +101,7 @@ public class MainActivity extends ActionBarActivity {
 
         currentFragmentId = 0;
         progressDlg = new ProgressDialog(this);
+        progressDlg.setCancelable(false);
 
         // UNIVERSAL IMAGE LOADER SETUP
         DisplayImageOptions defaultOptions = ImageLoaderUtils.createDefaultOptions();
@@ -164,7 +163,7 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             case R.id.refresh:
                 progressDlg.setMessage("Refreshing results");
-                progressDlg.show();
+                showProgress();
                 refreshFragment();
                 return true;
             default:
