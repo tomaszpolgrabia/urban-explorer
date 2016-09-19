@@ -23,6 +23,7 @@ import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.AppStage;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
+import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
 
 import java.util.List;
 
@@ -72,9 +73,9 @@ public class HelperUtils {
         ImageLoader.getInstance().init(config);
     }
 
-    public static void appendEffectToTransition(FragmentTransaction ctx, int old, int curr) {
+    public static void appendEffectToTransition(FragmentTransaction ctx, MainActivityState old, MainActivityState curr) {
         if (old != curr) {
-            if (curr < old) {
+            if (curr.getOrder() < old.getOrder()) {
                 // slide left animation
                 lg.trace("sliding left animation");
                 ctx.setCustomAnimations(

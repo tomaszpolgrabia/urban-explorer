@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
+import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
@@ -36,13 +37,13 @@ public class MainActivity extends ActionBarActivity {
 
     public static DisplayImageOptions options;
     private GestureDetectorCompat gestureDetector;
-    private int currentFragmentId = 0;
+    private MainActivityState currFrag = MainActivityState.PANORAMIO;
     private StandardLocationListener locationCallback;
     private boolean locationServicesActivated = false;
     private GestureDetector.OnGestureListener swipeHandler;
     private PanoramioImageInfo photoInfo;
     private ProgressDialog progressDlg;
-    private int oldFragmentId = 0;
+    private MainActivityState oldFragmentId = MainActivityState.PANORAMIO
     private boolean savedConfiguration;
 
     private static final Map<Integer, String> fragTags = new HashMap<>();
@@ -80,7 +81,7 @@ public class MainActivity extends ActionBarActivity {
         HelperUtils.initErrorAndDebugHanlers();
         NetUtils.setGlobalProxyAuth(this);
 
-        currentFragmentId = 0;
+        currFrag = MainActivityState.PANORAMIO;
         progressDlg = new ProgressDialog(this);
         progressDlg.setCancelable(false);
 
@@ -92,9 +93,12 @@ public class MainActivity extends ActionBarActivity {
         locationCallback = new StandardLocationListener();
 
         // init fragments
-        Integer fragId = savedInstanceState != null ? savedInstanceState.getInt(AppConstants.FRAG_ID) : null;
+        MainActivityState fragId = savedInstanceState != null
+            ? (MainActivityState)savedInstanceState.getSerializable(AppConstants.FRAG_ID)
+            : MainActivityState.PANORAMIO;
+
         lg.trace("Restored orig frag id:  {}", fragId);
-        currentFragmentId = fragId == null ? 0 : fragId;
+        currFrag = fragId == null ? MainActivityState.PANORAMIO : fragId;
         lg.trace("Set final frag id: {}", fragId);
         photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(AppConstants.PHOTO_INFO) : null;
         savedConfiguration = savedInstanceState != null ? savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY) : false;
@@ -103,6 +107,20 @@ public class MainActivity extends ActionBarActivity {
         switchFragment();
         updateSwipeHandler();
         HelperUtils.firstTimeNotification(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        lg.debug("Back pressed");
+
+        switch(currFrag) {
+            case PANORAMIO_SHOWER:
+                photoInfo = null;
+                currFrag = MainActivityState.PANORAMIO;
+                break;
+        }
+
+        super.onBackPressed();
     }
 
     @Override
@@ -130,7 +148,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void refreshFragment() {
-        final String tag = fragTags.get(currentFragmentId);
+        final String tag = fragTags.get(currFrag);
         if (tag == null) {
             lg.warn("Unknown fragment id");
             return;
@@ -182,21 +200,20 @@ public class MainActivity extends ActionBarActivity {
 
         if (!savedConfiguration) {
             photoInfo = null;
+            currFrag = MainActivityState.PANORAMIO;
         }
 
-        if (photoInfo != null) {
-            switchToPhoto(photoInfo);
-            return;
-        }
-
-        switch (currentFragmentId) {
-            case AppConstants.HOME_FRAGMENT_ID:
+        switch (currFrag) {
+            case PANORAMIO_SHOWER:
+                lg.debug("Switching to panoramio shower");
+                switchToPhoto(photoInfo);
+                break;
+            case PANORAMIO:
                 // switch to home fragment
                 lg.debug("Switching to home fragment");
-                final HomeFragment fragment = new HomeFragment();
-                switchFragment(fragment, HomeFragment.TAG);
+                switchFragment(new HomeFragment(), HomeFragment.TAG);
                 break;
-            case AppConstants.WIKI_FRAGMENT_ID:
+            case WIKI:
                 // switch to wiki fragment
                 lg.debug("Switching to wiki fragment");
                 switchFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
@@ -211,9 +228,9 @@ public class MainActivity extends ActionBarActivity {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        lg.trace("old newFragment id: {}, current newFragment id: {}", oldFragmentId, currentFragmentId);
+        lg.trace("old newFragment id: {}, current newFragment id: {}", oldFragmentId, currFrag);
 
-        HelperUtils.appendEffectToTransition(ctx, oldFragmentId, currentFragmentId);
+        HelperUtils.appendEffectToTransition(ctx, oldFragmentId, currFrag);
         HelperUtils.traceAllAvailableFragments(fragmentManager);
 
         lg.trace("Trying to search newFragment by tag {}", tag);
@@ -244,18 +261,18 @@ public class MainActivity extends ActionBarActivity {
 
     public void swipeLeft() {
         lg.debug("Swiped left");
-        changeCurrentFragId((int)Math.max(AppConstants.MIN_FRAGMENT_ID, currentFragmentId-1));
+        changeCurrentFragId((int)Math.max(AppConstants.MIN_FRAGMENT_ID, currFrag -1));
         switchFragment();
     }
 
-    private void changeCurrentFragId(int nextFragmentId) {
-        oldFragmentId = currentFragmentId;
-        currentFragmentId = nextFragmentId;
+    private void changeCurrentFragId(MainActivityState nextFragmentId) {
+        oldFragmentId = currFrag;
+        currFrag = nextFragmentId;
     }
 
     public void swipeRight() {
         lg.debug("Swiped right");
-        changeCurrentFragId((int)Math.min(AppConstants.MAX_FRAGMENT_ID, currentFragmentId+1));
+        changeCurrentFragId((int)Math.min(AppConstants.MAX_FRAGMENT_ID, currFrag +1));
         switchFragment();
     }
 
@@ -275,7 +292,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
         savedConfiguration = false;
-        photoInfo = null;
     }
 
     @Override
@@ -313,11 +329,11 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        lg.trace("1 Saving current fragment id: {}", currentFragmentId);
-        outState.putSerializable(AppConstants.FRAG_ID, currentFragmentId);
+        lg.trace("1 Saving current fragment id: {}", currFrag);
+        outState.putSerializable(AppConstants.FRAG_ID, currFrag);
         outState.putSerializable(AppConstants.PHOTO_INFO, photoInfo);
         outState.putBoolean(AppConstants.SAVED_CONFIG_KEY, true);
-        lg.trace("2 Saving current fragment id: {}", currentFragmentId);
+        lg.trace("2 Saving current fragment id: {}", currFrag);
     }
 
     @Override
