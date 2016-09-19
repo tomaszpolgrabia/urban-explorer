@@ -165,26 +165,30 @@ public class MainActivity extends ActionBarActivity {
             case R.id.refresh:
                 progressDlg.setMessage("Refreshing results");
                 progressDlg.show();
-                switch (currentFragmentId) {
-                    case HOME_FRAGMENT_ID:
-                        HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
-                            .findFragmentByTag(HomeFragment.TAG);
-                        homeFragment.fetchPanoramioPhotos();
-                        break;
-                    case WIKI_FRAGMENT_ID:
-                        WikiLocationsFragment wikiLocationsFragment = (WikiLocationsFragment)
-                            getSupportFragmentManager()
-                            .findFragmentByTag(WikiLocationsFragment.TAG);
-                        wikiLocationsFragment.clearData();
-                        wikiLocationsFragment.fetchWikiLocations();
-                        break;
-                    default:
-                        lg.warn("Unknown current fragment ID");
-                        break;
-                }
+                refreshFragment();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void refreshFragment() {
+        switch (currentFragmentId) {
+            case HOME_FRAGMENT_ID:
+                HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
+                    .findFragmentByTag(HomeFragment.TAG);
+                homeFragment.fetchPanoramioPhotos();
+                break;
+            case WIKI_FRAGMENT_ID:
+                WikiLocationsFragment wikiLocationsFragment = (WikiLocationsFragment)
+                    getSupportFragmentManager()
+                    .findFragmentByTag(WikiLocationsFragment.TAG);
+                wikiLocationsFragment.clearData();
+                wikiLocationsFragment.fetchWikiLocations();
+                break;
+            default:
+                lg.warn("Unknown current fragment ID");
+                break;
         }
     }
 
@@ -347,12 +351,16 @@ public class MainActivity extends ActionBarActivity {
 
     private boolean checkForLocalicatonEnabled() {
 
+        lg.trace("Check for location enabled");
         final String locationProvider = LocationUtils.getDefaultLocation(this);
+        lg.debug("Location provider {}", locationProvider);
         if (locationProvider == null) {
+            lg.debug("Location provider is null. Prompting for enabling location services");
             Intent locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivityForResult(locationSettingsIntent, LOCATION_SETTINGS_REQUEST_ID);
             return true;
         }
+
         return false;
     }
 
@@ -415,14 +423,7 @@ public class MainActivity extends ActionBarActivity {
 
         switch (requestCode) {
             case LOCATION_SETTINGS_REQUEST_ID:
-                String locationProvider = LocationUtils.getDefaultLocation(this);
-                if (locationProvider == null) {
-
-                    // launching settings activity to allow the user switching on location service
-
-                    Intent intent = new Intent(this, SettingsActivity.class);
-                    startActivity(intent);
-                }
+                refreshFragment();
                 break;
             case SETTINGS_ID_INTENT_REQUEST_ID:
                 NetUtils.setGlobalProxyAuth(this);
