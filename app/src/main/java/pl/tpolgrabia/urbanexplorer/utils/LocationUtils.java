@@ -2,8 +2,15 @@ package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
 import android.location.LocationManager;
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.AppConstants;
+import pl.tpolgrabia.urbanexplorer.callbacks.LocationGeoCoderCallback;
 
 /**
  * Created by tpolgrabia on 28.08.16.
@@ -33,5 +40,81 @@ public class LocationUtils {
         lg.debug("All location providers all disabled");
 
         return null;
+    }
+
+    public static void getGeoCodedLocation(Context ctx, Double latitude, Double longitude,
+                                           final LocationGeoCoderCallback clbk) {
+        if (ctx == null) {
+            throw new IllegalArgumentException("Context cannot be null");
+        }
+
+        if (latitude == null) {
+            throw new IllegalArgumentException("Latitude cannot be null");
+        }
+
+        if (longitude == null) {
+            throw new IllegalArgumentException("Longitude cannot be null");
+        }
+
+        AQuery aq = new AQuery(ctx);
+
+        aq.ajax("https://maps.googleapis.com/maps/api/geocode/json" +
+                "?latlng=" + latitude + "," + longitude +
+                "&key=" + AppConstants.GOOGLE_API_KEY, JSONObject.class, new AjaxCallback<JSONObject>(){
+            @Override
+            public void callback(String url, JSONObject object, AjaxStatus status) {
+                lg.debug("Got response from url {} with status {} - {}",
+                        url,
+                        status,
+                        object);
+
+                String googleStatus = object != null ? object.optString("status") : "(null)";
+                lg.trace("Google status {}", googleStatus);
+
+                if (status.getCode() != 200) {
+                    lg.info("Got invalid response with error code {} and message {} and error {}",
+                            status.getCode(), status.getMessage(), status.getError());
+                    clbk.callback(status.getCode(), status.getMessage(), googleStatus, null);
+                    return;
+                }
+
+                if (!"OK".equals(googleStatus)) {
+                    lg.info("Got invalid google status {}", googleStatus);
+                    clbk.callback(status.getCode(), status.getMessage(), googleStatus, null);
+                    return;
+                }
+
+                JSONArray results = object.optJSONArray("results");
+                int n = results.length();
+                for (int i = 0; i < n; i++) {
+                    result = results.optJSONObject(i);
+                    if (result == null) {
+                        continue;
+                    }
+
+                    JSONArray types = result.optJSONArray("types");
+                    if (types == null) {
+                        continue;
+                    }
+
+                    if (types.length() != 1){
+                        continue;
+                    }
+
+                    String singleType = types.optString(0);
+                    if (!"street_address".equals(singleType)) {
+                        continue;
+                    }
+                    clbk.callback(status.getCode(),
+                            status.getMessage(),
+                            googleStatus,
+                            result.optString("formatted_address"));
+                    return;
+                }
+
+                clbk.callback(status.getCode(), status.getMessage(), googleStatus, "(not found)");
+
+            }
+        });
     }
 }

@@ -21,10 +21,7 @@ import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
-import pl.tpolgrabia.urbanexplorer.callbacks.FetchWikiLocationsCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.ProviderStatusCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
+import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.utils.*;
@@ -51,6 +48,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
     private TextView currentLocation;
     private ArrayList<WikiAppObject> appObjects = new ArrayList<>();
     private int lastFetchSize = -1;
+    private String currentGeocodedLocation;
 
     public WikiLocationsFragment() {
         // Required empty public constructor
@@ -223,9 +221,32 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
     public void onResume() {
         super.onResume();
         getActivity().setTitle("Wiki search");
-        updateLocationInfo();
+        if (currentGeocodedLocation != null) {
+            updateLocationInfo();
+        } else {
+            updateGeocodedLocation();
+        }
         fetchWikiLocations();
         lg.trace("onResume {}", System.identityHashCode(this));
+    }
+
+    private void updateGeocodedLocation() {
+        if (getActivity() == null) {
+            lg.debug("Activity is not attached");
+            return;
+        }
+
+        Location location = NetUtils.getLastKnownLocation(getActivity());
+        LocationUtils.getGeoCodedLocation(getActivity(), location.getLatitude(), location.getLongitude(), new LocationGeoCoderCallback() {
+            @Override
+            public void callback(int code, String message, String googleStatus, String geocodedLocation) {
+                lg.debug("Geocoded result code {}, message {}, status: {}, value {}",
+                        code, message, googleStatus, geocodedLocation);
+
+                currentGeocodedLocation = geocodedLocation;
+                updateLocationInfo();
+            }
+        });
     }
 
     public void updateLocationInfo() {
@@ -235,12 +256,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
             return;
         }
         final Location location = NetUtils.getLastKnownLocation(activity);
-        if (location != null) {
-            currentLocation.setText("Your current location: ("
-                + location.getLatitude()
-                + ","
-                + location.getLongitude() + ")");
-        }
+        currentLocation.setText(currentGeocodedLocation);
     }
 
     @Override

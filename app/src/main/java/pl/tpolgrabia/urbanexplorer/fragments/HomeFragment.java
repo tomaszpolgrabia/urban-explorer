@@ -20,12 +20,10 @@ import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
-import pl.tpolgrabia.urbanexplorer.callbacks.ProviderStatusCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListenerCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
@@ -51,6 +49,7 @@ public class HomeFragment extends Fragment implements Refreshable {
     private Semaphore loading;
     private ArrayList<PanoramioImageInfo> photos;
     private boolean noMorePhotos;
+    private String currentGeocodedLocation;
 
     public int getPanoramioBulkDataSize() {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -93,7 +92,8 @@ public class HomeFragment extends Fragment implements Refreshable {
                 public void callback(Location location) {
                     noMorePhotos = false;
                     photos = new ArrayList<>();
-                    updateLocationInfo();
+                    currentGeocodedLocation = null;
+                    updateGeocodedLocation();
                     try {
                         fetchAdditionalPhotos();
                     } catch (InterruptedException e) {
@@ -111,6 +111,26 @@ public class HomeFragment extends Fragment implements Refreshable {
                         }
                     }
                 });
+    }
+
+    private void updateGeocodedLocation() {
+        if (getActivity() == null) {
+            lg.debug("Activity still not attached");
+            return;
+        }
+
+        Location currLocation = NetUtils.getLastKnownLocation(getActivity());
+        LocationUtils.getGeoCodedLocation(getActivity(), currLocation.getLatitude(), currLocation.getLongitude(), new LocationGeoCoderCallback() {
+            @Override
+            public void callback(int code, String message, String googleStatus, String geocodedLocation) {
+                lg.debug("Geocoded result code {}, message {}, status: {}, value {}",
+                        code, message, googleStatus, geocodedLocation);
+
+                currentGeocodedLocation = geocodedLocation;
+                updateLocationInfo();
+            }
+        });
+
     }
 
     @Override
@@ -415,7 +435,12 @@ public class HomeFragment extends Fragment implements Refreshable {
         super.onResume();
         getActivity().setTitle("Panoramio search");
         lg.trace("onResume");
-        updateLocationInfo();
+        if (currentGeocodedLocation != null) {
+            updateLocationInfo();
+        }
+        else {
+            updateGeocodedLocation();
+        }
     }
 
     public void updateLocationInfo() {
@@ -425,21 +450,16 @@ public class HomeFragment extends Fragment implements Refreshable {
             lg.warn("Fragment has no view");
             return;
         }
-        TextView locationInfo = (TextView) view.findViewById(R.id.locationInfo);
+        final TextView locationInfo = (TextView) view.findViewById(R.id.locationInfo);
         final FragmentActivity activity = getActivity();
         if (activity == null) {
             lg.warn("Activity should'nt be null. No headless fragment");
             return;
         }
-        Location currLocation = NetUtils.getLastKnownLocation(activity);
+        final Location currLocation = NetUtils.getLastKnownLocation(activity);
         lg.trace("Current location: {}, locationInfo: {}", currLocation, locationInfo);
-        if (currLocation != null && locationInfo != null) {
-            // update home fragment's location info
-            locationInfo.setText("Your current location: ("
-                + currLocation.getLatitude()
-                + "," +
-                currLocation.getLongitude() + ")");
-        }
+        locationInfo.setText(currentGeocodedLocation);
+
     }
 
     @Override
