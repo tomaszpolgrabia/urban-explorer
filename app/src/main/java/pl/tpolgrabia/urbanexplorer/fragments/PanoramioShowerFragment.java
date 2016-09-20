@@ -53,7 +53,7 @@ public class PanoramioShowerFragment extends Fragment {
             ImageLoader.getInstance().displayImage(
                 imageInfo.getPhotoFileUrl(),
                 (ImageView) inflatedView.findViewById(R.id.photo_container),
-                MainActivity.options);
+                MainActivity.rectOptions);
 
             photoTitle = (TextView)inflatedView.findViewById(R.id.photo_title);
             photoTitle.setText(imageInfo.getPhotoTitle());

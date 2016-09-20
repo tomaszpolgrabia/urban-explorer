@@ -45,7 +45,7 @@
     <string name="panoramio_radiusy_summary">Ograniczenie promienia Y wyszukiwania w panoramio</string>
     <string name="panoramio_radiusy_title">Ograniczenie promienia Y wyszukiwania w panoramio</string>
     <string name="panoramio_search_settings">Ustawienia wyszukiwania w panoramio</string>
-    <string name="panoramio_url">Link do serwisu panoramio</string>
+    <string name="panoramio_url">Link panoramio</string>
     <string name="panoramio_bulk_size_summary">Liczba zdjęć panoramio pobierana w czasie zapytania</string>
     <string name="panoramio_bulk_size_title">Paczka transferowa zdjęć panoramio</string>
     <string name="login">Użytkownik</string>

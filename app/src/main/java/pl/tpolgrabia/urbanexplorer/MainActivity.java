@@ -36,6 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private static final Logger lg = LoggerFactory.getLogger(MainActivity.class);
 
     public static DisplayImageOptions options;
+    public static DisplayImageOptions rectOptions;
     private GestureDetectorCompat gestureDetector;
     private MainActivityState currFrag = MainActivityState.PANORAMIO;
     private StandardLocationListener locationCallback;
@@ -101,11 +102,12 @@ public class MainActivity extends ActionBarActivity {
         currFrag = fragId == null ? MainActivityState.PANORAMIO : fragId;
         lg.trace("Set final frag id: {}", fragId);
         photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(AppConstants.PHOTO_INFO) : null;
-        savedConfiguration = savedInstanceState != null && savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY);
+        boolean copySavedConfiguration = savedConfiguration =
+            savedInstanceState != null && savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY);
 
         switchFragment();
         updateSwipeHandler();
-        if (HelperUtils.checkForLocalicatonEnabled(this)) return;
+        if (!copySavedConfiguration && HelperUtils.checkForLocalicatonEnabled(this)) return;
     }
 
     @Override
@@ -291,7 +293,10 @@ public class MainActivity extends ActionBarActivity {
         lg.trace("onResume");
         String locationProvider = LocationUtils.getDefaultLocation(this);
 
+        lg.debug("Selected location provider {} is available", locationProvider);
+
         if (locationProvider != null) {
+            lg.debug("Requesting location updates");
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.requestLocationUpdates(locationProvider,
                 HelperUtils.fetchGpsUpdateFreq(this),

@@ -237,6 +237,12 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
         }
 
         Location location = LocationUtils.getLastKnownLocation(getActivity());
+
+        if (location == null) {
+            lg.debug("Location is still not available");
+            return;
+        }
+
         LocationUtils.getGeoCodedLocation(getActivity(), location.getLatitude(), location.getLongitude(), new LocationGeoCoderCallback() {
             @Override
             public void callback(int code, String message, String googleStatus, String geocodedLocation) {

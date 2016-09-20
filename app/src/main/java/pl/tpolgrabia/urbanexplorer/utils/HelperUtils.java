@@ -59,7 +59,8 @@ public class HelperUtils {
     }
 
     public static void initUniversalDownloader(Context ctx) {
-        MainActivity.options = ImageLoaderUtils.createDefaultOptions();
+        MainActivity.options = ImageLoaderUtils.createRoundedOptions();
+        MainActivity.rectOptions = ImageLoaderUtils.createRectangularOptions();
         initUniversalDownloader(ctx, MainActivity.options);
     }
 

@@ -43,7 +43,7 @@ public class WikiLocationsAdapter extends ArrayAdapter<WikiAppObject> {
         String url = wikiPage.getThumbnail() != null ? wikiPage.getThumbnail() : null;
 
         TextView locDistanceInfo = (TextView) itemView.findViewById(R.id.wiki_locs_item_distance);
-        locDistanceInfo.setText("" + wikiPage.getDistance() / 1000.0 + " km");
+        locDistanceInfo.setText(String.format("%.2f km", wikiPage.getDistance() / 1000.0));
         imgPreview.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
 
         if (url != null) {
