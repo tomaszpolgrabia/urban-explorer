@@ -2,67 +2,67 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="Panoramio search settings"
+        android:title="@string/panoramio_search_settings"
         android:key="pref_panoramio_settings">
 
         <EditTextPreference
                 android:key="pref_panoramio_radiusx"
-                android:title="Radius X"
-                android:summary="Radius X"
+                android:title="@string/panoramio_radiusx_title"
+                android:summary="@string/panoramio_radiusx_summary"
                 android:defaultValue="0.05"
                 android:inputType="numberDecimal" />
 
         <EditTextPreference
                 android:key="pref_panoramio_radiusy"
-                android:title="Radius Y"
-                android:summary="Radius Y"
+                android:title="@string/panoramio_radiusy_title"
+                android:summary="@string/panoramio_radiusy_summary"
                 android:defaultValue="0.05"
                 android:inputType="numberDecimal" />
 
         <EditTextPreference
                 android:key="pref_panoramio_bulk_size"
-                android:title="Radius Y"
-                android:summary="Radius Y"
+                android:title="@string/panoramio_bulk_size_title"
+                android:summary="@string/panoramio_bulk_size_summary"
                 android:defaultValue="50"
                 android:inputType="number" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="Wiki search settings"
+            android:title="@string/wiki_search_settings"
             android:key="pref_wiki_settings">
 
         <EditTextPreference
                 android:key="pref_wiki_radius"
-                android:title="Wiki search radius"
-                android:summary="Wiki search radius[km]"
+                android:title="@string/wiki_search_radius_title"
+                android:summary="@string/wiki_search_radius_summary"
                 android:defaultValue="10.0"
                 android:inputType="numberDecimal" />
 
         <EditTextPreference
                 android:key="pref_wiki_limit"
-                android:title="Wiki search results limit"
-                android:summary="Limit of wiki results"
+                android:title="@string/wiki_search_results_limit_title"
+                android:summary="@string/wiki_search_results_limit_summary"
                 android:defaultValue="100"
                 android:inputType="number" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="GPS tracking settings"
+            android:title="@string/location_tracking_settings"
             android:key="pref_gps_settings">
 
         <EditTextPreference
                 android:key="pref_gps_update_freq"
-                android:title="GPS update frequency"
-                android:summary="Update time of GPS location in minutes"
+                android:title="@string/location_update_time_freq_title"
+                android:summary="@string/location_update_time_freq_summary"
                 android:defaultValue="15.0"
                 android:inputType="numberDecimal" />
 
         <EditTextPreference
                 android:key="pref_gps_distance_freq"
-                android:title="GPS distance frequency"
-                android:summary="Update distance of GPS location in meters"
+                android:title="@string/location_update_distance_freq_title"
+                android:summary="@string/location_update_distance_freq_summary"
                 android:defaultValue="100.0"
                 android:inputType="numberDecimal" />
 
@@ -70,40 +70,40 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="Network proxy settings"
+            android:title="@string/network_proxy_settings"
             android:key="pref_proxy_settings">
 
         <CheckBoxPreference
             android:key="pref_proxy_enabled"
-            android:title="Proxy enabled"
-            android:summary="Proxy enabled" />
+            android:title="@string/http_proxy_is_enabled_title"
+            android:summary="@string/http_proxy_is_enabled_summary" />
 
         <EditTextPreference
                 android:key="pref_proxy_host"
-                android:title="Proxy host"
-                android:summary="Proxy host"
+                android:title="@string/http_proxy_host_title"
+                android:summary="@string/http_proxy_host_summary"
                 android:defaultValue="localhost"
                 android:dependency="pref_proxy_enabled" />
 
         <EditTextPreference
                 android:key="pref_proxy_port"
-                android:title="Proxy port"
-                android:summary="Proxy port"
+                android:title="@string/http_proxy_port_title"
+                android:summary="@string/http_proxy_port_summary"
                 android:defaultValue="8123"
                 android:inputType="number"
                 android:dependency="pref_proxy_enabled" />
 
         <EditTextPreference
                 android:key="pref_proxy_user"
-                android:title="Proxy user"
-                android:summary="Proxy user"
+                android:title="@string/http_proxy_user_title"
+                android:summary="@string/http_proxy_user_summary"
                 android:defaultValue=""
                 android:dependency="pref_proxy_enabled" />
 
         <EditTextPreference
                 android:key="pref_proxy_pass"
-                android:title="Proxy password"
-                android:summary="Proxy password"
+                android:title="@string/http_proxy_password_title"
+                android:summary="@string/http_proxy_password_summary"
                 android:defaultValue=""
                 android:inputType="textPassword"
                 android:dependency="pref_proxy_enabled" />
