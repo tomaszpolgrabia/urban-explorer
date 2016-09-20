@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Urban Explorer</string>
+    <string name="author_label">Hersteller</string>
+    <string name="http_proxy_password_summary">Proxy Kennwort</string>
+    <string name="http_proxy_password_title">Proxy Kennwort</string>
+    <string name="http_proxy_port_summary">Proxy Port</string>
+    <string name="http_proxy_port_title">Proxy Port</string>
+    <string name="http_proxy_user_summary">Proxy Benutzer</string>
+    <string name="http_proxy_user_title">Proxy Benutzer</string>
+    <string name="password">Kennwort</string>
+    <string name="save">Speichern</string>
+    <string name="settings">Einstellung</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="panoramio_url">Panoramio link</string>
+    <string name="panoramio_radiusy_summary">Y-Radius</string>
+    <string name="panoramio_radiusy_title">Y-Radius</string>
+    <string name="panoramio_search_settings">Panoramio Sucheinstellungen</string>
+    <string name="panoramio_radiusx_summary">X-Radius</string>
+    <string name="panoramio_radiusx_title">X-Radius</string>
+    <string name="panoramio_bulk_size_summary">Panoramio Unterladung\'s groesse</string>
+    <string name="login">Benutzer</string>
+    <string name="location_xrange">Lage X-Radius</string>
+    <string name="location_yrange">Lage Y-Radius</string>
+    <string name="location_label">Lage:</string>
+    <string name="location_tracking_settings">Einstellungen vom Lageaufspurren</string>
+    <string name="location_info">Lage:</string>
+    <string name="http_proxy_host_summary">Proxy Host</string>
+    <string name="http_proxy_host_title">Proxy Host</string>
+    <string name="http_proxy_is_enabled_summary">Aktive Proxy</string>
+    <string name="http_proxy_is_enabled_title">Aktive Proxy</string>
+    <string name="location_update_distance_freq_summary">Minimal Weg um Geraet zu aktualisieren</string>
+</resources>
