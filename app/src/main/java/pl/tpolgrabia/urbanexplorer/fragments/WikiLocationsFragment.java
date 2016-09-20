@@ -150,7 +150,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
             return;
         }
 
-        final Location location = NetUtils.getLastKnownLocation(activity);
+        final Location location = LocationUtils.getLastKnownLocation(activity);
 
         if (location == null) {
             lg.info("Sorry, location is still not available");
@@ -236,7 +236,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
             return;
         }
 
-        Location location = NetUtils.getLastKnownLocation(getActivity());
+        Location location = LocationUtils.getLastKnownLocation(getActivity());
         LocationUtils.getGeoCodedLocation(getActivity(), location.getLatitude(), location.getLongitude(), new LocationGeoCoderCallback() {
             @Override
             public void callback(int code, String message, String googleStatus, String geocodedLocation) {
@@ -287,7 +287,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
             WikiCacheDto dto = new WikiCacheDto();
             dto.setAppObject(appObjects);
             if (getActivity() != null) {
-                Location location = NetUtils.getLastKnownLocation(getActivity());
+                Location location = LocationUtils.getLastKnownLocation(getActivity());
                 if (location != null) {
                     dto.setLongitude(location.getLongitude());
                     dto.setLatitude(location.getLatitude());

@@ -1,9 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -24,7 +22,6 @@ import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
-import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
 import java.io.*;
@@ -119,7 +116,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             return;
         }
 
-        Location currLocation = NetUtils.getLastKnownLocation(getActivity());
+        Location currLocation = LocationUtils.getLastKnownLocation(getActivity());
         lg.debug("Current location is {}", currLocation);
         if (currLocation == null) {
             lg.debug("Current location is not available");
@@ -283,7 +280,7 @@ public class HomeFragment extends Fragment implements Refreshable {
         }
 
 
-        final Location location = NetUtils.getLastKnownLocation(activity);
+        final Location location = LocationUtils.getLastKnownLocation(activity);
 
         if (location == null) {
             lg.info("Location still not available");
@@ -368,7 +365,7 @@ public class HomeFragment extends Fragment implements Refreshable {
 
         MainActivity mainActivity = (MainActivity) getActivity();
 
-        final Location location = NetUtils.getLastKnownLocation(activity);
+        final Location location = LocationUtils.getLastKnownLocation(activity);
         if (location == null) {
             lg.info("Location is still not available");
             mainActivity.hideProgress();
@@ -464,7 +461,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             lg.warn("Activity should'nt be null. No headless fragment");
             return;
         }
-        final Location currLocation = NetUtils.getLastKnownLocation(activity);
+        final Location currLocation = LocationUtils.getLastKnownLocation(activity);
         lg.trace("Current location: {}, locationInfo: {}", currLocation, locationInfo);
         locationInfo.setText(currentGeocodedLocation);
 
@@ -490,7 +487,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             PanoramioCacheDto dto = new PanoramioCacheDto();
             dto.setPanoramioImages(photos);
 
-            Location location = NetUtils.getLastKnownLocation(getActivity());
+            Location location = LocationUtils.getLastKnownLocation(getActivity());
             if (location != null) {
                 dto.setLongitude(location.getLongitude());
                 dto.setLatitude(location.getLatitude());

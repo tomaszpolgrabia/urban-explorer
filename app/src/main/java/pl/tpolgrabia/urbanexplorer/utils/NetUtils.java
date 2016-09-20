@@ -93,18 +93,7 @@ public class NetUtils {
                         AppConstants.DEF_HTTP_PROXY_ENABLED);
     }
 
-    public static Location getLastKnownLocation(Context ctx) {
-        String locationProvider = LocationUtils.getDefaultLocation(ctx);
-
-        if (locationProvider == null) {
-            lg.info("Location not available");
-            return null;
-        }
-
-        return getSystemService(ctx).getLastKnownLocation(locationProvider);
-    }
-
-    private static LocationManager getSystemService(Context ctx) {
+    static LocationManager getSystemService(Context ctx) {
         return (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
     }
 }

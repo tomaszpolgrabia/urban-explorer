@@ -1,6 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
+import android.location.Location;
 import android.location.LocationManager;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -121,5 +122,16 @@ public class LocationUtils {
 
             }
         });
+    }
+
+    public static Location getLastKnownLocation(Context ctx) {
+        String locationProvider = getDefaultLocation(ctx);
+
+        if (locationProvider == null) {
+            lg.info("Location not available");
+            return null;
+        }
+
+        return NetUtils.getSystemService(ctx).getLastKnownLocation(locationProvider);
     }
 }
