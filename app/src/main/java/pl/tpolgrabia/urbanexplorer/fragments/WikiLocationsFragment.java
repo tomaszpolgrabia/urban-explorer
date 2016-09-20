@@ -255,7 +255,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
             lg.warn("Activity shouldn't be null. No headless fragment");
             return;
         }
-        final Location location = NetUtils.getLastKnownLocation(activity);
+
         currentLocation.setText(currentGeocodedLocation);
     }
 

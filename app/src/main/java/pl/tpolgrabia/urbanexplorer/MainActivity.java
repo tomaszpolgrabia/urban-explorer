@@ -101,7 +101,7 @@ public class MainActivity extends ActionBarActivity {
         currFrag = fragId == null ? MainActivityState.PANORAMIO : fragId;
         lg.trace("Set final frag id: {}", fragId);
         photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(AppConstants.PHOTO_INFO) : null;
-        savedConfiguration = savedInstanceState != null ? savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY) : false;
+        savedConfiguration = savedInstanceState != null && savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY);
 
         switchFragment();
         updateSwipeHandler();
@@ -147,7 +147,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void refreshFragment() {
-        final String tag = fragTags.get(currFrag);
+        final String tag = fragTags.get(currFrag.getOrder());
         if (tag == null) {
             lg.warn("Unknown fragment id");
             hideProgress();

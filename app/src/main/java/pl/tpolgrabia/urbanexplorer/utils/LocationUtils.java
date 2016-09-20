@@ -85,6 +85,11 @@ public class LocationUtils {
                 }
 
                 JSONArray results = object.optJSONArray("results");
+                if (results == null) {
+                    clbk.callback(status.getCode(), status.getMessage(), googleStatus, null);
+                    return;
+                }
+
                 int n = results.length();
                 for (int i = 0; i < n; i++) {
                     result = results.optJSONObject(i);

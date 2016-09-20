@@ -120,6 +120,12 @@ public class HomeFragment extends Fragment implements Refreshable {
         }
 
         Location currLocation = NetUtils.getLastKnownLocation(getActivity());
+        lg.debug("Current location is {}", currLocation);
+        if (currLocation == null) {
+            lg.debug("Current location is not available");
+            return;
+        }
+
         LocationUtils.getGeoCodedLocation(getActivity(), currLocation.getLatitude(), currLocation.getLongitude(), new LocationGeoCoderCallback() {
             @Override
             public void callback(int code, String message, String googleStatus, String geocodedLocation) {
@@ -177,7 +183,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             }
         }
 
-        if (photos == null || photos.isEmpty()) {
+        if (photos.isEmpty()) {
             // maybe we find something in our cache file
             try (Reader br =
                 new InputStreamReader(
@@ -243,7 +249,6 @@ public class HomeFragment extends Fragment implements Refreshable {
 
             }
         });
-        ;
 
         return inflatedView;
     }
@@ -278,7 +283,6 @@ public class HomeFragment extends Fragment implements Refreshable {
         }
 
 
-        LocationManager locationService = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         final Location location = NetUtils.getLastKnownLocation(activity);
 
         if (location == null) {
@@ -384,7 +388,6 @@ public class HomeFragment extends Fragment implements Refreshable {
             new PanoramioResponseCallback() {
                 @Override
                 public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
-                    Long pageSize = fetchLocationPageSize();
 
                     ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(activity,
                         R.layout.location_item,
@@ -393,7 +396,12 @@ public class HomeFragment extends Fragment implements Refreshable {
                     if (images.isEmpty()) {
                         Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
                     }
-                    ListView locations = (ListView)getView().findViewById(R.id.locations);
+                    final View view = getView();
+                    if (view == null) {
+                        lg.trace("Fragment's view is not initialized");
+                        return;
+                    }
+                    ListView locations = (ListView) view.findViewById(R.id.locations);
                     locations.setAdapter(adapter);
                     MainActivity mainActivity = (MainActivity) getActivity();
                     if (mainActivity == null) {
@@ -407,7 +415,7 @@ public class HomeFragment extends Fragment implements Refreshable {
     }
 
     private Long fetchLocationPageSize() {
-        return new Long(getPanoramioBulkDataSize());
+        return Long.valueOf(getPanoramioBulkDataSize());
     }
 
     private Double fetchRadiusX() {

@@ -6,6 +6,7 @@ import java.io.Serializable;
  * Created by tpolgrabia on 05.09.16.
  */
 public class WikiAppObject implements Serializable {
+    private static final long serialVersionUID = 4012661137123526703L;
     private String url;
     private String thumbnail;
     private String title;
