@@ -30,4 +30,26 @@
     <string name="http_proxy_is_enabled_summary">Aktive Proxy</string>
     <string name="http_proxy_is_enabled_title">Aktive Proxy</string>
     <string name="location_update_distance_freq_summary">Minimal Weg um Geraet zu aktualisieren</string>
+    <string name="hello_blank_fragment">Guten Tag leeres Fragment</string>
+    <string name="location_update_distance_freq_title">Minimal Veranderung von der Lage um das Gerat zu aktualiesieren
+    </string>
+    <string name="test_string">Test string</string>
+    <string name="title_activity_settings">Einstellungen Activity</string>
+    <string name="title_label">Titel:</string>
+    <string name="upload_date_label">Lade Datum</string>
+    <string name="username">Benutzer</string>
+    <string name="wiki_location_fill_distance">Fulle den Weg</string>
+    <string name="wiki_location_fill_title">Fulle den Titel</string>
+    <string name="wiki_search_limit">Limit</string>
+    <string name="wiki_search_radius">Radius</string>
+    <string name="wiki_search_radius_summary">Ein Radius in Kilometers von der Suchunglage</string>
+    <string name="wiki_search_radius_title">Ein Radius von der Wikisuchung</string>
+    <string name="wiki_search_results_limit_summary">Limit</string>
+    <string name="wiki_search_results_limit_title">Limit</string>
+    <string name="wiki_search_settings">Einstellungen von der Wikisuchung</string>
+    <string name="panoramio_bulk_size_title">Die groosse von der Photosunterladung</string>
+    <string name="network_proxy_settings">Proxy Einstellungen</string>
+    <string name="location_update_time_freq_title">Frequency</string>
+    <string name="location_update_frequency">Frequency</string>
+    <string name="location_update_time_freq_summary">Frequency</string>
 </resources>
