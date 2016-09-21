@@ -10,7 +10,10 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.handlers.PanoramioLocationsScrollListener;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
 
@@ -208,49 +212,12 @@ public class HomeFragment extends Fragment implements Refreshable {
         locations.setAdapter(new PanoramioAdapter(getActivity(), R.layout.location_item, photos));
         lg.trace("Photos initialized {}", photos);
 
-        locations.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
-
-            @Override
-            public void onScroll(AbsListView view,
-                                 int firstVisibleItem,
-                                 int visibleItemCount,
-                                 int totalItemCount) {
-
-                try {
-
-                    if (firstVisibleItem <= 0) {
-                        // scrolled to the top
-                        lg.trace("Scrolled to the top");
-                    }
-
-                    if (firstVisibleItem + visibleItemCount >= totalItemCount) {
-                        lg.trace("Scrolled to the bottom");
-                        // scrolled to the bottom
-                        final View fragView = getView();
-                        if (fragView == null) {
-                            lg.trace("Frag still not initialized");
-                            return;
-                        }
-                        fetchAdditionalPhotos();
-
-                    }
-
-                } catch (InterruptedException e) {
-                    lg.error("Aquiring lock interrupted exception", e);
-                }
-
-            }
-        });
-
+        lg.trace("Photos size: {}", photos.size());
+        locations.setOnScrollListener(new PanoramioLocationsScrollListener(this));
         return inflatedView;
     }
 
-    private void fetchAdditionalPhotos() throws InterruptedException {
+    public void fetchAdditionalPhotos() throws InterruptedException {
 
         final FragmentActivity activity = getActivity();
         if (activity == null) {
@@ -307,50 +274,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             fetchRadiusY(),
             (long)(offset),
             fetchLocationPageSize(),
-            new PanoramioResponseCallback() {
-                @Override
-                public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
-                    try {
-                        lg.debug("Fetched with status: {}, images: {}, count: {}", status, images, imagesCount);
-                        if (status != PanoramioResponseStatus.SUCCESS) {
-                            return;
-                        }
-
-                        final View view = getView();
-                        if (view == null) {
-                            lg.debug("View still not initialized");
-                            return;
-                        }
-
-                        ListView locations = (ListView) view.findViewById(R.id.locations);
-                        if (locations == null) {
-                            lg.trace("Empty locations");
-                            return;
-                        }
-                        ArrayAdapter<PanoramioImageInfo> adapter = (ArrayAdapter<PanoramioImageInfo>) locations.getAdapter();
-                        photos.addAll(images);
-                        if (photos.isEmpty()) {
-                            Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
-                        }
-                        noMorePhotos = images.isEmpty();
-                        if (adapter == null) {
-                            locations.setAdapter(new PanoramioAdapter(activity, R.id.list_item, images));
-                        } else {
-                            adapter.addAll(images);
-                        }
-
-                        // TODO we can think about removing first items also and last if the number
-                        // TODO of items exceeds the limit (to save the memory)
-
-                        lg.debug("Finished Fetching additional photos count: {}", photos.size());
-
-                    } finally {
-                        lg.trace("Releasing fetching lock");
-                        loading.release();
-                    }
-
-                }
-            }
+            new FetchAdditionalPanoramioPhotosCallback(this, activity)
 
         );
     }
@@ -382,32 +306,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             radiusY,
             (pageId - 1) * fetchLocationPageSize(),
             fetchLocationPageSize(),
-            new PanoramioResponseCallback() {
-                @Override
-                public void callback(PanoramioResponseStatus status, List<PanoramioImageInfo> images, Long imagesCount) {
-
-                    ArrayAdapter<PanoramioImageInfo> adapter = new PanoramioAdapter(activity,
-                        R.layout.location_item,
-                        images);
-
-                    if (images.isEmpty()) {
-                        Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
-                    }
-                    final View view = getView();
-                    if (view == null) {
-                        lg.trace("Fragment's view is not initialized");
-                        return;
-                    }
-                    ListView locations = (ListView) view.findViewById(R.id.locations);
-                    locations.setAdapter(adapter);
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    if (mainActivity == null) {
-                        return;
-                    }
-
-                    mainActivity.hideProgress();
-                }
-            }
+            new FetchPanoramioPhotosCallback(this, activity)
         );
     }
 
@@ -479,10 +378,12 @@ public class HomeFragment extends Fragment implements Refreshable {
         lg.trace("onDestroy");
 
         File cacheDir = getActivity().getCacheDir();
-        try (BufferedWriter br = new BufferedWriter(
-            new OutputStreamWriter(
-                new FileOutputStream(
-                    new File(cacheDir, AppConstants.PANORAMIO_CACHE_FILENAME))))) {
+        BufferedWriter br = null;
+        try {
+            br = new BufferedWriter(
+                new OutputStreamWriter(
+                    new FileOutputStream(
+                        new File(cacheDir, AppConstants.PANORAMIO_CACHE_FILENAME))));
 
             PanoramioCacheDto dto = new PanoramioCacheDto();
             dto.setPanoramioImages(photos);
@@ -503,6 +404,14 @@ public class HomeFragment extends Fragment implements Refreshable {
             lg.error("File not found", e);
         } catch (IOException e) {
             lg.error("I/O Exception", e);
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    lg.error("I/O error during photos cache saving", e);
+                }
+            }
         }
     }
 
@@ -533,4 +442,21 @@ public class HomeFragment extends Fragment implements Refreshable {
     public void refresh() {
         fetchPanoramioPhotos();
     }
+
+    public Semaphore getLoading() {
+        return loading;
+    }
+
+    public void setNoMorePhotos(boolean noMorePhotos) {
+        this.noMorePhotos = noMorePhotos;
+    }
+
+    public int getPhotosCount() {
+        return photos.size();
+    }
+
+    public void addPhotos(List<PanoramioImageInfo> images) {
+        photos.addAll(images);
+    }
+
 }

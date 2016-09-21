@@ -29,6 +29,7 @@ import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends ActionBarActivity {
@@ -53,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
         fragTags.put(AppConstants.HOME_FRAGMENT_ID, HomeFragment.TAG);
         fragTags.put(AppConstants.WIKI_FRAGMENT_ID, WikiLocationsFragment.TAG);
     }
+
+    private List<PanoramioImageInfo> photos;
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
@@ -361,5 +364,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
         lg.trace("onStart {}", System.identityHashCode(this));
+    }
+
+    public void setPhotos(List<PanoramioImageInfo> photos) {
+        this.photos = photos;
     }
 }

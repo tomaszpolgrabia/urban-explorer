@@ -14,8 +14,8 @@
                   android:layout_marginBottom="8dp">
 
         <ImageView android:id="@+id/wiki_locs_item_img_preview"
-                   android:layout_width="120dp"
-                   android:layout_height="120dp"
+                   android:layout_width="80dp"
+                   android:layout_height="80dp"
                    android:layout_marginRight="10dp"/>
 
         <LinearLayout android:id="@+id/wiki_locs_item_desc_container"

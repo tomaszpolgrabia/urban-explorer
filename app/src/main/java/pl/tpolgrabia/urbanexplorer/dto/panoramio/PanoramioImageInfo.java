@@ -115,4 +115,22 @@ public class PanoramioImageInfo implements Serializable{
     public String getPhotoUrl() {
         return photoUrl;
     }
+
+    @Override
+    public String toString() {
+        return "PanoramioImageInfo{" +
+            "height=" + height +
+            ", ownerName='" + ownerName + '\'' +
+            ", ownerId=" + ownerId +
+            ", photoFileUrl='" + photoFileUrl + '\'' +
+            ", photoTitle='" + photoTitle + '\'' +
+            ", uploadDate='" + uploadDate + '\'' +
+            ", width=" + width +
+            ", latitude=" + latitude +
+            ", longitude=" + longitude +
+            ", ownerUrl='" + ownerUrl + '\'' +
+            ", photoId=" + photoId +
+            ", photoUrl='" + photoUrl + '\'' +
+            '}';
+    }
 }
