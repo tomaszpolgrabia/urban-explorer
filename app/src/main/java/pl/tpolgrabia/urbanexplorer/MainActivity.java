@@ -21,7 +21,10 @@ import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.Refreshable;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
+import pl.tpolgrabia.urbanexplorer.handlers.PanoramioShowerSwitchHandler;
+import pl.tpolgrabia.urbanexplorer.handlers.PanoramioSwitchHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.SwipeHandler;
+import pl.tpolgrabia.urbanexplorer.handlers.WikiSwitchHandler;
 import pl.tpolgrabia.urbanexplorer.utils.HelperUtils;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
@@ -47,12 +50,19 @@ public class MainActivity extends ActionBarActivity {
     private ProgressDialog progressDlg;
     private MainActivityState oldFrag = MainActivityState.PANORAMIO_SHOWER;
     private boolean savedConfiguration;
+    private static final Map<MainActivityState, Runnable> switchFragmentActions = new HashMap<>();
 
     private static final Map<Integer, String> fragTags = new HashMap<>();
 
     static {
         fragTags.put(AppConstants.HOME_FRAGMENT_ID, HomeFragment.TAG);
         fragTags.put(AppConstants.WIKI_FRAGMENT_ID, WikiLocationsFragment.TAG);
+    }
+
+    public MainActivity() {
+        switchFragmentActions.put(MainActivityState.PANORAMIO_SHOWER, new PanoramioShowerSwitchHandler(this));
+        switchFragmentActions.put(MainActivityState.PANORAMIO, new PanoramioSwitchHandler(this));
+        switchFragmentActions.put(MainActivityState.WIKI, new WikiSwitchHandler(this));
     }
 
     private List<PanoramioImageInfo> photos;
@@ -213,28 +223,18 @@ public class MainActivity extends ActionBarActivity {
             photoInfo = null;
         }
 
-        switch (currFrag) {
-            case PANORAMIO_SHOWER:
-                lg.debug("Switching to panoramio shower");
-                switchToPhoto(photoInfo);
-                break;
-            case PANORAMIO:
-                // switch to home fragment
-                lg.debug("Switching to home fragment");
-                switchFragment(new HomeFragment(), HomeFragment.TAG);
-                break;
-            case WIKI:
-                // switch to wiki fragment
-                lg.debug("Switching to wiki fragment");
-                switchFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
-                break;
+        Runnable switchAction = switchFragmentActions.get(currFrag);
+        if (switchAction != null) {
+            switchAction.run();
+        } else {
+            lg.warn("There is no valid switch action to the given fragment {}", currFrag);
         }
 
         savedConfiguration = false;
 
     }
 
-    private void switchFragment(Fragment newFragment, String tag) {
+    public void switchFragment(Fragment newFragment, String tag) {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
@@ -368,5 +368,9 @@ public class MainActivity extends ActionBarActivity {
 
     public void setPhotos(List<PanoramioImageInfo> photos) {
         this.photos = photos;
+    }
+
+    public PanoramioImageInfo getPhotoInfo() {
+        return photoInfo;
     }
 }

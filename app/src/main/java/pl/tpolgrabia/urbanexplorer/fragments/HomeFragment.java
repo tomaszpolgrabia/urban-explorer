@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +23,7 @@ import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.handlers.PanoramioItemLongClickHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioLocationsScrollListener;
 import pl.tpolgrabia.urbanexplorer.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorer.utils.PanoramioUtils;
@@ -88,33 +88,12 @@ public class HomeFragment extends Fragment implements Refreshable {
     private void initLocationCallback() {
         MainActivity mainActivity = ((MainActivity) getActivity());
         mainActivity.getLocationCallback()
-            .addCallback(new StandardLocationListenerCallback() {
-                @Override
-                public void callback(Location location) {
-                    noMorePhotos = false;
-                    photos = new ArrayList<>();
-                    currentGeocodedLocation = null;
-                    updateGeocodedLocation();
-                    try {
-                        fetchAdditionalPhotos();
-                    } catch (InterruptedException e) {
-                        lg.error("Failed trying acquring lock to load photos", e);
-                    }
-                }
-            });
+            .addCallback(new PanoramioLocationCallback(this));
         mainActivity.getLocationCallback()
-                .addProviderCallback(new ProviderStatusCallback() {
-                    @Override
-                    public void callback(String provider, boolean enabled) {
-                        if (enabled) {
-                            lg.trace("Handling provider enabling - refreshing panoramio listing");
-                            fetchPanoramioPhotos();
-                        }
-                    }
-                });
+                .addProviderCallback(new PanoramioProviderCallback(this));
     }
 
-    private void updateGeocodedLocation() {
+    public void updateGeocodedLocation() {
         if (getActivity() == null) {
             lg.debug("Activity still not attached");
             return;
@@ -127,16 +106,10 @@ public class HomeFragment extends Fragment implements Refreshable {
             return;
         }
 
-        LocationUtils.getGeoCodedLocation(getActivity(), currLocation.getLatitude(), currLocation.getLongitude(), new LocationGeoCoderCallback() {
-            @Override
-            public void callback(int code, String message, String googleStatus, String geocodedLocation) {
-                lg.debug("Geocoded result code {}, message {}, status: {}, value {}",
-                        code, message, googleStatus, geocodedLocation);
-
-                currentGeocodedLocation = geocodedLocation;
-                updateLocationInfo();
-            }
-        });
+        LocationUtils.getGeoCodedLocation(getActivity(),
+            currLocation.getLatitude(),
+            currLocation.getLongitude(),
+            new GeocodedLocationCallback(this));
 
     }
 
@@ -155,16 +128,7 @@ public class HomeFragment extends Fragment implements Refreshable {
         inflatedView = inflater.inflate(R.layout.fragment_home, container, false);
         ListView locations = (ListView)inflatedView.findViewById(R.id.locations);
         final ListView finalLocations = locations;
-        locations.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long rowId) {
-                PanoramioAdapter panAdapter = (PanoramioAdapter) finalLocations.getAdapter();
-                PanoramioImageInfo photoInfo = panAdapter.getItem(pos);
-                MainActivity activity = (MainActivity) getActivity();
-                activity.switchToPhoto(photoInfo);
-                return false;
-            }
-        });
+        locations.setOnItemLongClickListener(new PanoramioItemLongClickHandler(this, finalLocations));
 
         initialized = true;
 
@@ -457,6 +421,14 @@ public class HomeFragment extends Fragment implements Refreshable {
 
     public void addPhotos(List<PanoramioImageInfo> images) {
         photos.addAll(images);
+    }
+
+    public void setCurrentGeocodedLocation(String currentGeocodedLocation) {
+        this.currentGeocodedLocation = currentGeocodedLocation;
+    }
+
+    public void setPhotos(ArrayList<PanoramioImageInfo> photos) {
+        this.photos = photos;
     }
 
 }
