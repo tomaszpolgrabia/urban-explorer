@@ -2,7 +2,7 @@
     <string name="app_name">Urban Explorer</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="location_info">Location:</string>
+    <string name="location_info">Location: </string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -52,6 +52,6 @@
     <string name="title_label">Title:</string>
     <string name="author_label">Author:</string>
     <string name="upload_date_label">Upload date:</string>
-    <string name="location_label">Location:</string>
-    <string name="panoramio_url">Panoramio url:</string>
+    <string name="location_label">Location: </string>
+    <string name="panoramio_url">Panoramio url: </string>
 </resources>
