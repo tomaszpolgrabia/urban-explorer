@@ -1,7 +1,9 @@
 package pl.tpolgrabia.urbanexplorer.callbacks;
 
+import org.greenrobot.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 
 /**
@@ -19,7 +21,7 @@ public class PanoramioProviderCallback implements ProviderStatusCallback {
     public void callback(String provider, boolean enabled) {
         if (enabled) {
             lg.trace("Handling provider enabling - refreshing panoramio listing");
-            homeFragment.refresh();
+            EventBus.getDefault().post(new RefreshEvent(this));
         }
     }
 }

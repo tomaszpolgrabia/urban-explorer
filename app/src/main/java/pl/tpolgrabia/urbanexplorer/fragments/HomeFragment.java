@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
@@ -19,6 +20,7 @@ import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioItemLongClickHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioLocationsScrollListener;
 import pl.tpolgrabia.urbanexplorer.utils.*;
@@ -30,7 +32,7 @@ import java.util.concurrent.Semaphore;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment implements Refreshable {
+public class HomeFragment extends Fragment  {
 
     private static final Logger lg = LoggerFactory.getLogger(HomeFragment.class);
 
@@ -148,7 +150,7 @@ public class HomeFragment extends Fragment implements Refreshable {
             return;
         }
         int offset = photos.size();
-        lg.debug("Fetching additional photos offset: {}, count: {}", offset, SettingsUtils.getPanoramioBulkDataSize(this));
+        lg.debug("Fetching additional photos offset: {}, count: {}", offset, SettingsUtils.getPanoramioBulkDataSize(getActivity()));
         PanoramioUtils.fetchPanoramioImages(
             activity,
             location.getLatitude(),
@@ -162,7 +164,7 @@ public class HomeFragment extends Fragment implements Refreshable {
     }
 
     private Long fetchLocationPageSize() {
-        return Long.valueOf(SettingsUtils.getPanoramioBulkDataSize(this));
+        return Long.valueOf(SettingsUtils.getPanoramioBulkDataSize(getActivity()));
     }
 
     @Override
@@ -212,8 +214,8 @@ public class HomeFragment extends Fragment implements Refreshable {
         lg.trace("Saved photos: {}", photos);
     }
 
-    @Override
-    public void refresh() {
+    @Subscribe
+    public void refresh(RefreshEvent refreshEvent) {
         lg.trace("Fetch panoramio photos");
         final FragmentActivity activity = getActivity();
         if (activity == null) {

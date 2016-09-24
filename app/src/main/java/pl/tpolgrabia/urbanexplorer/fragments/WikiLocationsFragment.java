@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -27,6 +28,7 @@ import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorer.events.DataLoadingStartEvent;
+import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.utils.*;
 
 import java.io.*;
@@ -39,7 +41,7 @@ import static android.content.Context.LOCATION_SERVICE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WikiLocationsFragment extends Fragment implements Refreshable {
+public class WikiLocationsFragment extends Fragment {
 
     private static final Logger lg = LoggerFactory.getLogger(WikiLocationsFragment.class);
     private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
@@ -314,8 +316,8 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
         }
     }
 
-    @Override
-    public void refresh() {
+    @Subscribe
+    public void refresh(RefreshEvent event) {
         appObjects.clear();
         fetchWikiLocations();
     }

@@ -35,7 +35,7 @@ public class SettingsUtils {
     }
 
     public static int getPanoramioBulkDataSize(Context ctx) {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx.getActivity());
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         final String sValue = sharedPrefs.getString(AppConstants.PANORAMIO_BULK_SIZE_KEY,
             String.valueOf(AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE));
         try {
