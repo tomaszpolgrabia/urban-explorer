@@ -1,23 +1,30 @@
 package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
+import android.location.Location;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.PanoramioResponseStatus;
+import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioMapLocation;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioResponse;
 import pl.tpolgrabia.urbanexplorer.exceptions.PanoramioResponseNotExpected;
+import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 
+import java.io.*;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**

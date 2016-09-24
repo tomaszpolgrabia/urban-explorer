@@ -19,7 +19,7 @@ public class PanoramioProviderCallback implements ProviderStatusCallback {
     public void callback(String provider, boolean enabled) {
         if (enabled) {
             lg.trace("Handling provider enabling - refreshing panoramio listing");
-            homeFragment.fetchPanoramioPhotos();
+            homeFragment.refresh();
         }
     }
 }
