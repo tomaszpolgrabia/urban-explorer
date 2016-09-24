@@ -11,12 +11,16 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorer.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.Refreshable;
@@ -91,6 +95,8 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate");
         setContentView(R.layout.activity_main);
+
+        EventBus.getDefault().register(this);
 
         HelperUtils.initErrorAndDebugHanlers(this);
         NetUtils.setGlobalProxyAuth(this);
@@ -327,6 +333,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onDestroy() {
         super.onDestroy();
         lg.trace("onDestroy");
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -373,4 +380,15 @@ public class MainActivity extends ActionBarActivity {
     public PanoramioImageInfo getPhotoInfo() {
         return photoInfo;
     }
+
+    @Subscribe
+    public void handleLoadingStart(DataLoadingStartEvent event) {
+        progressDlg.show();
+    }
+
+    @Subscribe
+    public void handleLoadingFinish(DataLoadingFinishEvent event) {
+        progressDlg.dismiss();
+    }
+
 }

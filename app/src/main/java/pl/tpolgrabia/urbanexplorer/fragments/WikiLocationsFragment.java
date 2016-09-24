@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
+import org.greenrobot.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -24,6 +25,8 @@ import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
+import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorer.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorer.utils.*;
 
 import java.io.*;
@@ -58,6 +61,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate {}", System.identityHashCode(this));
+        EventBus.getDefault().register(this);
         appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
             : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WIKI_APP_OBJECTS);
 
@@ -123,10 +127,6 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
         return inflatedView;
     }
 
-    public void clearData() {
-        appObjects.clear();
-    }
-
     public void fetchWikiLocations() {
         lg.trace("Fetch wiki locations");
 
@@ -140,13 +140,13 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
 
         if (lastFetchSize == 0) {
             lg.trace("There is no results");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
 
         if (!appObjects.isEmpty()) {
             lg.trace("There are fetched objects");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
 
@@ -155,13 +155,13 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
         if (location == null) {
             lg.info("Sorry, location is still not available");
             Toast.makeText(activity, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
 
         if (getView() == null) {
             lg.info("Wiki view is not yet initialized");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
 
@@ -198,7 +198,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
                         return;
                     }
 
-                    mainActivity.hideProgress();
+                    EventBus.getDefault().post(new DataLoadingFinishEvent(this));
                 }
             }
         );
@@ -282,6 +282,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
         lg.trace("onDestroy {}", System.identityHashCode(this));
 
         try (BufferedWriter bw = new BufferedWriter(
@@ -315,7 +316,7 @@ public class WikiLocationsFragment extends Fragment implements Refreshable {
 
     @Override
     public void refresh() {
-        clearData();
+        appObjects.clear();
         fetchWikiLocations();
     }
 }

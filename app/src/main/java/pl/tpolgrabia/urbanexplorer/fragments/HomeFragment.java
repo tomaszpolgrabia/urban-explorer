@@ -11,12 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.greenrobot.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioItemLongClickHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioLocationsScrollListener;
 import pl.tpolgrabia.urbanexplorer.utils.*;
@@ -49,6 +51,7 @@ public class HomeFragment extends Fragment implements Refreshable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate {}", System.identityHashCode(this));
+        EventBus.getDefault().register(this);
         loading = new Semaphore(1, true);
         noMorePhotos = false;
         updateLocationInfo();
@@ -57,15 +60,10 @@ public class HomeFragment extends Fragment implements Refreshable {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initLocationCallback();
-    }
-
-    private void initLocationCallback() {
         MainActivity mainActivity = ((MainActivity) getActivity());
-        mainActivity.getLocationCallback()
-            .addCallback(new PanoramioLocationCallback(this));
-        mainActivity.getLocationCallback()
-                .addProviderCallback(new PanoramioProviderCallback(this));
+        final StandardLocationListener locationCallback = mainActivity.getLocationCallback();
+        locationCallback.addCallback(new PanoramioLocationCallback(this));
+        locationCallback.addProviderCallback(new PanoramioProviderCallback(this));
     }
 
     public void updateGeocodedLocation() {
@@ -124,24 +122,24 @@ public class HomeFragment extends Fragment implements Refreshable {
         MainActivity mainActivity = (MainActivity)getActivity();
         if (noMorePhotos) {
             lg.trace("No more photos - last query was zero result");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
         if (!initialized) {
             lg.trace("Fetching additional photos blocked till system is initialized");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
         if (getView() == null) {
             lg.trace("Application still not initialized");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
         final Location location = LocationUtils.getLastKnownLocation(activity);
         if (location == null) {
             lg.info("Location still not available");
             Toast.makeText(activity, "Location still not available", Toast.LENGTH_SHORT).show();
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
         lg.trace("Fetching additional photos. Trying loading acquirng lock");
@@ -202,6 +200,7 @@ public class HomeFragment extends Fragment implements Refreshable {
     public void onDestroy() {
         super.onDestroy();
         lg.trace("onDestroy");
+        EventBus.getDefault().unregister(this);
         CacheUtils.savePostsToCache(getActivity(), photos);
     }
 
@@ -227,7 +226,7 @@ public class HomeFragment extends Fragment implements Refreshable {
         final Location location = LocationUtils.getLastKnownLocation(activity);
         if (location == null) {
             lg.info("Location is still not available");
-            mainActivity.hideProgress();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             Toast.makeText(getActivity(), "Location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
