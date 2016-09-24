@@ -6,12 +6,13 @@ import android.preference.PreferenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
-import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 
 /**
  * Created by tpolgrabia on 24.09.16.
  */
 public class SettingsUtils {
+    public static final double WIKI_DEF_RADIUS = 10.0;
+    public static final long WIKI_DEF_LIMIT = 100;
     private static final Logger lg = LoggerFactory.getLogger(SettingsUtils.class);
 
     public static Double fetchRadiusY(Context ctx) {
@@ -44,5 +45,19 @@ public class SettingsUtils {
             lg.warn("Invalid panoramio bulk data size {}", sValue, e);
             return AppConstants.PANORAMIO_BULK_SIZE_DEF_VALUE;
         }
+    }
+
+    public static Double fetchRadiusLimit(Context ctx) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        final String prefWikiRadius = sharedPreferences.getString("pref_wiki_radius", String.valueOf(WIKI_DEF_RADIUS));
+        lg.debug("Pref wiki radius limit {}", prefWikiRadius);
+        return NumberUtils.safeParseDouble(prefWikiRadius)*1000.0; // in m, settings are in km unit
+    }
+
+    public static Long fetchSearchLimit(Context ctx) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        final String prefWikiResultsLimit = sharedPreferences.getString("pref_wiki_limit", String.valueOf(WIKI_DEF_LIMIT));
+        lg.debug("Pref wiki search results limit {}", prefWikiResultsLimit);
+        return NumberUtils.safeParseLong(prefWikiResultsLimit);
     }
 }

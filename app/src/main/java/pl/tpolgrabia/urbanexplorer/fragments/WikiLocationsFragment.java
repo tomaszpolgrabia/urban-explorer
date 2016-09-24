@@ -1,11 +1,9 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -27,14 +25,11 @@ import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
-import pl.tpolgrabia.urbanexplorer.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.utils.*;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -44,9 +39,6 @@ import static android.content.Context.LOCATION_SERVICE;
 public class WikiLocationsFragment extends Fragment {
 
     private static final Logger lg = LoggerFactory.getLogger(WikiLocationsFragment.class);
-    private static final String CLASS_TAG = WikiLocationsFragment.class.getSimpleName();
-    private static final double WIKI_DEF_RADIUS = 10.0;
-    private static final long WIKI_DEF_LIMIT = 100;
     public static final String TAG = WikiLocationsFragment.class.getSimpleName();
     private static final String WIKI_APP_OBJECTS = "WIKI_APP_OBJECTS";
     private LocationManager locationService;
@@ -90,37 +82,15 @@ public class WikiLocationsFragment extends Fragment {
         // Inflate the layout for this fragment
         final View inflatedView = inflater.inflate(R.layout.fragment_wiki_locations, container, false);
         lg.trace("TAG: {}", getTag());
-        for (Fragment frag : getFragmentManager().getFragments()) {
-            if (frag == null) {
-                lg.trace("Got null fragment");
-            } else {
-                lg.trace("Fragment TAG {}", frag.getTag());
-            }
-        }
+        DebugUtils.dumpFragments(getFragmentManager().getFragments());
 
         locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
         currentLocation = (TextView) inflatedView.findViewById(R.id.wiki_current_location);
 
         MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.getLocationCallback().addCallback(new StandardLocationListenerCallback() {
-            @Override
-            public void callback(Location location) {
-                lastFetchSize = -1;
-                appObjects = new ArrayList<>();
-                updateLocationInfo();
-                fetchWikiLocations();
-            }
-        });
+        mainActivity.getLocationCallback().addCallback(new WikiLocationCallback(this));
 
-        mainActivity.getLocationCallback().addProviderCallback(new ProviderStatusCallback() {
-            @Override
-            public void callback(String provider, boolean enabled) {
-                if (enabled) {
-                    lg.trace("Handling provider enabling - refreshing wiki listing");
-                    fetchWikiLocations();
-                }
-            }
-        });
+        mainActivity.getLocationCallback().addProviderCallback(new WikiLocationProviderStatusCallback(this));
 
         ListView locations = (ListView) inflatedView.findViewById(R.id.wiki_places);
         locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
@@ -170,53 +140,10 @@ public class WikiLocationsFragment extends Fragment {
         WikiUtils.fetchAppData(activity,
             location.getLatitude(),
             location.getLongitude(),
-            fetchRadiusLimit(),
-            fetchSearchLimit(),
-            new WikiAppResponseCallback() {
-
-                @Override
-                public void callback(WikiStatus status, final List<WikiAppObject> objects) {
-                    appObjects.clear();
-                    appObjects.addAll(objects);
-
-                    // handling here wiki locations
-                    if (status != WikiStatus.SUCCESS) {
-                        Toast.makeText(activity, "Sorry, currently we have problem with interfacing wiki" +
-                            ": " + status + ". Try again later", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // TODO on success
-
-                    ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
-                    locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
-                    locations.setAdapter(new WikiLocationsAdapter(activity, appObjects));
-                    if (objects.isEmpty()) {
-                        Toast.makeText(getActivity(), "No results", Toast.LENGTH_SHORT).show();
-                    }
-
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    if (mainActivity == null) {
-                        return;
-                    }
-
-                    EventBus.getDefault().post(new DataLoadingFinishEvent(this));
-                }
-            }
+            SettingsUtils.fetchRadiusLimit(getActivity()),
+            SettingsUtils.fetchSearchLimit(getActivity()),
+            new WikiFetchAppDataCallback(this, activity)
         );
-    }
-
-    private Double fetchRadiusLimit() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final String prefWikiRadius = sharedPreferences.getString("pref_wiki_radius", String.valueOf(WIKI_DEF_RADIUS));
-        lg.debug("Pref wiki radius limit {}", prefWikiRadius);
-        return NumberUtils.safeParseDouble(prefWikiRadius)*1000.0; // in m, settings are in km unit
-    }
-    private Long fetchSearchLimit() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final String prefWikiResultsLimit = sharedPreferences.getString("pref_wiki_limit", String.valueOf(WIKI_DEF_LIMIT));
-        lg.debug("Pref wiki search results limit {}", prefWikiResultsLimit);
-        return NumberUtils.safeParseLong(prefWikiResultsLimit);
     }
 
     @Override
@@ -287,33 +214,7 @@ public class WikiLocationsFragment extends Fragment {
         EventBus.getDefault().unregister(this);
         lg.trace("onDestroy {}", System.identityHashCode(this));
 
-        try (BufferedWriter bw = new BufferedWriter(
-            new OutputStreamWriter(
-                new FileOutputStream(
-                    new File(getActivity().getCacheDir(),
-                        AppConstants.WIKI_CACHE_FILENAME))))) {
-
-            WikiCacheDto dto = new WikiCacheDto();
-            dto.setAppObject(appObjects);
-            if (getActivity() != null) {
-                Location location = LocationUtils.getLastKnownLocation(getActivity());
-                if (location != null) {
-                    dto.setLongitude(location.getLongitude());
-                    dto.setLatitude(location.getLatitude());
-                    dto.setAltitude(location.getAltitude());
-                }
-            }
-
-            dto.setFetchedAt(new GregorianCalendar().getTime());
-            // FIXME should be a fetched time, not persist time
-
-            new Gson().toJson(bw);
-
-        } catch (FileNotFoundException e) {
-            lg.error("File not found", e);
-        } catch (IOException e) {
-            lg.error("I/O error", e);
-        }
+        CacheUtils.saveWikiObjectsToCache(getActivity(), appObjects);
     }
 
     @Subscribe
@@ -321,4 +222,13 @@ public class WikiLocationsFragment extends Fragment {
         appObjects.clear();
         fetchWikiLocations();
     }
+
+    public void setLastFetchSize(int lastFetchSize) {
+        this.lastFetchSize = lastFetchSize;
+    }
+
+    public void setAppObjects(ArrayList<WikiAppObject> appObjects) {
+        this.appObjects = appObjects;
+    }
+
 }
