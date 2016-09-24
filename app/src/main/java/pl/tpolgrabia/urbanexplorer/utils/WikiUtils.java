@@ -1,6 +1,8 @@
 package pl.tpolgrabia.urbanexplorer.utils;
 
 import android.content.Context;
+import android.location.Location;
+import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -11,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.callbacks.WikiLocationGeoCoderCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
@@ -21,6 +24,7 @@ import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiThumbnail;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoObject;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponse;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponseCallback;
+import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 
 import java.util.*;
 
@@ -349,5 +353,26 @@ public class WikiUtils {
             JSONObject.class,
             callback
         );
+    }
+
+    public static void getGeoCodedLocation(Context ctx, WikiLocationGeoCoderCallback clbk) {
+
+        if (ctx == null) {
+            lg.warn("Context is null - not available");
+            clbk.callback(-1, "ERROR", "ERROR", "Not available");
+            return;
+        }
+
+        Location location = LocationUtils.getLastKnownLocation(ctx);
+
+        if (location == null) {
+            lg.debug("Location is still not available");
+            return;
+        }
+
+        LocationUtils.getGeoCodedLocation(ctx,
+            location.getLatitude(),
+            location.getLongitude(),
+            clbk);
     }
 }

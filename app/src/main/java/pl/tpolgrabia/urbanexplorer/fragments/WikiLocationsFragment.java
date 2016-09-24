@@ -108,8 +108,6 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-
         if (lastFetchSize == 0) {
             lg.trace("There is no results");
             EventBus.getDefault().post(new DataLoadingFinishEvent(this));
@@ -127,12 +125,6 @@ public class WikiLocationsFragment extends Fragment {
         if (location == null) {
             lg.info("Sorry, location is still not available");
             Toast.makeText(activity, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
-            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
-            return;
-        }
-
-        if (getView() == null) {
-            lg.info("Wiki view is not yet initialized");
             EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
@@ -160,37 +152,10 @@ public class WikiLocationsFragment extends Fragment {
     }
 
     private void updateGeocodedLocation() {
-        if (getActivity() == null) {
-            lg.debug("Activity is not attached");
-            return;
-        }
-
-        Location location = LocationUtils.getLastKnownLocation(getActivity());
-
-        if (location == null) {
-            lg.debug("Location is still not available");
-            return;
-        }
-
-        LocationUtils.getGeoCodedLocation(getActivity(), location.getLatitude(), location.getLongitude(), new LocationGeoCoderCallback() {
-            @Override
-            public void callback(int code, String message, String googleStatus, String geocodedLocation) {
-                lg.debug("Geocoded result code {}, message {}, status: {}, value {}",
-                        code, message, googleStatus, geocodedLocation);
-
-                currentGeocodedLocation = geocodedLocation;
-                updateLocationInfo();
-            }
-        });
+        WikiUtils.getGeoCodedLocation(getActivity(), new WikiLocationGeoCoderCallback(this));
     }
 
     public void updateLocationInfo() {
-        final FragmentActivity activity = getActivity();
-        if (activity == null) {
-            lg.warn("Activity shouldn't be null. No headless fragment");
-            return;
-        }
-
         currentLocation.setText(currentGeocodedLocation);
     }
 
@@ -231,4 +196,7 @@ public class WikiLocationsFragment extends Fragment {
         this.appObjects = appObjects;
     }
 
+    public void setCurrentGeocodedLocation(String currentGeocodedLocation) {
+        this.currentGeocodedLocation = currentGeocodedLocation;
+    }
 }
