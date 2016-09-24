@@ -8,11 +8,13 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.callbacks.WikiFetchAppDataCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiLocationGeoCoderCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiResponseCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.WikiStatus;
@@ -24,6 +26,7 @@ import pl.tpolgrabia.urbanexplorer.dto.wiki.generator.WikiThumbnail;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoObject;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponse;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.geosearch.WikiGeoResponseCallback;
+import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 
 import java.util.*;
@@ -374,5 +377,24 @@ public class WikiUtils {
             location.getLatitude(),
             location.getLongitude(),
             clbk);
+    }
+
+    public static void fetchAppData(Context ctx, WikiFetchAppDataCallback clbk) {
+        final Location location = LocationUtils.getLastKnownLocation(ctx);
+
+        if (location == null) {
+            lg.info("Sorry, location is still not available");
+            Toast.makeText(ctx, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
+            EventBus.getDefault().post(new DataLoadingFinishEvent(ctx));
+            return;
+        }
+
+        fetchAppData(ctx,
+            location.getLatitude(),
+            location.getLongitude(),
+            SettingsUtils.fetchRadiusLimit(ctx),
+            SettingsUtils.fetchSearchLimit(ctx),
+            clbk
+        );
     }
 }

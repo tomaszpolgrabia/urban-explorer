@@ -1,9 +1,9 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -11,24 +11,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
-import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.utils.*;
 
-import java.io.*;
 import java.util.ArrayList;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -56,24 +51,12 @@ public class WikiLocationsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         lg.trace("onCreate {}", System.identityHashCode(this));
         EventBus.getDefault().register(this);
-        appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
-            : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WIKI_APP_OBJECTS);
+    }
 
-        if (appObjects == null) {
-            try (InputStreamReader ir = new InputStreamReader(
-                new FileInputStream(
-                    new File(getActivity().getCacheDir(),
-                        AppConstants.WIKI_CACHE_FILENAME)))) {
-
-                WikiCacheDto dto = new Gson().fromJson(ir, WikiCacheDto.class);
-                appObjects = new ArrayList<>(dto.getAppObject());
-
-            } catch (FileNotFoundException e) {
-                lg.error("File not found", e);
-            } catch (IOException e) {
-                lg.error("I/O error", e);
-            }
-        }
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        appObjects = CacheUtils.fetchAppObjectsFromCache(getActivity(), savedInstanceState);
     }
 
     @Override
@@ -105,6 +88,7 @@ public class WikiLocationsFragment extends Fragment {
         final FragmentActivity activity = getActivity();
         if (activity == null) {
             lg.warn("Activity shouldn't be null. No headless fragment");
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
 
@@ -120,22 +104,7 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        final Location location = LocationUtils.getLastKnownLocation(activity);
-
-        if (location == null) {
-            lg.info("Sorry, location is still not available");
-            Toast.makeText(activity, "Sorry, location is still not available", Toast.LENGTH_SHORT).show();
-            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
-            return;
-        }
-
-        WikiUtils.fetchAppData(activity,
-            location.getLatitude(),
-            location.getLongitude(),
-            SettingsUtils.fetchRadiusLimit(getActivity()),
-            SettingsUtils.fetchSearchLimit(getActivity()),
-            new WikiFetchAppDataCallback(this, activity)
-        );
+        WikiUtils.fetchAppData(activity, new WikiFetchAppDataCallback(this, activity));
     }
 
     @Override

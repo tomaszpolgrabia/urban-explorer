@@ -135,4 +135,26 @@ public class CacheUtils {
             lg.error("I/O error", e);
         }
     }
+
+    public static ArrayList<WikiAppObject> fetchAppObjectsFromCache(Context ctx, Bundle savedInstanceState) {
+        ArrayList<WikiAppObject> appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
+            : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WikiLocationsFragment.WIKI_APP_OBJECTS);
+
+        if (appObjects == null) {
+            try (InputStreamReader ir = new InputStreamReader(
+                new FileInputStream(
+                    new File(ctx.getCacheDir(),
+                        AppConstants.WIKI_CACHE_FILENAME)))) {
+
+                WikiCacheDto dto = new Gson().fromJson(ir, WikiCacheDto.class);
+                appObjects = new ArrayList<>(dto.getAppObject());
+
+            } catch (FileNotFoundException e) {
+                lg.error("File not found", e);
+            } catch (IOException e) {
+                lg.error("I/O error", e);
+            }
+        }
+        return appObjects;
+    }
 }
