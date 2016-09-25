@@ -24,6 +24,9 @@ import pl.tpolgrabia.urbanexplorer.AppStage;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
+import pl.tpolgrabia.urbanexplorerutils.utils.ImageLoaderUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.NumberUtils;
 
 import java.util.List;
 

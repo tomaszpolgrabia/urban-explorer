@@ -1,6 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.dto.wiki;
 
-import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
+import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -5,6 +5,8 @@ import android.location.LocationListener;
 import android.os.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.panoramiobindings.callback.ProviderStatusCallback;
+import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 
 import java.util.ArrayList;
 import java.util.List;

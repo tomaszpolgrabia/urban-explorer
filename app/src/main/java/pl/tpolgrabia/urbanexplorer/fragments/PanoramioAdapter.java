@@ -13,8 +13,8 @@ import com.androidquery.AQuery;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
-import pl.tpolgrabia.urbanexplorer.utils.NetUtils;
+import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
 
 import java.util.List;
 

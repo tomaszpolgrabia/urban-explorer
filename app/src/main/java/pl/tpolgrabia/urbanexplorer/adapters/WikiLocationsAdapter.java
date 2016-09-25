@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
+import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 
 import java.util.List;
 

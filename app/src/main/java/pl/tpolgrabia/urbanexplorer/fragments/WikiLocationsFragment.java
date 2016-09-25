@@ -18,11 +18,13 @@ import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
-import pl.tpolgrabia.urbanexplorer.callbacks.*;
-import pl.tpolgrabia.urbanexplorer.dto.wiki.app.WikiAppObject;
-import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
-import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
+import pl.tpolgrabia.urbanexplorer.callbacks.wiki.*;
+import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.utils.*;
+import pl.tpolgrabia.urbanexplorerutils.utils.DebugUtils;
+import pl.tpolgrabia.wikibinding.utils.WikiUtils;
 
 import java.util.ArrayList;
 
@@ -35,7 +37,7 @@ public class WikiLocationsFragment extends Fragment {
 
     private static final Logger lg = LoggerFactory.getLogger(WikiLocationsFragment.class);
     public static final String TAG = WikiLocationsFragment.class.getSimpleName();
-    private static final String WIKI_APP_OBJECTS = "WIKI_APP_OBJECTS";
+    public static final String WIKI_APP_OBJECTS = "WIKI_APP_OBJECTS";
     private LocationManager locationService;
     private TextView currentLocation;
     private ArrayList<WikiAppObject> appObjects = new ArrayList<>();
@@ -56,7 +58,7 @@ public class WikiLocationsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        appObjects = CacheUtils.fetchAppObjectsFromCache(getActivity(), savedInstanceState);
+        appObjects = WikiCacheUtils.loadWikiObjectsFromCache(getActivity(), savedInstanceState);
     }
 
     @Override
@@ -148,7 +150,7 @@ public class WikiLocationsFragment extends Fragment {
         EventBus.getDefault().unregister(this);
         lg.trace("onDestroy {}", System.identityHashCode(this));
 
-        CacheUtils.saveWikiObjectsToCache(getActivity(), appObjects);
+        WikiCacheUtils.saveWikiObjectsToCache(getActivity(), appObjects);
     }
 
     @Subscribe

@@ -15,15 +15,24 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.callbacks.*;
-import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
-import pl.tpolgrabia.urbanexplorer.events.DataLoadingFinishEvent;
-import pl.tpolgrabia.urbanexplorer.events.RefreshEvent;
+import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.callbacks.geocoder.GeocodedLocationCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.FetchAdditionalPanoramioPhotosCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.FetchPanoramioPhotosCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.PanoramioLocationCallback;
+import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.PanoramioProviderCallback;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioItemLongClickHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioLocationsScrollListener;
 import pl.tpolgrabia.urbanexplorer.utils.*;
+import pl.tpolgrabia.urbanexplorerutils.utils.DebugUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +113,7 @@ public class HomeFragment extends Fragment  {
 
         lg.trace("Saved instance state {}", savedInstanceState);
         if (photos != null) {
-            photos = CacheUtils.restorePhotosFromCache(this, savedInstanceState);
+            photos = PanoramioCacheUtils.loadPhotosFromCache(this, savedInstanceState);
         }
 
         locations.setAdapter(new PanoramioAdapter(getActivity(), R.layout.location_item, photos));
@@ -203,7 +212,7 @@ public class HomeFragment extends Fragment  {
         super.onDestroy();
         lg.trace("onDestroy");
         EventBus.getDefault().unregister(this);
-        CacheUtils.savePostsToCache(getActivity(), photos);
+        PanoramioCacheUtils.savePhotosToCache(getActivity(), photos);
     }
 
     @Override

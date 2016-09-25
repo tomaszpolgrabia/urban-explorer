@@ -1,6 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.dto.panoramio;
 
-import pl.tpolgrabia.urbanexplorer.dto.panoramio.PanoramioImageInfo;
+import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
 
 import java.io.Serializable;
 import java.util.Date;
