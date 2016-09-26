@@ -15,6 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
@@ -43,6 +44,7 @@ public class WikiLocationsFragment extends Fragment {
     private ArrayList<WikiAppObject> appObjects = new ArrayList<>();
     private int lastFetchSize = -1;
     private String currentGeocodedLocation;
+    private GeocoderUtils geocoderUtils;
 
     public WikiLocationsFragment() {
         // Required empty public constructor
@@ -59,6 +61,7 @@ public class WikiLocationsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         appObjects = WikiCacheUtils.loadWikiObjectsFromCache(getActivity(), savedInstanceState);
+        geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
     }
 
     @Override
@@ -123,7 +126,7 @@ public class WikiLocationsFragment extends Fragment {
     }
 
     private void updateGeocodedLocation() {
-        WikiUtils.getGeoCodedLocation(getActivity(), new WikiLocationGeoCoderCallback(this));
+        geocoderUtils.getGeoCodedLocation(new WikiLocationGeoCoderCallback(this));
     }
 
     public void updateLocationInfo() {

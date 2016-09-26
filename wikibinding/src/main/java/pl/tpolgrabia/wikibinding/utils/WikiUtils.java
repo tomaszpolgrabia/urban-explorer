@@ -359,27 +359,6 @@ public class WikiUtils {
         );
     }
 
-    public static void getGeoCodedLocation(Context ctx, LocationGeoCoderCallback clbk) {
-
-        if (ctx == null) {
-            lg.warn("Context is null - not available");
-            clbk.callback(-1, "ERROR", "ERROR", "Not available");
-            return;
-        }
-
-        Location location = LocationUtils.getLastKnownLocation(ctx);
-
-        if (location == null) {
-            lg.debug("Location is still not available");
-            return;
-        }
-
-        LocationUtils.getGeoCodedLocation(ctx,
-            location.getLatitude(),
-            location.getLongitude(),
-            clbk);
-    }
-
     public static void fetchAppData(Context ctx, WikiAppResponseCallback clbk) {
         final Location location = LocationUtils.getLastKnownLocation(ctx);
 
