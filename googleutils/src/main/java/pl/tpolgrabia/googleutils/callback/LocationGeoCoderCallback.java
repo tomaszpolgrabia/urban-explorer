@@ -1,4 +1,4 @@
-package pl.tpolgrabia.urbanexplorerutils.callbacks;
+package pl.tpolgrabia.googleutils.callback;
 
 /**
  * Created by Tomasz Półgrabia <tomasz.polgrabia@unicredit.eu> (c310702) on 20.09.2016.

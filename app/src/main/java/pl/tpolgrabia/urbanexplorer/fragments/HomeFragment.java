@@ -15,6 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+// import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
@@ -54,7 +55,7 @@ public class HomeFragment extends Fragment  {
     private ArrayList<PanoramioImageInfo> photos;
     private boolean noMorePhotos;
     private String currentGeocodedLocation;
-    private GeocoderUtils geocoderUtils;
+    // private GeocoderUtils geocoderUtils;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -77,7 +78,7 @@ public class HomeFragment extends Fragment  {
         final StandardLocationListener locationCallback = mainActivity.getLocationCallback();
         locationCallback.addCallback(new PanoramioLocationCallback(this));
         locationCallback.addProviderCallback(new PanoramioProviderCallback(this));
-        geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
+        //geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
     }
 
     public void updateGeocodedLocation() {
@@ -93,10 +94,10 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
-        geocoderUtils.getGeoCodedLocation(
-            currLocation.getLatitude(),
-            currLocation.getLongitude(),
-            new GeocodedLocationCallback(this));
+//        geocoderUtils.getGeoCodedLocation(
+//            currLocation.getLatitude(),
+//            currLocation.getLongitude(),
+//            new GeocodedLocationCallback(this));
 
     }
 

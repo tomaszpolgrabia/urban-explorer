@@ -13,7 +13,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.tpolgrabia.urbanexplorerutils.callbacks.LocationGeoCoderCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiAppResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiStatus;

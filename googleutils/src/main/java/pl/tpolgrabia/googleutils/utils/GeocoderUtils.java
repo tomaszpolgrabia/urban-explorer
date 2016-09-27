@@ -1,4 +1,4 @@
-package pl.tpolgrabia.urbanexplorer.utils;
+package pl.tpolgrabia.googleutils.utils;
 
 import android.content.Context;
 import android.location.Location;
@@ -9,10 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.tpolgrabia.urbanexplorerutils.callbacks.LocationGeoCoderCallback;
-import pl.tpolgrabia.urbanexplorerutils.constants.UtilConstants;
+import pl.tpolgrabia.googleutils.callback.LocationGeoCoderCallback;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
-import pl.tpolgrabia.wikibinding.utils.WikiUtils;
 
 /**
  * Created by tpolgrabia on 26.09.16.
