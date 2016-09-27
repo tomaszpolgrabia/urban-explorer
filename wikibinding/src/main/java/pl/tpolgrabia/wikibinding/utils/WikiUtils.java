@@ -13,6 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 import pl.tpolgrabia.wikibinding.callback.WikiAppResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiStatus;
@@ -24,10 +28,6 @@ import pl.tpolgrabia.wikibinding.dto.generator.WikiThumbnail;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoObject;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponseCallback;
-import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
-import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
-import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
-import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 
 import java.util.*;
 
@@ -36,27 +36,34 @@ import java.util.*;
  */
 public class WikiUtils {
     private static final Logger lg = LoggerFactory.getLogger(WikiUtils.class);
-    private static final String CLASS_TAG = WikiUtils.class.getSimpleName();
+
     private static final String WIKI_FORMAT = "json";
     private static final long WIKI_MIN_RADIUS = 10L;
     private static final Long WIKI_MAX_RESULTS_LIMIT = 500L;
     private static final Long WIKI_MIN_RESULTS = 10L;
     private static final Double WIKI_STD_RADIUS = 10000.0;
     private static final Long WIKI_STD_LIMIT = 10L;
+    private final Context ctx;
+    private final String countryCode;
 
-    public static void fetchNearPlaces(Context ctx,
-                                       final double latitude,
-                                       final double longitude,
-                                       final Long resultsLimit,
-                                       final Long radiusLimit,
-                                       final WikiResponseCallback callback) {
+    public WikiUtils(Context ctx, String countryCode) {
+        this.ctx = ctx;
+        this.countryCode = countryCode;
+    }
+
+    public void fetchNearPlaces(
+        final double latitude,
+        final double longitude,
+        final Long resultsLimit,
+        final Long radiusLimit,
+        final WikiResponseCallback callback) {
         final AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
 
         aq.ajax("TODO", JSONObject.class, new AjaxCallback<JSONObject>(){
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 // TODO handle response
-                final String qurl = "https://en.wikipedia.org/w/api.php?" +
+                final String qurl = "https://" + countryCode + ".wikipedia.org/w/api.php?" +
                     "action=query" +
                     "&prop=coordinates%7Cpageimages%7Cpageterms" +
                     "&colimit=50" +
@@ -164,12 +171,12 @@ public class WikiUtils {
         return wikiLocation;
     }
 
-    public static void fetchGeoSearchWikiMetadata(Context ctx,
-                                                  Double latitude,
-                                                  Double longitude,
-                                                  Double radius,
-                                                  Long limit,
-                                                  final WikiGeoResponseCallback callback) {
+    public void fetchGeoSearchWikiMetadata(Context ctx,
+                                           Double latitude,
+                                           Double longitude,
+                                           Double radius,
+                                           Long limit,
+                                           final WikiGeoResponseCallback callback) {
 
         lg.debug("Latitude: {}, longitude: {}, radius: {}, limit: {}", latitude, longitude, radius, limit);
 
@@ -182,7 +189,7 @@ public class WikiUtils {
         }
 
         AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
-        final String queryUrl = "https://en.wikipedia.org/w/api.php" +
+        final String queryUrl = "https://" + countryCode + ".wikipedia.org/w/api.php" +
             "?action=query" +
             "&list=geosearch" +
             "&gscoord=" + latitude + "%7C" + longitude +
@@ -244,12 +251,12 @@ public class WikiUtils {
         return object;
     }
 
-    public static void fetchAppData(final Context ctx,
-                                    final Double latitude,
-                                    final Double longitude,
-                                    final Double radius,
-                                    final Long limit,
-                                    final WikiAppResponseCallback callback) {
+    public void fetchAppData(
+        final Double latitude,
+        final Double longitude,
+        final Double radius,
+        final Long limit,
+        final WikiAppResponseCallback callback) {
 
         lg.debug("Latitude: {}, longitude: {}, radius: {}, limit: {}",
             latitude, longitude, radius, limit);
@@ -281,7 +288,7 @@ public class WikiUtils {
                 }
 
 
-                fetchPageInfos(ctx,
+                fetchPageInfos(
                     pageIds,
                     new WikiResponseCallback() {
                         @Override
@@ -318,9 +325,9 @@ public class WikiUtils {
 
     }
 
-    public static void fetchPageInfos(Context ctx, List<Long> pageIds, final WikiResponseCallback callback) {
+    public void fetchPageInfos(List<Long> pageIds, final WikiResponseCallback callback) {
         AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
-        aq.ajax("https://en.wikipedia.org/w/api.php" +
+        aq.ajax("https://" + countryCode + ".wikipedia.org/w/api.php" +
             "?action=query" +
             "&prop=coordinates%7Cpageimages%7Cpageterms" +
             "&colimit=50" +
@@ -347,18 +354,18 @@ public class WikiUtils {
     }
 
 
-    public static void fetchSingleWikiInfoItemAndRunWikiPage(Context ctx,
+    public void fetchSingleWikiInfoItemAndRunWikiPage(Context ctx,
                                                              Long pageId,
                                                              AjaxCallback<JSONObject> callback) {
         NetUtils.createProxyAQueryInstance(ctx).ajax(
-            "https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids="
+            "https://" + countryCode + ".wikipedia.org/w/api.php?action=query&prop=info&pageids="
                 + pageId + "&inprop=url&format=json",
             JSONObject.class,
             callback
         );
     }
 
-    public static void fetchAppData(Context ctx, WikiAppResponseCallback clbk) {
+    public void fetchAppData(WikiAppResponseCallback clbk) {
         final Location location = LocationUtils.getLastKnownLocation(ctx);
 
         if (location == null) {
@@ -368,7 +375,7 @@ public class WikiUtils {
             return;
         }
 
-        fetchAppData(ctx,
+        fetchAppData(
             location.getLatitude(),
             location.getLongitude(),
             SettingsUtils.fetchRadiusLimit(ctx),

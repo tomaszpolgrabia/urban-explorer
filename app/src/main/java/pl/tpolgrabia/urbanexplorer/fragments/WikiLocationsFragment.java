@@ -46,6 +46,7 @@ public class WikiLocationsFragment extends Fragment {
     private int lastFetchSize = -1;
     private String currentGeocodedLocation;
     private GeocoderUtils geocoderUtils;
+    private WikiUtils wikiUtils;
 
     public WikiLocationsFragment() {
         // Required empty public constructor
@@ -63,6 +64,7 @@ public class WikiLocationsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         appObjects = WikiCacheUtils.loadWikiObjectsFromCache(getActivity(), savedInstanceState);
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
+        wikiUtils = new WikiUtils(getActivity(), AppConstants.DEF_WIKI_COUNTRY_CODE);
     }
 
     @Override
@@ -110,7 +112,7 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        WikiUtils.fetchAppData(activity, new WikiFetchAppDataCallback(this, activity));
+        wikiUtils.fetchAppData(new WikiFetchAppDataCallback(this, activity));
     }
 
     @Override
