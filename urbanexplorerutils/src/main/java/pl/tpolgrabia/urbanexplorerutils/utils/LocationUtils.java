@@ -3,15 +3,8 @@ package pl.tpolgrabia.urbanexplorerutils.utils;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.tpolgrabia.urbanexplorerutils.callbacks.LocationGeoCoderCallback;
-import pl.tpolgrabia.urbanexplorerutils.constants.UtilConstants;
 
 /**
  * Created by tpolgrabia on 28.08.16.
