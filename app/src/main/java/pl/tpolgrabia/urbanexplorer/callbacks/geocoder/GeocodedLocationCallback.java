@@ -2,14 +2,13 @@ package pl.tpolgrabia.urbanexplorer.callbacks.geocoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.googleutils.callback.LocationGeoCoderCallback;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
-//import pl.tpolgrabia.urbanexplorerutils.callbacks.LocationGeoCoderCallback;
 
 /**
  * Created by tpolgrabia on 21.09.16.
  */
-public class GeocodedLocationCallback {
-    // implements LocationGeoCoderCallback {
+public class GeocodedLocationCallback implements LocationGeoCoderCallback {
     private static final Logger lg = LoggerFactory.getLogger(GeocodedLocationCallback.class);
     private HomeFragment homeFragment;
 
@@ -17,7 +16,7 @@ public class GeocodedLocationCallback {
         this.homeFragment = homeFragment;
     }
 
-    // @Override
+    @Override
     public void callback(int code, String message, String googleStatus, String geocodedLocation) {
         lg.debug("Geocoded result code {}, message {}, status: {}, value {}",
             code, message, googleStatus, geocodedLocation);

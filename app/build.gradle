@@ -80,5 +80,5 @@ dependencies {
     compile project(':panoramiobindings')
     compile project(':urbanexplorerutils')
     compile project(':wikibinding')
-    // compile project(':googleutils')
+    compile project(':googleutils')
 }
