@@ -32,6 +32,10 @@ public class PanoramioCacheUtils {
     public static ArrayList<PanoramioImageInfo> loadPhotosFromCache(HomeFragment homeFragment, Bundle savedBundleSettings) {
         ArrayList<PanoramioImageInfo> photos;
 
+        if (savedBundleSettings == null) {
+            return new ArrayList<>();
+        }
+
         final Serializable serPhotos = savedBundleSettings.getSerializable(HomeFragment.PHOTO_LIST);
         lg.trace("Photo list serPhotos {}", serPhotos);
         photos = (ArrayList<PanoramioImageInfo>) serPhotos;

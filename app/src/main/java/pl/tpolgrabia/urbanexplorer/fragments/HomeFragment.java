@@ -117,7 +117,7 @@ public class HomeFragment extends Fragment  {
         initialized = true;
 
         lg.trace("Saved instance state {}", savedInstanceState);
-        if (photos != null) {
+        if (photos == null) {
             photos = PanoramioCacheUtils.loadPhotosFromCache(this, savedInstanceState);
         }
 
