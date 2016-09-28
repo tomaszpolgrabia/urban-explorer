@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 public class PlacesFragment extends Fragment {
 
 
+    public static final String TAG = PlacesFragment.class.getSimpleName();
+
     public PlacesFragment() {
         // Required empty public constructor
     }

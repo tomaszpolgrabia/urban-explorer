@@ -15,7 +15,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-// import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.AppConstants;

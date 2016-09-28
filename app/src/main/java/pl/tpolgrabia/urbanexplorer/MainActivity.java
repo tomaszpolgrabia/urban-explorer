@@ -19,16 +19,13 @@ import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.handlers.*;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.Refreshable;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
-import pl.tpolgrabia.urbanexplorer.handlers.PanoramioShowerSwitchHandler;
-import pl.tpolgrabia.urbanexplorer.handlers.PanoramioSwitchHandler;
-import pl.tpolgrabia.urbanexplorer.handlers.SwipeHandler;
-import pl.tpolgrabia.urbanexplorer.handlers.WikiSwitchHandler;
 import pl.tpolgrabia.urbanexplorer.utils.HelperUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
@@ -59,14 +56,16 @@ public class MainActivity extends ActionBarActivity {
     private static final Map<Integer, String> fragTags = new HashMap<>();
 
     static {
-        fragTags.put(AppConstants.HOME_FRAGMENT_ID, HomeFragment.TAG);
-        fragTags.put(AppConstants.WIKI_FRAGMENT_ID, WikiLocationsFragment.TAG);
+        fragTags.put(MainActivityState.PANORAMIO.getOrder(), HomeFragment.TAG);
+        fragTags.put(MainActivityState.WIKI.getOrder(), WikiLocationsFragment.TAG);
+        fragTags.put(MainActivityState.GOOGLE_PLACES.getOrder(), PlacesFragment.TAG);
     }
 
     public MainActivity() {
         switchFragmentActions.put(MainActivityState.PANORAMIO_SHOWER, new PanoramioShowerSwitchHandler(this));
         switchFragmentActions.put(MainActivityState.PANORAMIO, new PanoramioSwitchHandler(this));
         switchFragmentActions.put(MainActivityState.WIKI, new WikiSwitchHandler(this));
+        switchFragmentActions.put(MainActivityState.GOOGLE_PLACES, new GooglePlacesSwitchHandler(this));
     }
 
     private List<PanoramioImageInfo> photos;
