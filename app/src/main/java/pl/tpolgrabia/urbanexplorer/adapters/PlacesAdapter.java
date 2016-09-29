@@ -38,6 +38,12 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         TextView placeDescriptionWidget = (TextView) resultView.findViewById(R.id.place_description);
         placeDescriptionWidget.setText(item.getName());
 
+        TextView placeAddressWidget = (TextView) resultView.findViewById(R.id.place_address);
+        placeAddressWidget.setText(item.getVicinity());
+
+        TextView placeRateWidget = (TextView) resultView.findViewById(R.id.place_rate);
+        placeRateWidget.setText("" + item.getRating());
+
         ImageView placePreviewWidget = (ImageView)resultView.findViewById(R.id.place_img_preview);
 
         ImageLoader.getInstance().displayImage(
