@@ -2,6 +2,8 @@ package pl.tpolgrabia.googleutils.converter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.dto.*;
 
 import java.util.ArrayList;
@@ -11,7 +13,16 @@ import java.util.List;
  * Created by tpolgrabia on 28.09.16.
  */
 public class GooglePlaceConverter {
+
+    private static final Logger lg = LoggerFactory.getLogger(GooglePlaceConverter.class);
     public static GooglePlaceResult convertToPlaceResult(JSONObject object) {
+
+        lg.trace("Place result object: {}", object);
+
+        if (object == null) {
+            return null;
+        }
+
         GooglePlaceResult dto = new GooglePlaceResult();
         dto.setGeometry(convertToPlaceGeometry(object.optJSONObject("geometry")));
         dto.setIcon(object.optString("icon"));
@@ -27,17 +38,29 @@ public class GooglePlaceConverter {
         return dto;
     }
 
-    private static List<String> convertToStringList(JSONArray types) {
-        int n = types.length();
+    private static List<String> convertToStringList(JSONArray stringArray) {
+        lg.trace("String array: {}", stringArray);
+
+        if (stringArray == null) {
+            return null;
+        }
+
+        int n = stringArray.length();
         List<String> ret = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            ret.add(types.optString(i));
+            ret.add(stringArray.optString(i));
         }
 
         return ret;
     }
 
     private static List<GooglePlacePhoto> convertToPlacePhotos(JSONArray jphotos) {
+        lg.trace("Place photos: {}", jphotos);
+
+        if (jphotos == null) {
+            return null;
+        }
+
         int n = jphotos.length();
         List<GooglePlacePhoto> photos = new ArrayList<>(n);
 
@@ -49,6 +72,12 @@ public class GooglePlaceConverter {
     }
 
     private static GooglePlacePhoto convertToPlacePhoto(JSONObject jphoto) {
+        lg.trace("Place photo: {}", jphoto);
+
+        if (jphoto == null) {
+            return null;
+        }
+
         GooglePlacePhoto photo = new GooglePlacePhoto();
         photo.setHeight(jphoto.optLong("height"));
         photo.setWidth(jphoto.optLong("width"));
@@ -58,6 +87,12 @@ public class GooglePlaceConverter {
     }
 
     private static GooglePlaceGeometry convertToPlaceGeometry(JSONObject jgeometry) {
+        lg.trace("Place geometry: {}", jgeometry);
+
+        if (jgeometry == null) {
+            return null;
+        }
+
         GooglePlaceGeometry geometry = new GooglePlaceGeometry();
         geometry.setLocation(convertToPlaceLocation(jgeometry.optJSONObject("location")));
         geometry.setViewport(convertToPlaceViewport(jgeometry.optJSONObject("viewport")));
@@ -65,6 +100,12 @@ public class GooglePlaceConverter {
     }
 
     private static GooglePlaceViewport convertToPlaceViewport(JSONObject jviewport) {
+        lg.trace("Place viewport: {}", jviewport);
+
+        if (jviewport == null) {
+            return null;
+        }
+
         GooglePlaceViewport viewport = new GooglePlaceViewport();
         viewport.setNorthEast(convertToPlaceLocation(jviewport.optJSONObject("northeast")));
         viewport.setSouthWest(convertToPlaceLocation(jviewport.optJSONObject("southwest")));
@@ -72,9 +113,29 @@ public class GooglePlaceConverter {
     }
 
     private static GooglePlaceLocation convertToPlaceLocation(JSONObject jlocation) {
+        lg.trace("Place location: {}", jlocation);
+        if (jlocation == null) {
+            return null;
+        }
+
         GooglePlaceLocation location = new GooglePlaceLocation();
         location.setLatitude(jlocation.optDouble("lat"));
         location.setLongitude(jlocation.optDouble("lng"));
         return location;
+    }
+
+    public static List<GooglePlaceResult> convertToPlaceResults(JSONArray jresults) {
+        lg.trace("Place results: {}", jresults);
+
+        if (jresults == null) {
+            return null;
+        }
+
+        List<GooglePlaceResult> results = new ArrayList<>();
+        int n = jresults.length();
+        for (int i = 0; i < n; i++) {
+            results.add(convertToPlaceResult(jresults.optJSONObject(i)));
+        }
+        return results;
     }
 }

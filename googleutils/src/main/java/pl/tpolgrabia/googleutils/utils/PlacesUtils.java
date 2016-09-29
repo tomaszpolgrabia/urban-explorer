@@ -8,6 +8,11 @@ import com.google.gson.JsonObject;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.googleutils.callback.PlacesCallback;
+import pl.tpolgrabia.googleutils.converter.GooglePlaceConverter;
+import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
+
+import java.util.List;
 
 /**
  * Created by tpolgrabia on 27.09.16.
@@ -26,7 +31,12 @@ public class PlacesUtils {
         this.aq = new AQuery(ctx);
     }
 
-    public void fetchNearbyPlaces(Double latitude, Double longitude, Double searchRadius, String searchItemType, String pageToken) {
+    public void fetchNearbyPlaces(Double latitude,
+                                  Double longitude,
+                                  Double searchRadius,
+                                  String searchItemType,
+                                  String pageToken,
+                                  final PlacesCallback clbk) {
 
         if (latitude == null) {
             throw new IllegalArgumentException("Latitude cannot be null");
@@ -65,16 +75,24 @@ public class PlacesUtils {
                             statusCode,
                             statusMessage,
                             statusError);
+                        clbk.callback((long)statusCode, statusMessage, null);
                         return;
                     }
 
                     String googleStatus = object.optString("status");
                     if (!"OK".equals(googleStatus)) {
                         lg.error("Invalid google status: {}", googleStatus);
+                        clbk.callback((long)statusCode, googleStatus, null);
                         return;
                     }
 
-
+                    try {
+                        List<GooglePlaceResult> googleResults = GooglePlaceConverter.convertToPlaceResults(object.getJSONArray("results"));
+                        clbk.callback((long) statusCode, googleStatus, googleResults);
+                    } catch (Throwable t) {
+                        lg.error("General error", t);
+                        clbk.callback(-1L, "General error", null);
+                    }
 
                 }
             });

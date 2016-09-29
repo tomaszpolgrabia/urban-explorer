@@ -3,7 +3,7 @@ package pl.tpolgrabia.urbanexplorer.handlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
-import pl.tpolgrabia.urbanexplorer.PlacesFragment;
+import pl.tpolgrabia.urbanexplorer.fragments.PlacesFragment;
 
 /**
  * Created by tpolgrabia on 28.09.16.
