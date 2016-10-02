@@ -1,12 +1,15 @@
 package pl.tpolgrabia.urbanexplorer.callbacks;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.widget.Toast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.panoramiobindings.callback.ProviderStatusCallback;
 import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
+import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +19,14 @@ import java.util.List;
  */
 public class StandardLocationListener implements LocationListener {
     private static final Logger lg = LoggerFactory.getLogger(StandardLocationListener.class);
+    private final Context ctx;
     private List<StandardLocationListenerCallback> locationChangedCallbacks = new ArrayList<>();
     private List<ProviderStatusCallback>
             providerStatusCallbacks = new ArrayList<>();
+
+    public StandardLocationListener(Context ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -26,11 +34,14 @@ public class StandardLocationListener implements LocationListener {
         for (StandardLocationListenerCallback callback : locationChangedCallbacks) {
             callback.callback(location);
         }
+        Toast.makeText(ctx, "Location changed " + location, Toast.LENGTH_LONG).show();
+        LocationUtils.updateLastLocationUPdate(ctx);
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         lg.debug("Location provider {} status  has changed to {} with {}", provider, status, extras);
+        Toast.makeText(ctx, "Location provider " + provider + " status changed to " + status, Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -106,7 +107,7 @@ public class MainActivity extends ActionBarActivity {
 
         swipeHandler = new SwipeHandler(this);
         gestureDetector = new GestureDetectorCompat(this, swipeHandler);
-        locationCallback = new StandardLocationListener();
+        locationCallback = new StandardLocationListener(this);
 
         // init fragments
         MainActivityState fragId = savedInstanceState != null
@@ -300,14 +301,27 @@ public class MainActivity extends ActionBarActivity {
 
         lg.debug("Selected location provider {} is available", locationProvider);
 
+        final Long updateTime = HelperUtils.fetchGpsUpdateFreq(this);
+        lg.debug("Update time: {}", updateTime);
         if (locationProvider != null) {
             lg.debug("Requesting location updates");
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.requestLocationUpdates(locationProvider,
-                HelperUtils.fetchGpsUpdateFreq(this),
+                updateTime,
                 HelperUtils.fetchGpsDistanceFreq(this),
                 locationCallback);
             locationServicesActivated = true;
+
+            final Long lastLocationUpdateTime = LocationUtils.getLastLocationUpdate(this);
+            lg.debug("Last location update time: {}", lastLocationUpdateTime);
+            final long now = System.currentTimeMillis();
+            lg.debug("Now: {}", now);
+            final long lastLocationUpdateTimeAgo = now - lastLocationUpdateTime;
+            lg.debug("Last location update was {} ms ago", lastLocationUpdateTimeAgo);
+            if (lastLocationUpdateTime < 0 || lastLocationUpdateTimeAgo >= updateTime) {
+                lg.info("Last location update time exceeded. Requesting single update...");
+                locationService.requestSingleUpdate(locationProvider, locationCallback, Looper.getMainLooper());
+            }
         }
 
         savedConfiguration = false;
