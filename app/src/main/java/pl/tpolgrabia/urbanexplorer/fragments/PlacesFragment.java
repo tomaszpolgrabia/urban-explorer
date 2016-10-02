@@ -9,10 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.googleutils.callback.LocationGeoCoderCallback;
 import pl.tpolgrabia.googleutils.callback.PlacesCallback;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
+import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.googleutils.utils.PlacesUtils;
 import pl.tpolgrabia.panoramiobindings.callback.ProviderStatusCallback;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -33,6 +37,7 @@ public class PlacesFragment extends Fragment {
     private static final Logger lg = LoggerFactory.getLogger(PlacesFragment.class);
     public static final String TAG = PlacesFragment.class.getSimpleName();
     private PlacesUtils placesUtils;
+    private GeocoderUtils geocoderUtils;
 
     public PlacesFragment() {
         // Required empty public constructor
@@ -94,6 +99,8 @@ public class PlacesFragment extends Fragment {
                 }
             });
 
+        geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
+
     }
 
     @Override
@@ -109,6 +116,19 @@ public class PlacesFragment extends Fragment {
             return;
         }
 
+        geocoderUtils.getGeoCodedLocation(new LocationGeoCoderCallback() {
+            @Override
+            public void callback(int code, String message, String googleStatus, String geocodedLocation) {
+                lg.trace("Geocoded code: {}, message: {}, google status: {}, location: {}",
+                    code,
+                    message,
+                    googleStatus,
+                    geocodedLocation);
+
+                TextView locationWidget = (TextView) getView().findViewById(R.id.google_places_location);
+                locationWidget.setText(geocodedLocation);
+            }
+        });
         fetchNearbyPlacesAndPresemt(location);
 
     }
