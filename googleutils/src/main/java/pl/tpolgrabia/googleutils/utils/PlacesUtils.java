@@ -4,15 +4,26 @@ import android.content.Context;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
-import com.google.gson.JsonObject;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.googleutils.GooglePlacesService;
+import pl.tpolgrabia.googleutils.callback.GooglePlacesPhotosCallback;
 import pl.tpolgrabia.googleutils.callback.PlacesCallback;
+import pl.tpolgrabia.googleutils.constants.GooglePlacesConstants;
 import pl.tpolgrabia.googleutils.converter.GooglePlaceConverter;
+import pl.tpolgrabia.googleutils.dto.GooglePlacePhoto;
+import pl.tpolgrabia.googleutils.dto.GooglePlacePhotoRefResult;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by tpolgrabia on 27.09.16.
@@ -96,5 +107,45 @@ public class PlacesUtils {
 
                 }
             });
+    }
+
+    public List<GooglePlacePhotoRefResult> fetchPhotosByRefSync(String photosRef) throws IOException {
+        Response<List<GooglePlacePhotoRefResult>> results = fetchPhotosByRefInvocation(photosRef).execute();
+        return results.code() == HttpStatus.SC_OK ? results.body() : null;
+    }
+
+    public void fetchPhotosByRefAsync(String photosRef, final GooglePlacesPhotosCallback clbk) {
+        fetchPhotosByRefInvocation(photosRef).enqueue(new Callback<List<GooglePlacePhotoRefResult>>() {
+            @Override
+            public void onResponse(Call<List<GooglePlacePhotoRefResult>> call, Response<List<GooglePlacePhotoRefResult>> response) {
+                clbk.onResponse(response.code(), response.message(), response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<GooglePlacePhotoRefResult>> call, Throwable t) {
+                clbk.onFailure(t);
+            }
+        });
+    }
+
+    private Call<List<GooglePlacePhotoRefResult>> fetchPhotosByRefInvocation(String photosRef) {
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(GooglePlacesConstants.GOOGLE_PLACES_BASEURL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+        GooglePlacesService service = retrofit.create(GooglePlacesService.class);
+        return service.fetchPhotosByRef(
+            GooglePlacesConstants.PHOTO_MAX_WIDTH,
+            photosRef,
+            apiKey);
+    }
+
+    public Map<String, List<GooglePlacePhotoRefResult>> fetchPhotosSync(Set<String> photoRefs) throws IOException {
+        HashMap<String, List<GooglePlacePhotoRefResult>> result = new HashMap<String, List<GooglePlacePhotoRefResult>>();
+        for (String photoRef : photoRefs) {
+            result.put(photoRef, fetchPhotosByRefSync(photoRef));
+        }
+
+        return result;
     }
 }

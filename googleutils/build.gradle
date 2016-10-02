@@ -32,4 +32,6 @@ dependencies {
 
     compile 'com.googlecode.android-query:android-query:0.25.9'
     compile project(path: ':urbanexplorerutils')
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 }
