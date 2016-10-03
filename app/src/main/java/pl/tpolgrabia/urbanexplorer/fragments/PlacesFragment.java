@@ -23,6 +23,8 @@ import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.PlacesAdapter;
+import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesRequest;
+import pl.tpolgrabia.urbanexplorer.worker.GooglePlacesWorker;
 import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 
@@ -38,6 +40,7 @@ public class PlacesFragment extends Fragment {
     public static final String TAG = PlacesFragment.class.getSimpleName();
     private PlacesUtils placesUtils;
     private GeocoderUtils geocoderUtils;
+    private GooglePlacesWorker worker;
 
     public PlacesFragment() {
         // Required empty public constructor
@@ -100,6 +103,7 @@ public class PlacesFragment extends Fragment {
             });
 
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
+        worker = new GooglePlacesWorker(getActivity(), this);
 
     }
 
@@ -129,29 +133,36 @@ public class PlacesFragment extends Fragment {
                 locationWidget.setText(geocodedLocation);
             }
         });
+        lg.debug("Fetching nearby places {}", location);
         fetchNearbyPlacesAndPresemt(location);
 
     }
 
     private void fetchNearbyPlacesAndPresemt(Location location) {
-        placesUtils.fetchNearbyPlaces(
-            location.getLatitude(),
-            location.getLongitude(),
-            AppConstants.DEF_PLACES_RADIUS,
-            "museum",
-            null,
-            new PlacesCallback() {
-                @Override
-                public void callback(Long statusCode, String statusMsg, List<GooglePlaceResult> googlePlaceResult) {
-                    lg.debug("Fetch nearby statusCode: {}, status message: {}, google result: {}",
-                        statusCode,
-                        statusMsg,
-                        googlePlaceResult);
+        GooglePlacesRequest request = new GooglePlacesRequest();
+        request.setLocation(location);
+        request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
+        request.setSearchItemType("museum");
+        worker.execute(request);
 
-                    ListView googlePlacesWidget = (ListView) getView().findViewById(R.id.google_places);
-                    PlacesAdapter adapter = new PlacesAdapter(getActivity(), googlePlaceResult);
-                    googlePlacesWidget.setAdapter(adapter);
-                }
-            });
+//        placesUtils.fetchNearbyPlaces(
+//            location.getLatitude(),
+//            location.getLongitude(),
+//            AppConstants.DEF_PLACES_RADIUS,
+//            "museum",
+//            null,
+//            new PlacesCallback() {
+//                @Override
+//                public void callback(Long statusCode, String statusMsg, List<GooglePlaceResult> googlePlaceResult) {
+//                    lg.debug("Fetch nearby statusCode: {}, status message: {}, google result: {}",
+//                        statusCode,
+//                        statusMsg,
+//                        googlePlaceResult);
+//
+//                    ListView googlePlacesWidget = (ListView) getView().findViewById(R.id.google_places);
+//                    PlacesAdapter adapter = new PlacesAdapter(getActivity(), googlePlaceResult);
+//                    googlePlacesWidget.setAdapter(adapter);
+//                }
+//            });
     }
 }

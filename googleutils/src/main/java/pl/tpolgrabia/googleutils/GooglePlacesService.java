@@ -5,6 +5,7 @@ import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 import java.util.List;
 
@@ -12,11 +13,9 @@ import java.util.List;
  * Created by tpolgrabia on 02.10.16.
  */
 public interface GooglePlacesService {
-    @GET("photo?maxwidth={maxWidth}" +
-        "&photoreference={photoRef}" +
-        "&key={apiKey}")
+    @GET("photo")
     Call<List<GooglePlacePhotoRefResult>> fetchPhotosByRef(
-        @Path("maxWidth") Long maxWidth,
-        @Path("photoRef") String photoRef,
-        @Path("apiKey") String apiKey);
+        @Query("max_width") Long maxWidth,
+        @Query("photoreference") String photoRef,
+        @Query("key") String apiKey);
 }
