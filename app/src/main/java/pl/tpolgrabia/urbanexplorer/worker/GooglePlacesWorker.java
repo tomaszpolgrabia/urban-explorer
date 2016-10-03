@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ListView;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.callback.PlacesCallback;
@@ -17,6 +18,7 @@ import pl.tpolgrabia.urbanexplorer.adapters.PlacesAdapter;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesRequest;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesResponse;
 import pl.tpolgrabia.urbanexplorer.fragments.PlacesFragment;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,27 +53,24 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
         for (final GooglePlacesRequest param : params) {
             lg.debug("Excuting param {}", param);
             Location location = param.getLocation();
-            final Semaphore sem = new Semaphore(0);
 
-            placesUtils.fetchNearbyPlaces(
-                location.getLatitude(),
-                location.getLongitude(),
-                param.getSearchRadius(),
-                param.getSearchItemType(),
-                param.getPageToken(),
-                new PlacesCallback() {
-                    @Override
-                    public void callback(Long statusCode, String statusMsg, List<GooglePlaceResult> googlePlaceResults) {
-                        GooglePlacesResponse response = new GooglePlacesResponse();
-                        response.setPlaces(googlePlaceResults);
-                        result.add(response);
-                        sem.release();
-                    }
-                });
+            Response<List<GooglePlaceResult>> placesResponse = null;
             try {
-                sem.acquire();
-            } catch (InterruptedException e) {
-                lg.error("Interrupted");
+                placesResponse = placesUtils.fetchNearbyPlaces(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    param.getSearchRadius(),
+                    param.getSearchItemType(),
+                    param.getPageToken());
+
+                if (placesResponse.code() == HttpStatus.SC_OK) {
+                    GooglePlacesResponse response = new GooglePlacesResponse();
+                    response.setPlaces(placesResponse.body());
+                    result.add(response);
+                }
+
+            } catch (IOException e) {
+                lg.error("I/O error", e);
             }
         }
 
