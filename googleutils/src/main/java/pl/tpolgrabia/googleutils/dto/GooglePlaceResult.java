@@ -1,5 +1,7 @@
 package pl.tpolgrabia.googleutils.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -11,6 +13,7 @@ public class GooglePlaceResult {
     private String id;
     private String name;
     private List<GooglePlacePhoto> photos;
+    @SerializedName("place_id")
     private String placeId;
     private Double rating;
     private String reference;

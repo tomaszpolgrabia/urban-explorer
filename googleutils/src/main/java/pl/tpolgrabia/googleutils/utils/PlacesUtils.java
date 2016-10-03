@@ -8,13 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.GooglePlacesService;
 import pl.tpolgrabia.googleutils.constants.GooglePlacesConstants;
-import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
+import pl.tpolgrabia.googleutils.dto.GooglePlaceResponse;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by tpolgrabia on 27.09.16.
@@ -33,11 +32,11 @@ public class PlacesUtils {
         this.aq = new AQuery(ctx);
     }
 
-    public Response<List<GooglePlaceResult>> fetchNearbyPlaces(Double latitude,
-                                                               Double longitude,
-                                                               Double searchRadius,
-                                                               String searchItemType,
-                                                               String pageToken) throws IOException {
+    public Response<GooglePlaceResponse> fetchNearbyPlaces(Double latitude,
+                                                           Double longitude,
+                                                           Double searchRadius,
+                                                           String searchItemType,
+                                                           String pageToken) throws IOException {
 
         if (latitude == null) {
             throw new IllegalArgumentException("Latitude cannot be null");
@@ -64,10 +63,10 @@ public class PlacesUtils {
 
         return pageToken != null ?
             retrofit.create(GooglePlacesService.class).fetchNearbyPlacesNext(apiKey,
-            latitude + "," + longitude,
-            searchRadius,
-            searchItemType,
-            pageToken).execute()
+                latitude + "," + longitude,
+                searchRadius,
+                searchItemType,
+                pageToken).execute()
             : retrofit.create(GooglePlacesService.class).fetchNearbyPlacesFirst(apiKey,
             latitude + "," + longitude,
             searchRadius,

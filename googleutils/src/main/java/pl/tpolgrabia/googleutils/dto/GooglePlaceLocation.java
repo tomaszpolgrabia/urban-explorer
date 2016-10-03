@@ -1,10 +1,14 @@
 package pl.tpolgrabia.googleutils.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by tpolgrabia on 28.09.16.
  */
 public class GooglePlaceLocation {
+    @SerializedName("lat")
     private Double latitude;
+    @SerializedName("lng")
     private Double longitude;
 
     public Double getLatitude() {

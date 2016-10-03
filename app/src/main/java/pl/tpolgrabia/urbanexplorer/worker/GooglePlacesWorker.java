@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.callback.PlacesCallback;
 import pl.tpolgrabia.googleutils.dto.GooglePlacePhoto;
+import pl.tpolgrabia.googleutils.dto.GooglePlaceResponse;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import pl.tpolgrabia.googleutils.utils.PlacesUtils;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -54,7 +55,7 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
             lg.debug("Excuting param {}", param);
             Location location = param.getLocation();
 
-            Response<List<GooglePlaceResult>> placesResponse = null;
+            Response<GooglePlaceResponse> placesResponse = null;
             try {
                 placesResponse = placesUtils.fetchNearbyPlaces(
                     location.getLatitude(),
@@ -63,9 +64,9 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
                     param.getSearchItemType(),
                     param.getPageToken());
 
-                if (placesResponse.code() == HttpStatus.SC_OK) {
+                if (placesResponse != null && placesResponse.code() == HttpStatus.SC_OK) {
                     GooglePlacesResponse response = new GooglePlacesResponse();
-                    response.setPlaces(placesResponse.body());
+                    response.setPlaces(placesResponse.body().getResults());
                     result.add(response);
                 }
 

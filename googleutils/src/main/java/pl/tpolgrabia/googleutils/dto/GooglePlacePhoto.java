@@ -1,5 +1,7 @@
 package pl.tpolgrabia.googleutils.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -7,7 +9,9 @@ import java.util.List;
  */
 public class GooglePlacePhoto {
     private Long height;
+    @SerializedName("html_attributions")
     private List<String> htmlAttributions;
+    @SerializedName("photo_reference")
     private String photoReference;
     private Long width;
 
