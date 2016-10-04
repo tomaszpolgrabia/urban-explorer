@@ -177,7 +177,7 @@ public class PlacesFragment extends Fragment {
         });
         lg.debug("Fetching nearby places {}", location);
 
-        if (places == null || places.isEmpty()) {
+        if ((places == null || places.isEmpty()) && !noMoreResults) {
             fetchNearbyPlacesAndPresent(location);
         }
 
