@@ -179,6 +179,8 @@ public class PlacesFragment extends Fragment {
 
         if ((places == null || places.isEmpty()) && !noMoreResults) {
             fetchNearbyPlacesAndPresent(location);
+        } else {
+            lg.debug("Places: {}, no more results: {}", places, noMoreResults);
         }
 
     }

@@ -12,6 +12,7 @@ public class GooglePlacesResponse {
 
     private String nextPageToken;
     private String originalPageToken;
+    private String status;
 
     public List<GooglePlaceResult> getPlaces() {
         return places;
@@ -37,12 +38,21 @@ public class GooglePlacesResponse {
         return originalPageToken;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "GooglePlacesResponse{" +
             "places=" + places +
             ", nextPageToken='" + nextPageToken + '\'' +
             ", originalPageToken='" + originalPageToken + '\'' +
+            ", status='" + status + '\'' +
             '}';
     }
 }

@@ -54,7 +54,11 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         placeAddressWidget.setText(item.getVicinity());
 
         TextView placeRateWidget = (TextView) resultView.findViewById(R.id.place_rate);
-        placeRateWidget.setText("" + item.getRating());
+        if (item.getRating() != null && !item.getRating().equals(Double.NaN)) {
+            placeRateWidget.setText("" + item.getRating());
+        } else {
+            placeRateWidget.setText("N/A");
+        }
 
         ImageView placePreviewWidget = (ImageView)resultView.findViewById(R.id.place_img_preview);
         placePreviewWidget.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
