@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
@@ -26,11 +28,13 @@ import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.PlacesAdapter;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesRequest;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesResponse;
+import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesState;
 import pl.tpolgrabia.urbanexplorer.handlers.GooglePlacesScrollListener;
 import pl.tpolgrabia.urbanexplorer.worker.GooglePlacesWorker;
 import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -125,6 +129,24 @@ public class PlacesFragment extends Fragment {
 
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
 
+        try (BufferedReader br = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(
+                    new File(getActivity().getCacheDir(),
+                        GooglePlacesConstants.GOOGLE_PLACES_CACHE_FILE))))) {
+
+            Gson g = new GsonBuilder().create();
+            GooglePlacesState state = g.fromJson(br, GooglePlacesState.class);
+            places = state.getPlaces();
+            nextPageToken = state.getNextPageToken();
+            noMoreResults = state.isNoMoreResults();
+
+        } catch (FileNotFoundException e) {
+            // no cache, ok, it can happen
+        } catch (IOException e) {
+            lg.error("I/O error during reading cache file", e);
+        }
+
     }
 
     @Override
@@ -154,7 +176,10 @@ public class PlacesFragment extends Fragment {
             }
         });
         lg.debug("Fetching nearby places {}", location);
-        fetchNearbyPlacesAndPresent(location);
+
+        if (places == null || places.isEmpty()) {
+            fetchNearbyPlacesAndPresent(location);
+        }
 
     }
 
@@ -227,5 +252,26 @@ public class PlacesFragment extends Fragment {
         super.onDestroy();
 
         EventBus.getDefault().unregister(this);
+        GooglePlacesState state = new GooglePlacesState();
+        state.setPlaces(places);
+        state.setNextPageToken(nextPageToken);
+        state.setNoMoreResults(noMoreResults);
+
+        Gson g = new GsonBuilder().create();
+        try (BufferedWriter bw  = new BufferedWriter(
+            new OutputStreamWriter(
+                new FileOutputStream(
+                    new File(getActivity().getCacheDir(),
+                        GooglePlacesConstants.GOOGLE_PLACES_CACHE_FILE))))) {
+
+            g.toJson(state, bw);
+            bw.close();
+
+        } catch (FileNotFoundException e) {
+            lg.error("File not found error during saving a state", e);
+        } catch (IOException e) {
+            lg.error("I/O error during saving a state");
+        }
+
     }
 }

@@ -21,7 +21,8 @@ public class GooglePlacesScrollListener implements AbsListView.OnScrollListener 
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        if (firstVisibleItem + visibleItemCount >= totalItemCount) {
+        // avoiding scroll bottom events on empty listview
+        if (totalItemCount > 0 && firstVisibleItem + visibleItemCount >= totalItemCount) {
             // scrolled to the bottom, loading new page
             placesFragment.loadNextPage();
         }
