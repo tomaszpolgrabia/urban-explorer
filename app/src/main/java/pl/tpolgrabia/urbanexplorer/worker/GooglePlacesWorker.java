@@ -36,13 +36,9 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
 
     private static final Logger lg = LoggerFactory.getLogger(GooglePlacesWorker.class);
 
-    private final Context ctx;
     private final PlacesUtils placesUtils;
-    private final PlacesFragment placesFragment;
 
-    public GooglePlacesWorker(Context ctx, PlacesFragment placesFragment) {
-        this.ctx = ctx;
-        this.placesFragment = placesFragment;
+    public GooglePlacesWorker(Context ctx) {
         this.placesUtils = new PlacesUtils(ctx, AppConstants.GOOGLE_API_KEY);
     }
 
@@ -87,17 +83,9 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
     @Override
     protected void onPostExecute(List<GooglePlacesResponse> googlePlacesResponses) {
         lg.debug("Post execute {}", googlePlacesResponses);
-//        final View view = placesFragment.getView();
-//        if (view == null) {
-//            lg.error("Fragment not attached to the view");
-//            return;
-//        }
 
         for (GooglePlacesResponse response : googlePlacesResponses) {
-            // placesFragment.setNextPageToken(response.getNextPageToken());
-            // ListView places = (ListView) view.findViewById(R.id.google_places);
             EventBus.getDefault().post(response);
-            // places.setAdapter(new PlacesAdapter(ctx, response));
         }
     }
 }

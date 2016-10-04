@@ -193,7 +193,7 @@ public class PlacesFragment extends Fragment {
         request.setLocation(location);
         request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
         request.setSearchItemType(GooglePlacesConstants.PLACES_SEARCH_TYPE);
-        new GooglePlacesWorker(getActivity(), this).execute(request);
+        new GooglePlacesWorker(getActivity()).execute(request);
     }
 
     public void loadNextPage() {
@@ -216,7 +216,7 @@ public class PlacesFragment extends Fragment {
         request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
         request.setSearchItemType(GooglePlacesConstants.PLACES_SEARCH_TYPE);
         request.setPageToken(nextPageToken);
-        new GooglePlacesWorker(getActivity(), this).execute(request);
+        new GooglePlacesWorker(getActivity()).execute(request);
     }
 
     public void setNextPageToken(String nextPageToken) {
