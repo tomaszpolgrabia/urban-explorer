@@ -10,6 +10,9 @@ import java.util.List;
 public class GooglePlacesResponse {
     private List<GooglePlaceResult> places;
 
+    private String nextPageToken;
+    private String originalPageToken;
+
     public List<GooglePlaceResult> getPlaces() {
         return places;
     }
@@ -18,10 +21,28 @@ public class GooglePlacesResponse {
         this.places = places;
     }
 
+    public String getNextPageToken() {
+        return nextPageToken;
+    }
+
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
+    }
+
+    public void setOriginalPageToken(String originalPageToken) {
+        this.originalPageToken = originalPageToken;
+    }
+
+    public String getOriginalPageToken() {
+        return originalPageToken;
+    }
+
     @Override
     public String toString() {
         return "GooglePlacesResponse{" +
             "places=" + places +
+            ", nextPageToken='" + nextPageToken + '\'' +
+            ", originalPageToken='" + originalPageToken + '\'' +
             '}';
     }
 }

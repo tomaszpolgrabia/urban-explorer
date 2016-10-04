@@ -8,13 +8,15 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import org.apache.http.HttpStatus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.callback.LocationGeoCoderCallback;
-import pl.tpolgrabia.googleutils.callback.PlacesCallback;
+import pl.tpolgrabia.googleutils.constants.GooglePlacesConstants;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.googleutils.utils.PlacesUtils;
@@ -24,11 +26,15 @@ import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.PlacesAdapter;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesRequest;
+import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesResponse;
+import pl.tpolgrabia.urbanexplorer.handlers.GooglePlacesScrollListener;
 import pl.tpolgrabia.urbanexplorer.worker.GooglePlacesWorker;
 import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 
 /**
@@ -40,18 +46,31 @@ public class PlacesFragment extends Fragment {
     public static final String TAG = PlacesFragment.class.getSimpleName();
     private PlacesUtils placesUtils;
     private GeocoderUtils geocoderUtils;
-    private GooglePlacesWorker worker;
+    private String nextPageToken;
+    private List<GooglePlaceResult> places = new ArrayList<>();
+
+    private Semaphore semaphore = new Semaphore(1);
+    private boolean finished = false;
 
     public PlacesFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        EventBus.getDefault().register(this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View inflatedView = inflater.inflate(R.layout.fragment_places, container, false);
+
+        ListView placesWidget = (ListView) inflatedView.findViewById(R.id.google_places);
+        placesWidget.setOnScrollListener(new GooglePlacesScrollListener(this));
 
         return inflatedView;
     }
@@ -103,7 +122,6 @@ public class PlacesFragment extends Fragment {
             });
 
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
-        worker = new GooglePlacesWorker(getActivity(), this);
 
     }
 
@@ -139,30 +157,73 @@ public class PlacesFragment extends Fragment {
     }
 
     private void fetchNearbyPlacesAndPresemt(Location location) {
+        if (!semaphore.tryAcquire()) {
+            // running
+            return;
+        }
+
         GooglePlacesRequest request = new GooglePlacesRequest();
         request.setLocation(location);
         request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
-        request.setSearchItemType("museum");
-        worker.execute(request);
+        request.setSearchItemType(GooglePlacesConstants.PLACES_SEARCH_TYPE);
+        new GooglePlacesWorker(getActivity(), this).execute(request);
+    }
 
-//        placesUtils.fetchNearbyPlaces(
-//            location.getLatitude(),
-//            location.getLongitude(),
-//            AppConstants.DEF_PLACES_RADIUS,
-//            "museum",
-//            null,
-//            new PlacesCallback() {
-//                @Override
-//                public void callback(Long statusCode, String statusMsg, List<GooglePlaceResult> googlePlaceResult) {
-//                    lg.debug("Fetch nearby statusCode: {}, status message: {}, google result: {}",
-//                        statusCode,
-//                        statusMsg,
-//                        googlePlaceResult);
-//
-//                    ListView googlePlacesWidget = (ListView) getView().findViewById(R.id.google_places);
-//                    PlacesAdapter adapter = new PlacesAdapter(getActivity(), googlePlaceResult);
-//                    googlePlacesWidget.setAdapter(adapter);
-//                }
-//            });
+    public void loadNextPage() {
+
+        if (!semaphore.tryAcquire()) {
+            // running
+            return;
+        }
+
+        if (finished) {
+            semaphore.release();
+            return;
+        }
+
+        lg.debug("Loading next page");
+
+        Location location = LocationUtils.getLastKnownLocation(getActivity());
+        GooglePlacesRequest request = new GooglePlacesRequest();
+        request.setLocation(location);
+        request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
+        request.setSearchItemType(GooglePlacesConstants.PLACES_SEARCH_TYPE);
+        request.setPageToken(nextPageToken);
+        new GooglePlacesWorker(getActivity(), this).execute(request);
+    }
+
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
+    }
+
+    @Subscribe
+    public void handleGooglePlacesResult(GooglePlacesResponse response) {
+        lg.debug("Handling google places results with original {} and next page token {}",
+            response.getOriginalPageToken(),
+            response.getNextPageToken());
+
+        ListView placesWidget = (ListView) getView().findViewById(R.id.google_places);
+        if (nextPageToken == null) {
+            places = response.getPlaces();
+            PlacesAdapter adapter = new PlacesAdapter(getActivity(), places);
+            placesWidget.setAdapter(adapter);
+        } else {
+            places.addAll(response.getPlaces());
+            PlacesAdapter adapter = (PlacesAdapter)placesWidget.getAdapter();
+            adapter.addAll(places);
+        }
+
+        nextPageToken = response.getNextPageToken();
+        if (nextPageToken == null) {
+            finished = true;
+        }
+        semaphore.release();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        EventBus.getDefault().unregister(this);
     }
 }

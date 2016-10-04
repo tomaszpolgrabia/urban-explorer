@@ -1,6 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.adapters;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +23,9 @@ import java.util.List;
  */
 public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
 
-    private final GooglePlacesResponse objects;
 
-    public PlacesAdapter(Context context, GooglePlacesResponse objects) {
-        super(context, R.layout.google_place_item, objects.getPlaces());
-        this.objects = objects;
+    public PlacesAdapter(Context context, List<GooglePlaceResult> objects) {
+        super(context, R.layout.google_place_item, objects);
     }
 
     @Override
@@ -40,6 +39,10 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         }
 
         GooglePlaceResult item = getItem(position);
+        if (item.getId().equals(resultView.getTag())) {
+            return resultView;
+        }
+
         final List<GooglePlacePhoto> photos = item.getPhotos();
         String photoRef = photos != null && !photos.isEmpty() ? photos.get(0).getPhotoReference() : null;
         String photoUrl = photoRef == null ? null : "https://maps.googleapis.com/maps/api/place/photo?photoreference="
@@ -55,11 +58,15 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         placeRateWidget.setText("" + item.getRating());
 
         ImageView placePreviewWidget = (ImageView)resultView.findViewById(R.id.place_img_preview);
+        placePreviewWidget.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
+
 
         ImageLoader.getInstance().displayImage(
             photoUrl != null ? photoUrl : item.getIcon(),
             placePreviewWidget,
             MainActivity.options);
+
+        resultView.setTag(item.getId());
 
         return resultView;
     }

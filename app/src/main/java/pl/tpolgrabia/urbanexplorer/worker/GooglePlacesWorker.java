@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ListView;
 import org.apache.http.HttpStatus;
+import org.greenrobot.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.callback.PlacesCallback;
@@ -53,6 +54,7 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
 
         for (final GooglePlacesRequest param : params) {
             lg.debug("Excuting param {}", param);
+            lg.debug("Fetching page with token {}", param.getPageToken());
             Location location = param.getLocation();
 
             Response<GooglePlaceResponse> placesResponse = null;
@@ -67,6 +69,8 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
                 if (placesResponse != null && placesResponse.code() == HttpStatus.SC_OK) {
                     GooglePlacesResponse response = new GooglePlacesResponse();
                     response.setPlaces(placesResponse.body().getResults());
+                    response.setNextPageToken(placesResponse.body().getNextPageToken());
+                    response.setOriginalPageToken(param.getPageToken());
                     result.add(response);
                 }
 
@@ -83,15 +87,17 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
     @Override
     protected void onPostExecute(List<GooglePlacesResponse> googlePlacesResponses) {
         lg.debug("Post execute {}", googlePlacesResponses);
-        final View view = placesFragment.getView();
-        if (view == null) {
-            lg.error("Fragment not attached to the view");
-            return;
-        }
+//        final View view = placesFragment.getView();
+//        if (view == null) {
+//            lg.error("Fragment not attached to the view");
+//            return;
+//        }
 
         for (GooglePlacesResponse response : googlePlacesResponses) {
-            ListView places = (ListView) view.findViewById(R.id.google_places);
-            places.setAdapter(new PlacesAdapter(ctx, response));
+            // placesFragment.setNextPageToken(response.getNextPageToken());
+            // ListView places = (ListView) view.findViewById(R.id.google_places);
+            EventBus.getDefault().post(response);
+            // places.setAdapter(new PlacesAdapter(ctx, response));
         }
     }
 }
