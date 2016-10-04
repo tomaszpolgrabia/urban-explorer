@@ -60,11 +60,12 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         ImageView placePreviewWidget = (ImageView)resultView.findViewById(R.id.place_img_preview);
         placePreviewWidget.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
 
-
-        ImageLoader.getInstance().displayImage(
-            photoUrl != null ? photoUrl : item.getIcon(),
-            placePreviewWidget,
-            MainActivity.options);
+        if (photoUrl != null ) {
+            ImageLoader.getInstance().displayImage(
+                photoUrl,
+                placePreviewWidget,
+                MainActivity.options);
+        }
 
         resultView.setTag(item.getId());
 
