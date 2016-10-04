@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import org.greenrobot.eventbus.EventBus;
@@ -50,7 +49,7 @@ public class PlacesFragment extends Fragment {
     private List<GooglePlaceResult> places = new ArrayList<>();
 
     private Semaphore semaphore = new Semaphore(1);
-    private boolean finished = false;
+    private boolean noMoreResults = false;
 
     public PlacesFragment() {
         // Required empty public constructor
@@ -91,7 +90,10 @@ public class PlacesFragment extends Fragment {
                         return;
                     }
 
-                    fetchNearbyPlacesAndPresemt(location);
+                    places = null;
+                    nextPageToken = null;
+                    noMoreResults = false;
+                    fetchNearbyPlacesAndPresent(location);
 
                 }
             });
@@ -116,7 +118,7 @@ public class PlacesFragment extends Fragment {
                         return;
                     }
 
-                    fetchNearbyPlacesAndPresemt(location);
+                    fetchNearbyPlacesAndPresent(location);
 
                 }
             });
@@ -152,11 +154,11 @@ public class PlacesFragment extends Fragment {
             }
         });
         lg.debug("Fetching nearby places {}", location);
-        fetchNearbyPlacesAndPresemt(location);
+        fetchNearbyPlacesAndPresent(location);
 
     }
 
-    private void fetchNearbyPlacesAndPresemt(Location location) {
+    private void fetchNearbyPlacesAndPresent(Location location) {
         if (!semaphore.tryAcquire()) {
             // running
             return;
@@ -176,7 +178,7 @@ public class PlacesFragment extends Fragment {
             return;
         }
 
-        if (finished) {
+        if (noMoreResults) {
             semaphore.release();
             return;
         }
@@ -215,7 +217,7 @@ public class PlacesFragment extends Fragment {
 
         nextPageToken = response.getNextPageToken();
         if (nextPageToken == null) {
-            finished = true;
+            noMoreResults = true;
         }
         semaphore.release();
     }

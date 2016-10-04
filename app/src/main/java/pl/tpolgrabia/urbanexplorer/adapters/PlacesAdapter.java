@@ -14,7 +14,6 @@ import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesResponse;
 
 import java.util.List;
 
