@@ -2,7 +2,9 @@ package pl.tpolgrabia.googleutils.utils;
 
 import android.content.Context;
 import com.androidquery.AQuery;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +52,8 @@ public class PlacesUtils {
             throw new IllegalArgumentException("Search radius cannot be null");
         }
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        // set your desired log level
-        logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // httpClient.addInterceptor(new RetrofitDebugInterceptor());
 
         Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(GooglePlacesConstants.GOOGLE_MAPS_PLACES_API_BASEURL)
@@ -72,5 +72,24 @@ public class PlacesUtils {
             searchRadius,
             searchItemType).execute();
 
+    }
+
+    private static class RetrofitDebugInterceptor implements Interceptor {
+        @Override
+        public okhttp3.Response intercept(Chain chain) throws IOException {
+            final Request req = chain.request();
+            okhttp3.Response response = chain.proceed(req);
+            boolean successFull = response.isSuccessful();
+            int code = response.code();
+            String message = response.message();
+            String msg = response.body().string();
+            lg.debug("Got response. Is successfull: {}, code: {}, message: {}, msg: {}",
+                successFull,
+                code,
+                message,
+                msg);
+            // now we repeat once again (because we have used the stream)
+            return chain.proceed(chain.request());
+        }
     }
 }
