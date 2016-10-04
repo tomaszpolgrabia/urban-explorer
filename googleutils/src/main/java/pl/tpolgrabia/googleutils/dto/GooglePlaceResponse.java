@@ -13,6 +13,7 @@ public class GooglePlaceResponse {
     @SerializedName("next_page_token")
     private String nextPageToken;
     private List<GooglePlaceResult> results;
+    private String status;
 
     public List<String> getHtmlAttributions() {
         return htmlAttributions;
@@ -38,12 +39,21 @@ public class GooglePlaceResponse {
         this.results = results;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "GooglePlaceResponse{" +
             "htmlAttributions=" + htmlAttributions +
             ", nextPageToken='" + nextPageToken + '\'' +
-            ", results='" + results + '\'' +
+            ", results=" + results +
+            ", status='" + status + '\'' +
             '}';
     }
 }
