@@ -27,6 +27,7 @@ import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorer.utils.HelperUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
+import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
 
@@ -179,9 +180,7 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
 
-        Refreshable refreshable = (Refreshable) fragment;
-        refreshable.refresh();
-
+        EventBus.getDefault().post(new RefreshEvent(this));
     }
 
     public void resetPhotoInfo() {

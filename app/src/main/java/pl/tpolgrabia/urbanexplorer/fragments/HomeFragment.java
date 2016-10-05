@@ -236,8 +236,6 @@ public class HomeFragment extends Fragment  {
             return;
         }
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-
         final Location location = LocationUtils.getLastKnownLocation(activity);
         if (location == null) {
             lg.info("Location is still not available");
