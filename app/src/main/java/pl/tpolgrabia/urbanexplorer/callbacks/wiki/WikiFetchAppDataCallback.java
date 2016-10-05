@@ -4,9 +4,11 @@ import android.support.v4.app.FragmentActivity;
 import android.widget.ListView;
 import android.widget.Toast;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
+import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.wikibinding.callback.WikiStatus;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
@@ -57,4 +59,5 @@ public class WikiFetchAppDataCallback implements WikiAppResponseCallback {
 
         EventBus.getDefault().post(new DataLoadingFinishEvent(this));
     }
+
 }

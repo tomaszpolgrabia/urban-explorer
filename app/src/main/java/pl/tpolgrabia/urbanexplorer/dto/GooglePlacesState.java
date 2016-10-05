@@ -12,6 +12,7 @@ public class GooglePlacesState {
     private List<GooglePlaceResult> places;
     private String nextPageToken;
     private boolean noMoreResults;
+    private Long pageId;
 
     public void setPlaces(List<GooglePlaceResult> places) {
         this.places = places;
@@ -37,12 +38,21 @@ public class GooglePlacesState {
         return noMoreResults;
     }
 
+    public void setPageId(Long pageId) {
+        this.pageId = pageId;
+    }
+
+    public Long getPageId() {
+        return pageId;
+    }
+
     @Override
     public String toString() {
         return "GooglePlacesState{" +
             "places=" + places +
             ", nextPageToken='" + nextPageToken + '\'' +
             ", noMoreResults=" + noMoreResults +
+            ", pageId=" + pageId +
             '}';
     }
 }
