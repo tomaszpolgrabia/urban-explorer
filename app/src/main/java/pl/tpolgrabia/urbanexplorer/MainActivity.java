@@ -354,6 +354,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case AppConstants.SETTINGS_ID_INTENT_REQUEST_ID:
                 NetUtils.setGlobalProxyAuth(this);
+                refreshFragment();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
