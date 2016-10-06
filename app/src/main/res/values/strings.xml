@@ -54,4 +54,235 @@
     <string name="upload_date_label">Upload date:</string>
     <string name="location_label">Location:</string>
     <string name="panoramio_url">Panoramio url:</string>
+
+    <string-array name="google_places_categories">
+        <item>accounting</item>
+        <item>airport</item>
+        <item>amusement_park</item>
+        <item>aquarium</item>
+        <item>art_gallery</item>
+        <item>atm</item>
+        <item>bakery</item>
+        <item>bank</item>
+        <item>bar</item>
+        <item>beauty_salon</item>
+        <item>bicycle_store</item>
+        <item>book_store</item>
+        <item>bowling_alley</item>
+        <item>bus_station</item>
+        <item>cafe</item>
+        <item>campground</item>
+        <item>car_dealer</item>
+        <item>car_rental</item>
+        <item>car_repair</item>
+        <item>car_wash</item>
+        <item>casino</item>
+        <item>cemetery</item>
+        <item>church</item>
+        <item>city_hall</item>
+        <item>clothing_store</item>
+        <item>convenience_store</item>
+        <item>courthouse</item>
+        <item>dentist</item>
+        <item>department_store</item>
+        <item>doctor</item>
+        <item>electrician</item>
+        <item>electronics_store</item>
+        <item>embassy</item>
+        <item>fire_station</item>
+        <item>florist</item>
+        <item>funeral_home</item>
+        <item>furniture_store</item>
+        <item>gas_station</item>
+        <item>gym</item>
+        <item>hair_care</item>
+        <item>hardware_store</item>
+        <item>hindu_temple</item>
+        <item>home_goods_store</item>
+        <item>hospital</item>
+        <item>insurance_agency</item>
+        <item>jewelry_store</item>
+        <item>laundry</item>
+        <item>lawyer</item>
+        <item>library</item>
+        <item>liquor_store</item>
+        <item>local_government_office</item>
+        <item>locksmith</item>
+        <item>lodging</item>
+        <item>meal_delivery</item>
+        <item>meal_takeaway</item>
+        <item>mosque</item>
+        <item>movie_rental</item>
+        <item>movie_theater</item>
+        <item>moving_company</item>
+        <item>museum</item>
+        <item>night_club</item>
+        <item>painter</item>
+        <item>park</item>
+        <item>parking</item>
+        <item>pet_store</item>
+        <item>pharmacy</item>
+        <item>physiotherapist</item>
+        <item>plumber</item>
+        <item>police</item>
+        <item>post_office</item>
+        <item>real_estate_agency</item>
+        <item>restaurant</item>
+        <item>roofing_contractor</item>
+        <item>rv_park</item>
+        <item>school</item>
+        <item>shoe_store</item>
+        <item>shopping_mall</item>
+        <item>spa</item>
+        <item>stadium</item>
+        <item>storage</item>
+        <item>store</item>
+        <item>subway_station</item>
+        <item>synagogue</item>
+        <item>taxi_stand</item>
+        <item>train_station</item>
+        <item>transit_station</item>
+        <item>travel_agency</item>
+        <item>university</item>
+        <item>veterinary_care</item>
+        <item>zoo</item>
+    </string-array>
+
+    <string-array name="def_google_places_categories">
+        <item>airport</item>
+        <item>amusement_park</item>
+        <item>aquarium</item>
+        <item>art_gallery</item>
+        <item>bar</item>
+        <item>beauty_salon</item>
+        <item>bowling_alley</item>
+        <item>cafe</item>
+        <item>campground</item>
+        <item>casino</item>
+        <item>cemetery</item>
+        <item>church</item>
+        <item>city_hall</item>
+        <item>clothing_store</item>
+        <item>department_store</item>
+        <item>embassy</item>
+        <item>gym</item>
+        <item>hair_care</item>
+        <item>hindu_temple</item>
+        <item>jewelry_store</item>
+        <item>liquor_store</item>
+        <item>meal_delivery</item>
+        <item>meal_takeaway</item>
+        <item>mosque</item>
+        <item>museum</item>
+        <item>night_club</item>
+        <item>park</item>
+        <item>restaurant</item>
+        <item>rv_park</item>
+        <item>shoe_store</item>
+        <item>shopping_mall</item>
+        <item>spa</item>
+        <item>stadium</item>
+        <item>store</item>
+        <item>subway_station</item>
+        <item>synagogue</item>
+        <item>taxi_stand</item>
+        <item>train_station</item>
+        <item>transit_station</item>
+        <item>travel_agency</item>
+        <item>university</item>
+        <item>zoo</item>
+    </string-array>
+
+    <string-array name="google_places_category_labels">
+        <item>Accounting</item>
+        <item>Airport</item>
+        <item>Amusement park</item>
+        <item>Aquarium</item>
+        <item>Art gallery</item>
+        <item>ATM</item>
+        <item>Bakery</item>
+        <item>Bank</item>
+        <item>Bar</item>
+        <item>Beauty salon</item>
+        <item>Bicycle store</item>
+        <item>Book store</item>
+        <item>Bowling alley</item>
+        <item>Bus station</item>
+        <item>Cafe</item>
+        <item>Campground</item>
+        <item>Car dealer</item>
+        <item>Car rental</item>
+        <item>Car repair</item>
+        <item>Car wash</item>
+        <item>Casino</item>
+        <item>Cemetery</item>
+        <item>Church</item>
+        <item>City hall</item>
+        <item>Clothing store</item>
+        <item>Convenience store</item>
+        <item>Courthouse</item>
+        <item>Dentist</item>
+        <item>Department store</item>
+        <item>Doctor</item>
+        <item>Electrician</item>
+        <item>Electronics store</item>
+        <item>Embassy</item>
+        <item>Fire station</item>
+        <item>Florist</item>
+        <item>Funeral home</item>
+        <item>Furniture store</item>
+        <item>Gas station</item>
+        <item>Gym</item>
+        <item>Hair care</item>
+        <item>Hardware store</item>
+        <item>Hindu temple</item>
+        <item>Home goods store</item>
+        <item>Hospital</item>
+        <item>Insurance agency</item>
+        <item>Jewelry store</item>
+        <item>Laundry</item>
+        <item>Lawyer</item>
+        <item>Library</item>
+        <item>Liquor store</item>
+        <item>Local government office</item>
+        <item>Locksmith</item>
+        <item>Lodging</item>
+        <item>Meal delivery</item>
+        <item>Meal takeaway</item>
+        <item>Mosque</item>
+        <item>Movie rental</item>
+        <item>Movie theater</item>
+        <item>Moving company</item>
+        <item>Museum</item>
+        <item>Night club</item>
+        <item>Painter</item>
+        <item>Park</item>
+        <item>Parking</item>
+        <item>Pet store</item>
+        <item>Pharmacy</item>
+        <item>Physiotherapist</item>
+        <item>Plumber</item>
+        <item>Police</item>
+        <item>Post office</item>
+        <item>Real estate agency</item>
+        <item>Restaurant</item>
+        <item>Roofing contractor</item>
+        <item>Rv park</item>
+        <item>School</item>
+        <item>Shoe store</item>
+        <item>Shopping mall</item>
+        <item>SPA</item>
+        <item>Stadium</item>
+        <item>Storage</item>
+        <item>Store</item>
+        <item>Subway station</item>
+        <item>Synagogue</item>
+        <item>Taxi stand</item>
+        <item>Train station</item>
+        <item>Transit station</item>
+        <item>Travel agency</item>
+        <item>University</item>
+        <item>Veterinary care</item>
+        <item>Zoo</item>
+    </string-array>
 </resources>

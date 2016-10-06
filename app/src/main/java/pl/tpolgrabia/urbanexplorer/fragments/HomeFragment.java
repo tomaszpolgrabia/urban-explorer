@@ -229,6 +229,7 @@ public class HomeFragment extends Fragment  {
 
     @Subscribe
     public void refresh(RefreshEvent refreshEvent) {
+        lg.debug("Refreshing event...");
         lg.trace("Fetch panoramio photos");
         final FragmentActivity activity = getActivity();
         if (activity == null) {

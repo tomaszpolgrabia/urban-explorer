@@ -14,13 +14,11 @@ public class AppConstants {
     public static final String PREF_GPS_UPDATE_FREQ = "pref_gps_update_freq";
     public static final String PREF_GPS_DISTANCE_FREQ = "pref_gps_distance_freq";
     public static final String PHOTO_BACKSTACK = "PHOTO_BACKSTACK";
-    static final int HOME_FRAGMENT_ID = 0;
-    static final int WIKI_FRAGMENT_ID = 1;
     static final String FRAG_ID = "FRAG_ID";
     static final int SETTINGS_ID_INTENT_REQUEST_ID = 2;
     static final String PHOTO_INFO = "PHOTO_INFO";
     static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static final String GOOGLE_API_KEY = "AIzaSyBAJoK-pu_qnQ0U8EGjM1Zkz_g8oJV4w2g";
     public static final String DEF_WIKI_COUNTRY_CODE = "en";
-    public static final Double DEF_PLACES_RADIUS = 10000.0;
+    public static final Double DEF_PLACES_RADIUS = 5000.0;
 }

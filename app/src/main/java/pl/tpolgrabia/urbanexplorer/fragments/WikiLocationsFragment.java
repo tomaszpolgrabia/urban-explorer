@@ -161,6 +161,7 @@ public class WikiLocationsFragment extends Fragment {
 
     @Subscribe
     public void refresh(RefreshEvent event) {
+        lg.debug("Refreshing event...");
         appObjects.clear();
         fetchWikiLocations();
     }

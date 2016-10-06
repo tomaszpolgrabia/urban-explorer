@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.greenrobot.eventbus.EventBus;
@@ -95,6 +96,11 @@ public class PlacesFragment extends Fragment {
                     if (location == null) {
                         return;
                     }
+
+                    Toast.makeText(getActivity(),
+                        String.format("Location changed: %.3f,%.3f",
+                            location.getLatitude(), location.getLongitude()),
+                        Toast.LENGTH_SHORT).show();
 
                     places = null;
                     nextPageToken = null;
@@ -208,8 +214,13 @@ public class PlacesFragment extends Fragment {
     private void fetchNearbyPlacesAndPresent(Location location) {
         if (!semaphore.tryAcquire()) {
             // running
+            lg.debug("Active fetching nearby, quitting...");
             return;
         }
+        Toast.makeText(getActivity(),
+            String.format("Fetching nearby places %.3f,%.3f", location.getLatitude(), location.getLongitude()),
+            Toast.LENGTH_SHORT).show();
+
 
         GooglePlacesRequest request = new GooglePlacesRequest();
         request.setLocation(location);
@@ -222,10 +233,12 @@ public class PlacesFragment extends Fragment {
 
         if (!semaphore.tryAcquire()) {
             // running
+            lg.debug("Active fetching nearby, quitting...");
             return;
         }
 
         if (noMoreResults) {
+            lg.debug("There is no results, quitting...");
             semaphore.release();
             return;
         }
@@ -311,6 +324,9 @@ public class PlacesFragment extends Fragment {
 
     @Subscribe
     public void refresh(RefreshEvent event) {
+        lg.debug("Refreshing event...");
+        Toast.makeText(getActivity(), "Refreshing event google places", Toast.LENGTH_SHORT).show();
+        pageId = 0L;
         places = null;
         nextPageToken = null;
         noMoreResults = false;

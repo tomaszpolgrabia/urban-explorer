@@ -70,6 +70,30 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="Google places search settings"
+            android:key="pref_gplaces_settings">
+
+        <EditTextPreference
+                android:key="pref_gplaces_radius"
+                android:title="Google places search radius"
+                android:summary="Google places search radius in kilometer"
+                android:defaultValue="10.0"
+                android:inputType="numberDecimal" />
+
+        <MultiSelectListPreference
+                android:key="pref_gplaces_categories"
+                android:defaultValue="@array/def_google_places_categories"
+                android:title="Google places categories"
+                android:summary="Categories of places which are included in the search results"
+                android:entries="@array/google_places_category_labels"
+                android:entryValues="@array/google_places_categories">
+
+        </MultiSelectListPreference>
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/network_proxy_settings"
             android:key="pref_proxy_settings">
 
