@@ -20,4 +20,8 @@ public class UtilConstants {
 
     public static final String PANORAMIO_BULK_SIZE_KEY = "pref_panoramio_bulk_size";
     public static final int PANORAMIO_BULK_SIZE_DEF_VALUE = 50;
+    public static final double GOOGLE_PLACES_STD_UNIT = 1000.0;
+    public static final String PREF_GOOGLE_PLACES_RADIUS = "pref_gplaces_radius";
+    public static final Double DEF_PLACES_RADIUS = 5000.0;
+    public static final String GOOGLE_PLACES_CATEGORIES_PREF = "pref_gplaces_categories";
 }

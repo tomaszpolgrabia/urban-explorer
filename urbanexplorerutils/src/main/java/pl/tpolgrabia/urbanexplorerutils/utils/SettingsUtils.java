@@ -3,9 +3,12 @@ package pl.tpolgrabia.urbanexplorerutils.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorerutils.constants.UtilConstants;
+
+import java.util.HashSet;
 
 /**
  * Created by tpolgrabia on 24.09.16.
@@ -59,5 +62,22 @@ public class SettingsUtils {
         final String prefWikiResultsLimit = sharedPreferences.getString("pref_wiki_limit", String.valueOf(WIKI_DEF_LIMIT));
         lg.debug("Pref wiki search results limit {}", prefWikiResultsLimit);
         return NumberUtils.safeParseLong(prefWikiResultsLimit);
+    }
+
+    public static Double getDefaultPlacesSearchRadius(Context ctx) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        try {
+            return Double.parseDouble(sharedPrefs.getString(UtilConstants.PREF_GOOGLE_PLACES_RADIUS,
+                UtilConstants.DEF_PLACES_RADIUS.toString())) * UtilConstants.GOOGLE_PLACES_STD_UNIT;
+        } catch (NumberFormatException e) {
+            lg.error("Invalid settings for google places search radius", e);
+            return UtilConstants.DEF_PLACES_RADIUS;
+        }
+    }
+
+    public static String getPlacesSearchCategories(Context ctx) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return StringUtils.join("|",
+            sharedPrefs.getStringSet(UtilConstants.GOOGLE_PLACES_CATEGORIES_PREF, new HashSet<String>()));
     }
 }

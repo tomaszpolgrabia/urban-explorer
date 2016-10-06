@@ -35,6 +35,7 @@ import pl.tpolgrabia.urbanexplorer.worker.GooglePlacesWorker;
 import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -224,8 +225,8 @@ public class PlacesFragment extends Fragment {
 
         GooglePlacesRequest request = new GooglePlacesRequest();
         request.setLocation(location);
-        request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
-        request.setSearchItemType(GooglePlacesConstants.PLACES_SEARCH_TYPE);
+        request.setSearchRadius(SettingsUtils.getDefaultPlacesSearchRadius(getActivity()));
+        request.setSearchItemType(SettingsUtils.getPlacesSearchCategories(getActivity()));
         new GooglePlacesWorker(getActivity()).execute(request);
     }
 
@@ -243,13 +244,18 @@ public class PlacesFragment extends Fragment {
             return;
         }
 
+        if (getActivity() == null) {
+            lg.debug("Headless fragment, no activity - no context");
+            return;
+        }
+
         lg.debug("Loading next page");
 
         Location location = LocationUtils.getLastKnownLocation(getActivity());
         GooglePlacesRequest request = new GooglePlacesRequest();
         request.setLocation(location);
-        request.setSearchRadius(AppConstants.DEF_PLACES_RADIUS);
-        request.setSearchItemType(GooglePlacesConstants.PLACES_SEARCH_TYPE);
+        request.setSearchRadius(SettingsUtils.getDefaultPlacesSearchRadius(getActivity()));
+        request.setSearchItemType(SettingsUtils.getPlacesSearchCategories(getActivity()));
         request.setPageToken(nextPageToken);
         new GooglePlacesWorker(getActivity()).execute(request);
     }
