@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import org.apache.commons.lang3.StringUtils;
 import pl.tpolgrabia.googleutils.dto.GooglePlacePhoto;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -52,6 +53,9 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
 
         TextView placeAddressWidget = (TextView) resultView.findViewById(R.id.place_address);
         placeAddressWidget.setText(item.getVicinity());
+
+        TextView placeType = (TextView) resultView.findViewById(R.id.place_type);
+        placeType.setText(item.getTypes() != null ? StringUtils.join(item.getTypes(), ",") : "N/A");
 
         TextView placeRateWidget = (TextView) resultView.findViewById(R.id.place_rate);
         if (item.getRating() != null && !item.getRating().equals(Double.NaN)) {

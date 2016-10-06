@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorerutils.constants.UtilConstants;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -77,7 +78,8 @@ public class SettingsUtils {
 
     public static String getPlacesSearchCategories(Context ctx) {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return StringUtils.join("|",
-            sharedPrefs.getStringSet(UtilConstants.GOOGLE_PLACES_CATEGORIES_PREF, new HashSet<String>()));
+        return StringUtils.join(sharedPrefs.getStringSet(
+            UtilConstants.GOOGLE_PLACES_CATEGORIES_PREF, new HashSet<String>()),
+            "|");
     }
 }
