@@ -5,16 +5,14 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
-import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
+import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.wikibinding.callback.WikiAppResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiStatus;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
-import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
-import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
-import pl.tpolgrabia.wikibinding.callback.WikiAppResponseCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +51,7 @@ public class WikiFetchAppDataCallback implements WikiAppResponseCallback {
         }
 
         ListView locations = (ListView) view.findViewById(R.id.wiki_places);
-        locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(wikiLocationsFragment, nobjects));
+        locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(wikiLocationsFragment));
         locations.setAdapter(new WikiLocationsAdapter(activity, objects));
         if (objects.isEmpty()) {
             Toast.makeText(wikiLocationsFragment.getActivity(), "No results", Toast.LENGTH_SHORT).show();

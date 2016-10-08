@@ -1,5 +1,6 @@
 package pl.tpolgrabia.urbanexplorer.callbacks.wiki;
 
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
@@ -15,17 +16,16 @@ import java.util.List;
 public class FetchWikiLocationsCallback implements AdapterView.OnItemLongClickListener {
     private final WikiUtils wikiUtils;
     private WikiLocationsFragment wikiLocationsFragment;
-    private final List<WikiAppObject> appObjects;
 
-    public FetchWikiLocationsCallback(WikiLocationsFragment wikiLocationsFragment, List<WikiAppObject> appObjects) {
+    public FetchWikiLocationsCallback(WikiLocationsFragment wikiLocationsFragment) {
         this.wikiLocationsFragment = wikiLocationsFragment;
-        this.wikiUtils = new WikiUtils(wikiLocationsFragment.getActivity(), AppConstants.DEF_WIKI_COUNTRY_CODE);
-        this.appObjects = appObjects;
+        final FragmentActivity activity = wikiLocationsFragment.getActivity();
+        this.wikiUtils = new WikiUtils(activity, wikiLocationsFragment.getWikiLocale(activity));
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-        final WikiAppObject item = appObjects.get(position);
+        final WikiAppObject item = wikiLocationsFragment.getAppObjects().get(position);
         wikiUtils.fetchSingleWikiInfoItemAndRunWikiPage(
             wikiLocationsFragment.getActivity(),
             item.getPageId(),

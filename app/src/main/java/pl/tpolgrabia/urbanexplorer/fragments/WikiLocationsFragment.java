@@ -74,6 +74,8 @@ public class WikiLocationsFragment extends Fragment {
     private void refreshSettings() {
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
         wikiUtils = new WikiUtils(getActivity(), getWikiLocale(getActivity()));
+        ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
+        locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(this));
     }
 
     @Override
@@ -94,7 +96,7 @@ public class WikiLocationsFragment extends Fragment {
         EventBus.getDefault().register(providerHandler);
 
         ListView locations = (ListView) inflatedView.findViewById(R.id.wiki_places);
-        locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
+        locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(this));
         locations.setAdapter(new WikiLocationsAdapter(getActivity(), appObjects));
 
         return inflatedView;
@@ -202,5 +204,9 @@ public class WikiLocationsFragment extends Fragment {
     public void handleRefreshSettings(RefreshSettingsEvent event) {
         lg.debug("Refreshing settings {}", event);
         refreshSettings();
+    }
+
+    public ArrayList<WikiAppObject> getAppObjects() {
+        return appObjects;
     }
 }
