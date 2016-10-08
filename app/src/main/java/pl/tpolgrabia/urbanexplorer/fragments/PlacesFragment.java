@@ -1,16 +1,13 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
-import android.content.Intent;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,11 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.callback.LocationGeoCoderCallback;
 import pl.tpolgrabia.googleutils.constants.GooglePlacesConstants;
-import pl.tpolgrabia.googleutils.dto.GooglePlacePhoto;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.googleutils.utils.PlacesUtils;
-import pl.tpolgrabia.panoramiobindings.callback.ProviderStatusCallback;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
@@ -34,9 +29,10 @@ import pl.tpolgrabia.urbanexplorer.adapters.PlacesAdapter;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesRequest;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesResponse;
 import pl.tpolgrabia.urbanexplorer.dto.GooglePlacesState;
+import pl.tpolgrabia.urbanexplorer.events.LocationChangedEvent;
+import pl.tpolgrabia.urbanexplorer.handlers.GooglePlacesLongClickItemHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.GooglePlacesScrollListener;
 import pl.tpolgrabia.urbanexplorer.worker.GooglePlacesWorker;
-import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
@@ -45,7 +41,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
@@ -64,7 +59,6 @@ public class PlacesFragment extends Fragment {
 
     private Semaphore semaphore = new Semaphore(1);
     private boolean noMoreResults = false;
-    private final Pattern pattern = Pattern.compile(".*href=\"(.*)\".*");
 
     public PlacesFragment() {
         // Required empty public constructor
@@ -84,34 +78,7 @@ public class PlacesFragment extends Fragment {
         final View inflatedView = inflater.inflate(R.layout.fragment_places, container, false);
 
         final ListView placesWidget = (ListView) inflatedView.findViewById(R.id.google_places);
-        placesWidget.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                GooglePlaceResult item = (GooglePlaceResult) placesWidget.getAdapter().getItem(position);
-                if (item.getPhotos() != null && !item.getPhotos().isEmpty()) {
-                    GooglePlacePhoto alink = item.getPhotos().get(0);
-                    lg.debug("Photo link: {}", alink);
-                    final List<String> htmlAttributions = alink.getHtmlAttributions();
-                    lg.debug("Html attributions: {}", htmlAttributions);
-                    if (htmlAttributions != null && !htmlAttributions.isEmpty()) {
-                        String attribute = htmlAttributions.get(0);
-                        lg.debug("Attribute {}", attribute);
-                        Matcher matcher = pattern.matcher(attribute);
-                        boolean found = matcher.find();
-                        if (found) {
-                            String link = matcher.group(1);
-                            lg.debug("Link: {}", link);
-                            Uri uri = Uri.parse(link);
-                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                            getActivity().startActivity(intent);
-                        } else {
-                            lg.warn("Not expected link url html attribute expression {}", attribute);
-                        }
-                    }
-                }
-                return false;
-            }
-        });
+        placesWidget.setOnItemLongClickListener(new GooglePlacesLongClickItemHandler(this, placesWidget));
         placesWidget.setOnScrollListener(new GooglePlacesScrollListener(this));
 
         return inflatedView;
@@ -123,54 +90,6 @@ public class PlacesFragment extends Fragment {
         placesUtils = new PlacesUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
 
         MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.getLocationCallback()
-            .addCallback(new StandardLocationListenerCallback() {
-                @Override
-                public void callback(Location location) {
-                    lg.debug("Location changed: {}", location);
-
-                    if (location == null) {
-                        return;
-                    }
-
-                    Toast.makeText(getActivity(),
-                        String.format("Location changed: %.3f,%.3f",
-                            location.getLatitude(), location.getLongitude()),
-                        Toast.LENGTH_SHORT).show();
-
-                    places = null;
-                    nextPageToken = null;
-                    noMoreResults = false;
-                    pageId = 0L;
-                    fetchNearbyPlacesAndPresent(location);
-
-                }
-            });
-
-        mainActivity.getLocationCallback()
-            .addProviderCallback(new ProviderStatusCallback() {
-                @Override
-                public void callback(String provider, boolean enabled) {
-
-                    lg.debug("Provider {} has changed the status to {}", provider, enabled);
-
-                    if (!enabled) {
-                        return;
-                    }
-
-                    if (getActivity() == null) {
-                        return;
-                    }
-
-                    Location location = LocationUtils.getLastKnownLocation(getActivity());
-                    if (location == null) {
-                        return;
-                    }
-
-                    fetchNearbyPlacesAndPresent(location);
-
-                }
-            });
 
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
         BufferedReader br = null;
@@ -207,6 +126,48 @@ public class PlacesFragment extends Fragment {
             }
         }
 
+    }
+
+    @Subscribe
+    public void handleProviderStatusChanged(String provider, boolean enabled) {
+        lg.debug("Provider {} has changed the status to {}", provider, enabled);
+
+        if (!enabled) {
+            return;
+        }
+
+        if (getActivity() == null) {
+            return;
+        }
+
+        Location location = LocationUtils.getLastKnownLocation(getActivity());
+        if (location == null) {
+            return;
+        }
+
+        fetchNearbyPlacesAndPresent(location);
+    }
+
+    @Subscribe
+    public void handleLocationChanged(LocationChangedEvent event) {
+        Location location = event.getLocation();
+
+        lg.debug("Location changed: {}", location);
+
+        if (location == null) {
+            return;
+        }
+
+        Toast.makeText(getActivity(),
+            String.format("Location changed: %.3f,%.3f",
+                location.getLatitude(), location.getLongitude()),
+            Toast.LENGTH_SHORT).show();
+
+        places = null;
+        nextPageToken = null;
+        noMoreResults = false;
+        pageId = 0L;
+        fetchNearbyPlacesAndPresent(location);
     }
 
     @Override
@@ -373,4 +334,5 @@ public class PlacesFragment extends Fragment {
         noMoreResults = false;
         fetchNearbyPlacesAndPresent(LocationUtils.getLastKnownLocation(getActivity()));
     }
+
 }
