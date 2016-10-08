@@ -110,8 +110,11 @@ public class WikiUtils {
         }
 
         WikiResponse wikiResponse = new WikiResponse();
-        wikiResponse.setBatchComplete(Boolean.valueOf(object.getString("batchcomplete")));
-        wikiResponse.setPages(fetchPages(object.getJSONObject("query").getJSONObject("pages")));
+        wikiResponse.setBatchComplete(Boolean.valueOf(object.optString("batchcomplete")));
+        final JSONObject query = object.optJSONObject("query");
+        if (query != null) {
+            wikiResponse.setPages(fetchPages(query.optJSONObject("pages")));
+        }
         return wikiResponse;
     }
 
@@ -120,7 +123,7 @@ public class WikiUtils {
         Iterator<String> pagesIds = jpages.keys();
         while (pagesIds.hasNext()) {
             String pageId = pagesIds.next();
-            pages.add(fetchPage(jpages.getJSONObject(pageId)));
+            pages.add(fetchPage(jpages.optJSONObject(pageId)));
         }
         return pages;
     }
@@ -141,9 +144,9 @@ public class WikiUtils {
             return null;
         }
         WikiThumbnail wikiThumbnail = new WikiThumbnail();
-        wikiThumbnail.setWidth(jthumbnail.getLong("width"));
-        wikiThumbnail.setHeight(jthumbnail.getLong("height"));
-        wikiThumbnail.setSource(jthumbnail.getString("source"));
+        wikiThumbnail.setWidth(jthumbnail.optLong("width"));
+        wikiThumbnail.setHeight(jthumbnail.optLong("height"));
+        wikiThumbnail.setSource(jthumbnail.optString("source"));
         return wikiThumbnail;
     }
 
@@ -156,7 +159,7 @@ public class WikiUtils {
 
         int n = jcoordinates.length();
         for (int i = 0; i < n; i++) {
-            wikiLocations.add(fetchCoordinate(jcoordinates.getJSONObject(i)));
+            wikiLocations.add(fetchCoordinate(jcoordinates.optJSONObject(i)));
         }
 
         return wikiLocations;
@@ -164,10 +167,10 @@ public class WikiUtils {
 
     public static WikiLocation fetchCoordinate(JSONObject jlocation) throws JSONException {
         WikiLocation wikiLocation = new WikiLocation();
-        wikiLocation.setLatitude(jlocation.getDouble("lat"));
-        wikiLocation.setLongitude(jlocation.getDouble("lon"));
-        wikiLocation.setPrimary(jlocation.getString("primary"));
-        wikiLocation.setGlobe(jlocation.getString("globe"));
+        wikiLocation.setLatitude(jlocation.optDouble("lat"));
+        wikiLocation.setLongitude(jlocation.optDouble("lon"));
+        wikiLocation.setPrimary(jlocation.optString("primary"));
+        wikiLocation.setGlobe(jlocation.optString("globe"));
         return wikiLocation;
     }
 
@@ -300,6 +303,11 @@ public class WikiUtils {
 
                             List<WikiAppObject> results = new ArrayList<WikiAppObject>();
                             List<WikiPage> pages = response.getPages();
+                            if (pages == null) {
+                                callback.callback(WikiStatus.SUCCESS, new ArrayList<WikiAppObject>());
+                                return;
+                            }
+
                             for (WikiPage page : pages) {
                                 WikiAppObject appObject = new WikiAppObject();
                                 appObject.setTitle(page.getTitle());
