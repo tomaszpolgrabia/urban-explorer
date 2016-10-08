@@ -47,6 +47,8 @@ public class WikiLocationsFragment extends Fragment {
     private String currentGeocodedLocation;
     private GeocoderUtils geocoderUtils;
     private WikiUtils wikiUtils;
+    private WikiLocationCallback locationHandler;
+    private WikiLocationProviderStatusCallback providerHandler;
 
     public WikiLocationsFragment() {
         // Required empty public constructor
@@ -78,10 +80,11 @@ public class WikiLocationsFragment extends Fragment {
         locationService = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
         currentLocation = (TextView) inflatedView.findViewById(R.id.wiki_current_location);
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.getLocationCallback().addCallback(new WikiLocationCallback(this));
+        locationHandler = new WikiLocationCallback(this);
+        providerHandler = new WikiLocationProviderStatusCallback(this);
 
-        mainActivity.getLocationCallback().addProviderCallback(new WikiLocationProviderStatusCallback(this));
+        EventBus.getDefault().register(locationHandler);
+        EventBus.getDefault().register(providerHandler);
 
         ListView locations = (ListView) inflatedView.findViewById(R.id.wiki_places);
         locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(WikiLocationsFragment.this, appObjects));
@@ -155,6 +158,9 @@ public class WikiLocationsFragment extends Fragment {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         lg.trace("onDestroy {}", System.identityHashCode(this));
+
+        EventBus.getDefault().unregister(locationHandler);
+        EventBus.getDefault().unregister(providerHandler);
 
         WikiCacheUtils.saveWikiObjectsToCache(getActivity(), appObjects);
     }
