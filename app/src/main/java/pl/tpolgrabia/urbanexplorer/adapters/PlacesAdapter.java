@@ -16,6 +16,7 @@ import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,6 +24,8 @@ import java.util.List;
  */
 public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
 
+
+    private static final int MAX_CHARS_FOR_TAGS_IN_INDEX_FRAG = 40;
 
     public PlacesAdapter(Context context, List<GooglePlaceResult> objects) {
         super(context, R.layout.google_place_item, objects);
@@ -55,7 +58,7 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         placeAddressWidget.setText(item.getVicinity());
 
         TextView placeType = (TextView) resultView.findViewById(R.id.place_type);
-        placeType.setText(item.getTypes() != null ? StringUtils.join(item.getTypes(), ",") : "N/A");
+        placeType.setText(makeTagsString(item));
 
         TextView placeRateWidget = (TextView) resultView.findViewById(R.id.place_rate);
         if (item.getRating() != null && !item.getRating().equals(Double.NaN)) {
@@ -77,5 +80,19 @@ public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
         resultView.setTag(item.getId());
 
         return resultView;
+    }
+
+    private static String makeTagsString(GooglePlaceResult item) {
+        if (item.getTypes() != null) {
+            List<String> types = item.getTypes();
+            Collections.sort(types); // TODO make maybe in the frequency tags by user favorites
+            final String typesString = StringUtils.join(types, ",");
+            final int n = typesString.length();
+            return n <= MAX_CHARS_FOR_TAGS_IN_INDEX_FRAG
+                ? typesString
+                : typesString.substring(0, MAX_CHARS_FOR_TAGS_IN_INDEX_FRAG) + "...";
+        } else {
+            return "N/A";
+        }
     }
 }

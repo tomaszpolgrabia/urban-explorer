@@ -1,11 +1,13 @@
 package pl.tpolgrabia.urbanexplorer.callbacks.panoramio;
 
 import android.location.Location;
+import org.greenrobot.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorerutils.callbacks.StandardLocationListenerCallback;
 import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
+import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 
 import java.util.ArrayList;
 
@@ -24,5 +26,6 @@ public class PanoramioLocationCallback implements StandardLocationListenerCallba
     public void callback(Location location) {
         homeFragment.setNoMorePhotos(false);
         homeFragment.setPhotos(new ArrayList<PanoramioImageInfo>());
+        EventBus.getDefault().post(new RefreshEvent(this));
     }
 }

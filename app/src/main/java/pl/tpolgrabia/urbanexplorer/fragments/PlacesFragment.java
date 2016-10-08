@@ -1,13 +1,16 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.callback.LocationGeoCoderCallback;
 import pl.tpolgrabia.googleutils.constants.GooglePlacesConstants;
+import pl.tpolgrabia.googleutils.dto.GooglePlacePhoto;
 import pl.tpolgrabia.googleutils.dto.GooglePlaceResult;
 import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.googleutils.utils.PlacesUtils;
@@ -41,6 +45,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -58,6 +64,7 @@ public class PlacesFragment extends Fragment {
 
     private Semaphore semaphore = new Semaphore(1);
     private boolean noMoreResults = false;
+    private final Pattern pattern = Pattern.compile(".*href=\"(.*)\".*");
 
     public PlacesFragment() {
         // Required empty public constructor
@@ -76,7 +83,35 @@ public class PlacesFragment extends Fragment {
         // Inflate the layout for this fragment
         final View inflatedView = inflater.inflate(R.layout.fragment_places, container, false);
 
-        ListView placesWidget = (ListView) inflatedView.findViewById(R.id.google_places);
+        final ListView placesWidget = (ListView) inflatedView.findViewById(R.id.google_places);
+        placesWidget.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                GooglePlaceResult item = (GooglePlaceResult) placesWidget.getAdapter().getItem(position);
+                if (item.getPhotos() != null && !item.getPhotos().isEmpty()) {
+                    GooglePlacePhoto alink = item.getPhotos().get(0);
+                    lg.debug("Photo link: {}", alink);
+                    final List<String> htmlAttributions = alink.getHtmlAttributions();
+                    lg.debug("Html attributions: {}", htmlAttributions);
+                    if (htmlAttributions != null && !htmlAttributions.isEmpty()) {
+                        String attribute = htmlAttributions.get(0);
+                        lg.debug("Attribute {}", attribute);
+                        Matcher matcher = pattern.matcher(attribute);
+                        boolean found = matcher.find();
+                        if (found) {
+                            String link = matcher.group(1);
+                            lg.debug("Link: {}", link);
+                            Uri uri = Uri.parse(link);
+                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                            getActivity().startActivity(intent);
+                        } else {
+                            lg.warn("Not expected link url html attribute expression {}", attribute);
+                        }
+                    }
+                }
+                return false;
+            }
+        });
         placesWidget.setOnScrollListener(new GooglePlacesScrollListener(this));
 
         return inflatedView;

@@ -1,6 +1,7 @@
 package pl.tpolgrabia.urbanexplorer.callbacks.wiki;
 
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 import org.greenrobot.eventbus.EventBus;
@@ -45,7 +46,13 @@ public class WikiFetchAppDataCallback implements WikiAppResponseCallback {
 
         // TODO on success
 
-        ListView locations = (ListView) wikiLocationsFragment.getView().findViewById(R.id.wiki_places);
+        final View view = wikiLocationsFragment.getView();
+
+        if (view == null) {
+            return;
+        }
+
+        ListView locations = (ListView) view.findViewById(R.id.wiki_places);
         locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(wikiLocationsFragment, nobjects));
         locations.setAdapter(new WikiLocationsAdapter(activity, objects));
         if (objects.isEmpty()) {

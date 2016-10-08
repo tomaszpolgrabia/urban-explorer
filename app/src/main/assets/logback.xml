@@ -1,4 +1,23 @@
 <configuration>
+
+    <property name="LOG_DIR" value="/sdcard/urbanexplorer" />
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- active log file -->
+        <file>${LOG_DIR}/logs/urban-explorer.txt</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%-20thread] %-5level %logger{36} - %msg</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover period -->
+            <fileNamePattern>${LOG_DIR}/log.%d.txt</fileNamePattern>
+
+            <!-- keep 7 days' worth of history -->
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+
     <appender name="logcat" class="ch.qos.logback.classic.android.LogcatAppender">
         <tagEncoder>
             <pattern>%logger{12}</pattern>
@@ -8,9 +27,13 @@
         </encoder>
     </appender>
 
-    <logger name="pl.tpolgrabia.urbanexplorer" level="ALL"/>
+    <logger name="pl.tpolgrabia.urbanexplorer" level="ALL">
+        <appender-ref ref="logcat" />
+        <appender-ref ref="FILE" />
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="logcat" />
     </root>
+
 </configuration>
