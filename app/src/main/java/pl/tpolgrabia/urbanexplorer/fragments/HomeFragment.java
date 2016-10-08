@@ -56,6 +56,8 @@ public class HomeFragment extends Fragment  {
     private boolean noMorePhotos;
     private String currentGeocodedLocation;
     private GeocoderUtils geocoderUtils;
+    private PanoramioLocationCallback locationChangedHandler;
+    private PanoramioProviderCallback providerChangedHandler;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -74,10 +76,13 @@ public class HomeFragment extends Fragment  {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MainActivity mainActivity = ((MainActivity) getActivity());
-        final StandardLocationListener locationCallback = mainActivity.getLocationCallback();
-        locationCallback.addCallback(new PanoramioLocationCallback(this));
-        locationCallback.addProviderCallback(new PanoramioProviderCallback(this));
+
+        locationChangedHandler = new PanoramioLocationCallback(this);
+        providerChangedHandler = new PanoramioProviderCallback(this);
+
+        EventBus.getDefault().register(locationChangedHandler);
+        EventBus.getDefault().register(providerChangedHandler);
+
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
     }
 
@@ -217,6 +222,9 @@ public class HomeFragment extends Fragment  {
         lg.trace("onDestroy");
         EventBus.getDefault().unregister(this);
         PanoramioCacheUtils.savePhotosToCache(getActivity(), photos);
+
+        EventBus.getDefault().unregister(locationChangedHandler);
+        EventBus.getDefault().unregister(providerChangedHandler);
     }
 
     @Override
