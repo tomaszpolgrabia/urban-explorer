@@ -20,4 +20,5 @@ public class AppConstants {
     static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static final String GOOGLE_API_KEY = "AIzaSyBAJoK-pu_qnQ0U8EGjM1Zkz_g8oJV4w2g";
     public static final String DEF_WIKI_COUNTRY_CODE = "en";
+    public static final String DEAD_BEAF = "DEAD_BEAF";
 }

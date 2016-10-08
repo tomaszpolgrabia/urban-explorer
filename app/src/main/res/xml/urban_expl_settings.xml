@@ -32,6 +32,14 @@
             android:title="@string/wiki_search_settings"
             android:key="pref_wiki_settings">
 
+        <ListPreference
+            android:key="@string/pref_wiki_locale"
+            android:title="Wikipedia endpoint locale"
+            android:summary="Wikipedia endpoint localization"
+            android:defaultValue="@string/def_wikipedia_endpoint_locale"
+            android:entryValues="@array/wikipedia_endpoint_locale_values"
+            android:entries="@array/wikipedia_endpoint_locale_labels" />
+
         <EditTextPreference
                 android:key="pref_wiki_radius"
                 android:title="@string/wiki_search_radius_title"

@@ -20,6 +20,7 @@ import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
+import pl.tpolgrabia.urbanexplorer.events.RefreshSettingsEvent;
 import pl.tpolgrabia.urbanexplorer.fragments.*;
 import pl.tpolgrabia.urbanexplorer.handlers.*;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
@@ -353,11 +354,16 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case AppConstants.SETTINGS_ID_INTENT_REQUEST_ID:
                 NetUtils.setGlobalProxyAuth(this);
+                refreshAppSettings();
                 refreshFragment();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void refreshAppSettings() {
+        EventBus.getDefault().post(new RefreshSettingsEvent(this));
     }
 
 

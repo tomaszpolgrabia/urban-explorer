@@ -1,8 +1,11 @@
 package pl.tpolgrabia.urbanexplorer.fragments;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,10 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.utils.GeocoderUtils;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
-import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.wiki.*;
+import pl.tpolgrabia.urbanexplorer.events.RefreshSettingsEvent;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
@@ -65,8 +68,12 @@ public class WikiLocationsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         appObjects = WikiCacheUtils.loadWikiObjectsFromCache(getActivity(), savedInstanceState);
+        refreshSettings();
+    }
+
+    private void refreshSettings() {
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
-        wikiUtils = new WikiUtils(getActivity(), AppConstants.DEF_WIKI_COUNTRY_CODE);
+        wikiUtils = new WikiUtils(getActivity(), getWikiLocale(getActivity()));
     }
 
     @Override
@@ -182,5 +189,18 @@ public class WikiLocationsFragment extends Fragment {
 
     public void setCurrentGeocodedLocation(String currentGeocodedLocation) {
         this.currentGeocodedLocation = currentGeocodedLocation;
+    }
+
+    public static String getWikiLocale(Context ctx) {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return sharedPrefs.getString(
+            ctx.getResources().getString(R.string.pref_wiki_locale),
+            ctx.getResources().getString(R.string.def_wikipedia_endpoint_locale));
+    }
+
+    @Subscribe
+    public void handleRefreshSettings(RefreshSettingsEvent event) {
+        lg.debug("Refreshing settings {}", event);
+        refreshSettings();
     }
 }
