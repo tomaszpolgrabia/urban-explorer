@@ -4,7 +4,7 @@ package pl.tpolgrabia.urbanexplorer;
  * Created by tpolgrabia on 27.08.16.
  */
 public class AppConstants {
-    public static final AppStage RELEASE = AppStage.DEVELOPMENT;
+    public static final AppStage RELEASE = AppStage.RELEASE_CANDIDATE;
     public static final float MIN_DISTANCE = 100;
     public static final long GPS_LOCATION_UPDATE_FREQ = 15000;
     public static final float GPS_LOCATION_DISTANCE_FREQ = MIN_DISTANCE;
@@ -19,6 +19,4 @@ public class AppConstants {
     static final String PHOTO_INFO = "PHOTO_INFO";
     static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static final String GOOGLE_API_KEY = "AIzaSyBAJoK-pu_qnQ0U8EGjM1Zkz_g8oJV4w2g";
-    public static final String DEF_WIKI_COUNTRY_CODE = "en";
-    public static final String DEAD_BEAF = "DEAD_BEAF";
 }
