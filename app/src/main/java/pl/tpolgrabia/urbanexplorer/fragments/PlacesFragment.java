@@ -33,6 +33,7 @@ import pl.tpolgrabia.urbanexplorer.events.LocationChangedEvent;
 import pl.tpolgrabia.urbanexplorer.handlers.GooglePlacesLongClickItemHandler;
 import pl.tpolgrabia.urbanexplorer.handlers.GooglePlacesScrollListener;
 import pl.tpolgrabia.urbanexplorer.worker.GooglePlacesWorker;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
@@ -79,6 +80,7 @@ public class PlacesFragment extends Fragment {
         final ListView placesWidget = (ListView) inflatedView.findViewById(R.id.google_places);
         placesWidget.setOnItemLongClickListener(new GooglePlacesLongClickItemHandler(this, placesWidget));
         placesWidget.setOnScrollListener(new GooglePlacesScrollListener(this));
+        placesWidget.setAdapter(new PlacesAdapter(getActivity(), places));
 
         return inflatedView;
     }
@@ -214,8 +216,10 @@ public class PlacesFragment extends Fragment {
         if (!semaphore.tryAcquire()) {
             // running
             lg.debug("Active fetching nearby, quitting...");
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
+
         Toast.makeText(getActivity(),
             String.format(AppConstants.DEF_APP_LOCALE,
                 "Fetching nearby places %.3f,%.3f",
@@ -289,8 +293,7 @@ public class PlacesFragment extends Fragment {
             noMoreResults = true;
         }
 
-        MainActivity activity = (MainActivity) getActivity();
-        activity.hideProgress();
+        EventBus.getDefault().post(new DataLoadingFinishEvent(this));
         semaphore.release();
     }
 
@@ -339,6 +342,7 @@ public class PlacesFragment extends Fragment {
 
         if (getView() == null) {
             lg.debug("Sorry, headless fragment");
+            EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
         }
 
@@ -354,7 +358,9 @@ public class PlacesFragment extends Fragment {
     private void cleanAdapter() {
         ListView plagesWidget = (ListView) getView().findViewById(R.id.google_places);
         PlacesAdapter adapter = (PlacesAdapter) plagesWidget.getAdapter();
-        adapter.clear();
+        if (adapter != null) {
+            adapter.clear();
+        }
     }
 
 }
