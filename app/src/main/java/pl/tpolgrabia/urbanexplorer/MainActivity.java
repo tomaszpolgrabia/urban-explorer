@@ -301,13 +301,13 @@ public class MainActivity extends ActionBarActivity {
 
         lg.debug("Selected location provider {} is available", locationProvider);
 
-        final Long updateTimeInMinutes = HelperUtils.fetchGpsUpdateFreq(this);
-        lg.debug("Update time: {}", updateTimeInMinutes);
+        final Long updateTimeInMilliseconds = HelperUtils.fetchGpsUpdateFreq(this);
+        lg.debug("Update time: {}", updateTimeInMilliseconds);
         if (locationProvider != null) {
             lg.debug("Requesting location updates");
             LocationManager locationService = (LocationManager)getSystemService(LOCATION_SERVICE);
             locationService.requestLocationUpdates(locationProvider,
-                updateTimeInMinutes,
+                updateTimeInMilliseconds,
                 HelperUtils.fetchGpsDistanceFreq(this),
                 locationCallback);
             locationServicesActivated = true;
@@ -318,7 +318,7 @@ public class MainActivity extends ActionBarActivity {
             lg.debug("Now: {}", now);
             final long lastLocationUpdateTimeAgo = now - lastLocationUpdateTime;
             lg.debug("Last location update was {} ms ago", lastLocationUpdateTimeAgo);
-            if (lastLocationUpdateTime < 0 || lastLocationUpdateTimeAgo >= updateTimeInMinutes*1000.0) {
+            if (lastLocationUpdateTime < 0 || lastLocationUpdateTimeAgo >= updateTimeInMilliseconds) {
                 lg.info("Last location update time exceeded. Requesting single update...");
                 locationService.requestSingleUpdate(locationProvider, locationCallback, Looper.getMainLooper());
             }
