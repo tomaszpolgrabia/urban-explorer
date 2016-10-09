@@ -46,6 +46,8 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
             Location location = param.getLocation();
 
             Response<GooglePlaceResponse> placesResponse = null;
+            GooglePlacesResponse response = new GooglePlacesResponse();
+            response.setOriginalPageToken(param.getPageToken());
             try {
                 placesResponse = placesUtils.fetchNearbyPlaces(
                     location.getLatitude(),
@@ -62,18 +64,23 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
                         placesResponse.body(),
                         placesResponse.errorBody(),
                         placesResponse.message());
-                    GooglePlacesResponse response = new GooglePlacesResponse();
+
                     final GooglePlaceResponse responseBody = placesResponse.body();
                     lg.debug("Google response body: {}", responseBody);
                     response.setPlaces(responseBody.getResults());
                     response.setNextPageToken(responseBody.getNextPageToken());
-                    response.setOriginalPageToken(param.getPageToken());
                     response.setStatus(responseBody.getStatus());
                     result.add(response);
                 }
 
             } catch (IOException e) {
                 lg.error("I/O error", e);
+                response.setStatus("I/O error: " + e.getMessage());
+                result.add(response);
+            } catch (Throwable t) {
+                lg.error("General error", t);
+                response.setStatus("General error: " + t.getMessage());
+                result.add(response);
             }
         }
 
