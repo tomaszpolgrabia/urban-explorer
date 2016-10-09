@@ -6,7 +6,7 @@
         <!-- active log file -->
         <file>${LOG_DIR}/logs/urban-explorer.txt</file>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%-20thread] %-5level %logger{36} - %msg</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%-20thread] %-5level %logger{36} - %msg\n</pattern>
         </encoder>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
