@@ -55,6 +55,11 @@ android {
             signingConfig signingConfigs.config
         }
     }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        abortOnError false
+    }
 }
 
 dependencies {

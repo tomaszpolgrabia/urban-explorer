@@ -1,5 +1,7 @@
 package pl.tpolgrabia.urbanexplorer;
 
+import java.util.Locale;
+
 /**
  * Created by tpolgrabia on 27.08.16.
  */
@@ -19,4 +21,5 @@ public class AppConstants {
     static final String PHOTO_INFO = "PHOTO_INFO";
     static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static final String GOOGLE_API_KEY = "AIzaSyBAJoK-pu_qnQ0U8EGjM1Zkz_g8oJV4w2g";
+    public static final Locale DEF_APP_LOCALE = Locale.ENGLISH;
 }

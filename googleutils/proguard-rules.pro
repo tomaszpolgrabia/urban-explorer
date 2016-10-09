@@ -28,3 +28,6 @@
 -keepattributes Signature
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
+-keep class java.nio.file.** { *; }
+-keep class retrofit2.** { *; }
+-keep class okio.** { *; }

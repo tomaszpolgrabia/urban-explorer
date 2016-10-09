@@ -53,4 +53,612 @@
     <string name="location_xrange">Zakres X pozycji</string>
     <string name="location_yrange">Zakres Y pozycji</string>
     <string name="location_update_time_freq_title">Czestotliwość aktualizacji położenia</string>
+    <string name="def_wikipedia_endpoint_locale">en</string>
+    <string name="pref_wiki_locale">pref_wiki_locale</string>
+
+    <string-array name="google_places_categories">
+        <item>accounting</item>
+        <item>airport</item>
+        <item>amusement_park</item>
+        <item>aquarium</item>
+        <item>art_gallery</item>
+        <item>atm</item>
+        <item>bakery</item>
+        <item>bank</item>
+        <item>bar</item>
+        <item>beauty_salon</item>
+        <item>bicycle_store</item>
+        <item>book_store</item>
+        <item>bowling_alley</item>
+        <item>bus_station</item>
+        <item>cafe</item>
+        <item>campground</item>
+        <item>car_dealer</item>
+        <item>car_rental</item>
+        <item>car_repair</item>
+        <item>car_wash</item>
+        <item>casino</item>
+        <item>cemetery</item>
+        <item>church</item>
+        <item>city_hall</item>
+        <item>clothing_store</item>
+        <item>convenience_store</item>
+        <item>courthouse</item>
+        <item>dentist</item>
+        <item>department_store</item>
+        <item>doctor</item>
+        <item>electrician</item>
+        <item>electronics_store</item>
+        <item>embassy</item>
+        <item>fire_station</item>
+        <item>florist</item>
+        <item>funeral_home</item>
+        <item>furniture_store</item>
+        <item>gas_station</item>
+        <item>gym</item>
+        <item>hair_care</item>
+        <item>hardware_store</item>
+        <item>hindu_temple</item>
+        <item>home_goods_store</item>
+        <item>hospital</item>
+        <item>insurance_agency</item>
+        <item>jewelry_store</item>
+        <item>laundry</item>
+        <item>lawyer</item>
+        <item>library</item>
+        <item>liquor_store</item>
+        <item>local_government_office</item>
+        <item>locksmith</item>
+        <item>lodging</item>
+        <item>meal_delivery</item>
+        <item>meal_takeaway</item>
+        <item>mosque</item>
+        <item>movie_rental</item>
+        <item>movie_theater</item>
+        <item>moving_company</item>
+        <item>museum</item>
+        <item>night_club</item>
+        <item>painter</item>
+        <item>park</item>
+        <item>parking</item>
+        <item>pet_store</item>
+        <item>pharmacy</item>
+        <item>physiotherapist</item>
+        <item>plumber</item>
+        <item>police</item>
+        <item>post_office</item>
+        <item>real_estate_agency</item>
+        <item>restaurant</item>
+        <item>roofing_contractor</item>
+        <item>rv_park</item>
+        <item>school</item>
+        <item>shoe_store</item>
+        <item>shopping_mall</item>
+        <item>spa</item>
+        <item>stadium</item>
+        <item>storage</item>
+        <item>store</item>
+        <item>subway_station</item>
+        <item>synagogue</item>
+        <item>taxi_stand</item>
+        <item>train_station</item>
+        <item>transit_station</item>
+        <item>travel_agency</item>
+        <item>university</item>
+        <item>veterinary_care</item>
+        <item>zoo</item>
+    </string-array>
+
+    <string-array name="def_google_places_categories">
+        <item>airport</item>
+        <item>amusement_park</item>
+        <item>aquarium</item>
+        <item>art_gallery</item>
+        <item>bar</item>
+        <item>beauty_salon</item>
+        <item>bowling_alley</item>
+        <item>cafe</item>
+        <item>campground</item>
+        <item>casino</item>
+        <item>cemetery</item>
+        <item>church</item>
+        <item>city_hall</item>
+        <item>clothing_store</item>
+        <item>department_store</item>
+        <item>embassy</item>
+        <item>gym</item>
+        <item>hair_care</item>
+        <item>hindu_temple</item>
+        <item>jewelry_store</item>
+        <item>liquor_store</item>
+        <item>meal_delivery</item>
+        <item>meal_takeaway</item>
+        <item>mosque</item>
+        <item>museum</item>
+        <item>night_club</item>
+        <item>park</item>
+        <item>restaurant</item>
+        <item>rv_park</item>
+        <item>shoe_store</item>
+        <item>shopping_mall</item>
+        <item>spa</item>
+        <item>stadium</item>
+        <item>store</item>
+        <item>subway_station</item>
+        <item>synagogue</item>
+        <item>taxi_stand</item>
+        <item>train_station</item>
+        <item>transit_station</item>
+        <item>travel_agency</item>
+        <item>university</item>
+        <item>zoo</item>
+    </string-array>
+
+    <string-array name="google_places_category_labels">
+        <item>Accounting</item>
+        <item>Airport</item>
+        <item>Amusement park</item>
+        <item>Aquarium</item>
+        <item>Art gallery</item>
+        <item>ATM</item>
+        <item>Bakery</item>
+        <item>Bank</item>
+        <item>Bar</item>
+        <item>Beauty salon</item>
+        <item>Bicycle store</item>
+        <item>Book store</item>
+        <item>Bowling alley</item>
+        <item>Bus station</item>
+        <item>Cafe</item>
+        <item>Campground</item>
+        <item>Car dealer</item>
+        <item>Car rental</item>
+        <item>Car repair</item>
+        <item>Car wash</item>
+        <item>Casino</item>
+        <item>Cemetery</item>
+        <item>Church</item>
+        <item>City hall</item>
+        <item>Clothing store</item>
+        <item>Convenience store</item>
+        <item>Courthouse</item>
+        <item>Dentist</item>
+        <item>Department store</item>
+        <item>Doctor</item>
+        <item>Electrician</item>
+        <item>Electronics store</item>
+        <item>Embassy</item>
+        <item>Fire station</item>
+        <item>Florist</item>
+        <item>Funeral home</item>
+        <item>Furniture store</item>
+        <item>Gas station</item>
+        <item>Gym</item>
+        <item>Hair care</item>
+        <item>Hardware store</item>
+        <item>Hindu temple</item>
+        <item>Home goods store</item>
+        <item>Hospital</item>
+        <item>Insurance agency</item>
+        <item>Jewelry store</item>
+        <item>Laundry</item>
+        <item>Lawyer</item>
+        <item>Library</item>
+        <item>Liquor store</item>
+        <item>Local government office</item>
+        <item>Locksmith</item>
+        <item>Lodging</item>
+        <item>Meal delivery</item>
+        <item>Meal takeaway</item>
+        <item>Mosque</item>
+        <item>Movie rental</item>
+        <item>Movie theater</item>
+        <item>Moving company</item>
+        <item>Museum</item>
+        <item>Night club</item>
+        <item>Painter</item>
+        <item>Park</item>
+        <item>Parking</item>
+        <item>Pet store</item>
+        <item>Pharmacy</item>
+        <item>Physiotherapist</item>
+        <item>Plumber</item>
+        <item>Police</item>
+        <item>Post office</item>
+        <item>Real estate agency</item>
+        <item>Restaurant</item>
+        <item>Roofing contractor</item>
+        <item>Rv park</item>
+        <item>School</item>
+        <item>Shoe store</item>
+        <item>Shopping mall</item>
+        <item>SPA</item>
+        <item>Stadium</item>
+        <item>Storage</item>
+        <item>Store</item>
+        <item>Subway station</item>
+        <item>Synagogue</item>
+        <item>Taxi stand</item>
+        <item>Train station</item>
+        <item>Transit station</item>
+        <item>Travel agency</item>
+        <item>University</item>
+        <item>Veterinary care</item>
+        <item>Zoo</item>
+    </string-array>
+
+    <!-- 639‑2/T  https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes  -->
+    <string-array name="wikipedia_endpoint_locale_values">
+        <item>ab</item>
+        <item>aa</item>
+        <item>af</item>
+        <item>ak</item>
+        <item>sq</item>
+        <item>am</item>
+        <item>ar</item>
+        <item>an</item>
+        <item>hy</item>
+        <item>as</item>
+        <item>av</item>
+        <item>ae</item>
+        <item>ay</item>
+        <item>az</item>
+        <item>bm</item>
+        <item>ba</item>
+        <item>eu</item>
+        <item>be</item>
+        <item>bn</item>
+        <item>bh</item>
+        <item>bi</item>
+        <item>bs</item>
+        <item>br</item>
+        <item>bg</item>
+        <item>my</item>
+        <item>ca</item>
+        <item>ch</item>
+        <item>ce</item>
+        <item>ny</item>
+        <item>zh</item>
+        <item>cv</item>
+        <item>kw</item>
+        <item>co</item>
+        <item>cr</item>
+        <item>hr</item>
+        <item>cs</item>
+        <item>da</item>
+        <item>dv</item>
+        <item>nl</item>
+        <item>dz</item>
+        <item>en</item>
+        <item>eo</item>
+        <item>et</item>
+        <item>ee</item>
+        <item>fo</item>
+        <item>fj</item>
+        <item>fi</item>
+        <item>fr</item>
+        <item>ff</item>
+        <item>gl</item>
+        <item>ka</item>
+        <item>de</item>
+        <item>el</item>
+        <item>gn</item>
+        <item>gu</item>
+        <item>ht</item>
+        <item>ha</item>
+        <item>he</item>
+        <item>hz</item>
+        <item>hi</item>
+        <item>ho</item>
+        <item>hu</item>
+        <item>ia</item>
+        <item>id</item>
+        <item>ie</item>
+        <item>ga</item>
+        <item>ig</item>
+        <item>ik</item>
+        <item>io</item>
+        <item>is</item>
+        <item>it</item>
+        <item>iu</item>
+        <item>ja</item>
+        <item>jv</item>
+        <item>kl</item>
+        <item>kn</item>
+        <item>kr</item>
+        <item>ks</item>
+        <item>kk</item>
+        <item>km</item>
+        <item>ki</item>
+        <item>rw</item>
+        <item>ky</item>
+        <item>kv</item>
+        <item>kg</item>
+        <item>ko</item>
+        <item>ku</item>
+        <item>kj</item>
+        <item>la</item>
+        <item>lb</item>
+        <item>lg</item>
+        <item>li</item>
+        <item>ln</item>
+        <item>lo</item>
+        <item>lt</item>
+        <item>lu</item>
+        <item>lv</item>
+        <item>gv</item>
+        <item>mk</item>
+        <item>mg</item>
+        <item>ms</item>
+        <item>ml</item>
+        <item>mt</item>
+        <item>mi</item>
+        <item>mr</item>
+        <item>mh</item>
+        <item>mn</item>
+        <item>na</item>
+        <item>nv</item>
+        <item>nd</item>
+        <item>ne</item>
+        <item>ng</item>
+        <item>nb</item>
+        <item>nn</item>
+        <item>no</item>
+        <item>ii</item>
+        <item>nr</item>
+        <item>oc</item>
+        <item>oj</item>
+        <item>cu</item>
+        <item>om</item>
+        <item>or</item>
+        <item>os</item>
+        <item>pa</item>
+        <item>pi</item>
+        <item>fa</item>
+        <item>pl</item>
+        <item>ps</item>
+        <item>pt</item>
+        <item>qu</item>
+        <item>rm</item>
+        <item>rn</item>
+        <item>ro</item>
+        <item>ru</item>
+        <item>sa</item>
+        <item>sc</item>
+        <item>sd</item>
+        <item>se</item>
+        <item>sm</item>
+        <item>sg</item>
+        <item>sr</item>
+        <item>gd</item>
+        <item>sn</item>
+        <item>si</item>
+        <item>sk</item>
+        <item>sl</item>
+        <item>so</item>
+        <item>st</item>
+        <item>es</item>
+        <item>su</item>
+        <item>sw</item>
+        <item>ss</item>
+        <item>sv</item>
+        <item>ta</item>
+        <item>te</item>
+        <item>tg</item>
+        <item>th</item>
+        <item>ti</item>
+        <item>bo</item>
+        <item>tk</item>
+        <item>tl</item>
+        <item>tn</item>
+        <item>to</item>
+        <item>tr</item>
+        <item>ts</item>
+        <item>tt</item>
+        <item>tw</item>
+        <item>ty</item>
+        <item>ug</item>
+        <item>uk</item>
+        <item>ur</item>
+        <item>uz</item>
+        <item>ve</item>
+        <item>vi</item>
+        <item>vo</item>
+        <item>wa</item>
+        <item>cy</item>
+        <item>wo</item>
+        <item>fy</item>
+        <item>xh</item>
+        <item>yi</item>
+        <item>yo</item>
+        <item>za</item>
+        <item>zu</item>
+    </string-array>
+    <!-- Native name  https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes  -->
+    <string-array name="wikipedia_endpoint_locale_labels">
+        <item>Abkhaz</item>
+        <item>Afar</item>
+        <item>Afrikaans</item>
+        <item>Akan</item>
+        <item>Albanian</item>
+        <item>Amharic</item>
+        <item>Arabic</item>
+        <item>Aragonese</item>
+        <item>Armenian</item>
+        <item>Assamese</item>
+        <item>Avaric</item>
+        <item>Avestan</item>
+        <item>Aymara</item>
+        <item>Azerbaijani</item>
+        <item>Bambara</item>
+        <item>Bashkir</item>
+        <item>Basque</item>
+        <item>Belarusian</item>
+        <item>Bengali, Bangla</item>
+        <item>Bihari</item>
+        <item>Bislama</item>
+        <item>Bosnian</item>
+        <item>Breton</item>
+        <item>Bulgarian</item>
+        <item>Burmese</item>
+        <item>Catalan</item>
+        <item>Chamorro</item>
+        <item>Chechen</item>
+        <item>Chichewa, Chewa, Nyanja</item>
+        <item>Chinese</item>
+        <item>Chuvash</item>
+        <item>Cornish</item>
+        <item>Corsican</item>
+        <item>Cree</item>
+        <item>Croatian</item>
+        <item>Czech</item>
+        <item>Danish</item>
+        <item>Divehi, Dhivehi, Maldivian</item>
+        <item>Dutch</item>
+        <item>Dzongkha</item>
+        <item>English</item>
+        <item>Esperanto</item>
+        <item>Estonian</item>
+        <item>Ewe</item>
+        <item>Faroese</item>
+        <item>Fijian</item>
+        <item>Finnish</item>
+        <item>French</item>
+        <item>Fula, Fulah, Pulaar, Pular</item>
+        <item>Galician</item>
+        <item>Georgian</item>
+        <item>German</item>
+        <item>Greek (modern)</item>
+        <item>Guaraní</item>
+        <item>Gujarati</item>
+        <item>Haitian, Haitian Creole</item>
+        <item>Hausa</item>
+        <item>Hebrew (modern)</item>
+        <item>Herero</item>
+        <item>Hindi</item>
+        <item>Hiri Motu</item>
+        <item>Hungarian</item>
+        <item>Interlingua</item>
+        <item>Indonesian</item>
+        <item>Interlingue</item>
+        <item>Irish</item>
+        <item>Igbo</item>
+        <item>Inupiaq</item>
+        <item>Ido</item>
+        <item>Icelandic</item>
+        <item>Italian</item>
+        <item>Inuktitut</item>
+        <item>Japanese</item>
+        <item>Javanese</item>
+        <item>Kalaallisut, Greenlandic</item>
+        <item>Kannada</item>
+        <item>Kanuri</item>
+        <item>Kashmiri</item>
+        <item>Kazakh</item>
+        <item>Khmer</item>
+        <item>Kikuyu, Gikuyu</item>
+        <item>Kinyarwanda</item>
+        <item>Kyrgyz</item>
+        <item>Komi</item>
+        <item>Kongo</item>
+        <item>Korean</item>
+        <item>Kurdish</item>
+        <item>Kwanyama, Kuanyama</item>
+        <item>Latin</item>
+        <item>Luxembourgish, Letzeburgesch</item>
+        <item>Ganda</item>
+        <item>Limburgish, Limburgan, Limburger</item>
+        <item>Lingala</item>
+        <item>Lao</item>
+        <item>Lithuanian</item>
+        <item>Luba-Katanga</item>
+        <item>Latvian</item>
+        <item>Manx</item>
+        <item>Macedonian</item>
+        <item>Malagasy</item>
+        <item>Malay</item>
+        <item>Malayalam</item>
+        <item>Maltese</item>
+        <item>Māori</item>
+        <item>Marathi (Marāṭhī)</item>
+        <item>Marshallese</item>
+        <item>Mongolian</item>
+        <item>Nauruan</item>
+        <item>Navajo, Navaho</item>
+        <item>Northern Ndebele</item>
+        <item>Nepali</item>
+        <item>Ndonga</item>
+        <item>Norwegian Bokmål</item>
+        <item>Norwegian Nynorsk</item>
+        <item>Norwegian</item>
+        <item>Nuosu</item>
+        <item>Southern Ndebele</item>
+        <item>Occitan</item>
+        <item>Ojibwe, Ojibwa</item>
+        <item>Old Church Slavonic, Church Slavonic, Old Bulgarian</item>
+        <item>Oromo</item>
+        <item>Oriya</item>
+        <item>Ossetian, Ossetic</item>
+        <item>Eastern Punjabi, Eastern Panjabi</item>
+        <item>Pāli</item>
+        <item>Persian (Farsi)</item>
+        <item>Polish</item>
+        <item>Pashto, Pushto</item>
+        <item>Portuguese</item>
+        <item>Quechua</item>
+        <item>Romansh</item>
+        <item>Kirundi</item>
+        <item>Romanian</item>
+        <item>Russian</item>
+        <item>Sanskrit (Saṁskṛta)</item>
+        <item>Sardinian</item>
+        <item>Sindhi</item>
+        <item>Northern Sami</item>
+        <item>Samoan</item>
+        <item>Sango</item>
+        <item>Serbian</item>
+        <item>Scottish Gaelic, Gaelic</item>
+        <item>Shona</item>
+        <item>Sinhalese, Sinhala</item>
+        <item>Slovak</item>
+        <item>Slovene</item>
+        <item>Somali</item>
+        <item>Southern Sotho</item>
+        <item>Spanish</item>
+        <item>Sundanese</item>
+        <item>Swahili</item>
+        <item>Swati</item>
+        <item>Swedish</item>
+        <item>Tamil</item>
+        <item>Telugu</item>
+        <item>Tajik</item>
+        <item>Thai</item>
+        <item>Tigrinya</item>
+        <item>Tibetan Standard, Tibetan, Central</item>
+        <item>Turkmen</item>
+        <item>Tagalog</item>
+        <item>Tswana</item>
+        <item>Tonga (Tonga Islands)</item>
+        <item>Turkish</item>
+        <item>Tsonga</item>
+        <item>Tatar</item>
+        <item>Twi</item>
+        <item>Tahitian</item>
+        <item>Uyghur</item>
+        <item>Ukrainian</item>
+        <item>Urdu</item>
+        <item>Uzbek</item>
+        <item>Venda</item>
+        <item>Vietnamese</item>
+        <item>Volapük</item>
+        <item>Walloon</item>
+        <item>Welsh</item>
+        <item>Wolof</item>
+        <item>Western Frisian</item>
+        <item>Xhosa</item>
+        <item>Yiddish</item>
+        <item>Yoruba</item>
+        <item>Zhuang, Chuang</item>
+        <item>Zulu</item>
+    </string-array>
 </resources>

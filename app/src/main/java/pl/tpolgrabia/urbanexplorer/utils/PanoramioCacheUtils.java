@@ -45,11 +45,13 @@ public class PanoramioCacheUtils {
             return photos;
         } else {
             // maybe we find something in our cache file
-            try (Reader reader =
-                new InputStreamReader(
-                    new FileInputStream(
-                        new File(homeFragment.getActivity().getCacheDir(),
-                            AppConstants.PANORAMIO_CACHE_FILENAME)))) {
+            Reader reader = null;
+            try {
+                reader =
+                    new InputStreamReader(
+                        new FileInputStream(
+                            new File(homeFragment.getActivity().getCacheDir(),
+                                AppConstants.PANORAMIO_CACHE_FILENAME)));
 
                 PanoramioCacheDto dto = new Gson().fromJson(new JsonReader(reader), PanoramioCacheDto.class);
                 if (dto == null) {
@@ -71,6 +73,14 @@ public class PanoramioCacheUtils {
             } catch (Throwable t) {
                 lg.error("Throwable", t);
                 return new ArrayList<>();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        lg.error("Error closing reader - I/O error", e);
+                    }
+                }
             }
         }
     }

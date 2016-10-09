@@ -47,7 +47,7 @@ public class HelperUtils {
                 Toast.LENGTH_LONG).show();
             SharedPreferences.Editor editor = sharedPrefs.edit();
             editor.putBoolean(FIRST_TIME_LAUNCH, false);
-            editor.commit();
+            editor.apply();
         }
     }
 

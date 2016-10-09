@@ -9,16 +9,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by tpolgrabia on 01.09.16.
  */
 public class WikiLocationsAdapter extends ArrayAdapter<WikiAppObject> {
+
     public WikiLocationsAdapter(Context ctx, List<WikiAppObject> locations) {
         super(ctx, R.layout.wiki_locations_item, locations);
     }
@@ -43,7 +46,7 @@ public class WikiLocationsAdapter extends ArrayAdapter<WikiAppObject> {
         String url = wikiPage.getThumbnail() != null ? wikiPage.getThumbnail() : null;
 
         TextView locDistanceInfo = (TextView) itemView.findViewById(R.id.wiki_locs_item_distance);
-        locDistanceInfo.setText(String.format("%.2f km", wikiPage.getDistance() / 1000.0));
+        locDistanceInfo.setText(String.format(AppConstants.DEF_APP_LOCALE, "%.2f km", wikiPage.getDistance() / 1000.0));
         imgPreview.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
 
         if (url != null) {

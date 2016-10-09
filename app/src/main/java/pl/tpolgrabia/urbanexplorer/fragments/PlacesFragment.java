@@ -40,6 +40,7 @@ import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 
@@ -159,7 +160,8 @@ public class PlacesFragment extends Fragment {
         }
 
         Toast.makeText(getActivity(),
-            String.format("Location changed: %.3f,%.3f",
+            String.format(AppConstants.DEF_APP_LOCALE,
+                "Location changed: %.3f,%.3f",
                 location.getLatitude(), location.getLongitude()),
             Toast.LENGTH_SHORT).show();
 
@@ -215,7 +217,10 @@ public class PlacesFragment extends Fragment {
             return;
         }
         Toast.makeText(getActivity(),
-            String.format("Fetching nearby places %.3f,%.3f", location.getLatitude(), location.getLongitude()),
+            String.format(AppConstants.DEF_APP_LOCALE,
+                "Fetching nearby places %.3f,%.3f",
+                location.getLatitude(),
+                location.getLongitude()),
             Toast.LENGTH_SHORT).show();
 
 

@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiCacheDto;
-import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
+import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -30,11 +30,13 @@ public class WikiCacheUtils {
     }
 
     public static void saveWikiObjectsToCache(Context ctx, List<WikiAppObject> appObjects) {
-        try (BufferedWriter bw = new BufferedWriter(
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(
             new OutputStreamWriter(
                 new FileOutputStream(
                     new File(ctx.getCacheDir(),
-                        AppConstants.WIKI_CACHE_FILENAME))))) {
+                        AppConstants.WIKI_CACHE_FILENAME))));
 
             WikiCacheDto dto = new WikiCacheDto();
             dto.setAppObject(appObjects);
@@ -52,30 +54,44 @@ public class WikiCacheUtils {
 
             new Gson().toJson(bw);
 
-        } catch (FileNotFoundException e) {
-            lg.error("File not found", e);
         } catch (IOException e) {
             lg.error("I/O error", e);
+        } finally {
+            if (bw != null) {
+                try {
+                    bw.close();
+                } catch (IOException e) {
+                    lg.error("Error closing writer - I/O error", e);
+                }
+            }
         }
     }
 
     public static ArrayList<WikiAppObject> loadWikiObjectsFromCache(Context ctx, Bundle savedInstanceState) {
         ArrayList<WikiAppObject> appObjects = savedInstanceState == null ? new ArrayList<WikiAppObject>()
-            : (ArrayList<WikiAppObject>)savedInstanceState.getSerializable(WikiLocationsFragment.WIKI_APP_OBJECTS);
+            : (ArrayList<WikiAppObject>) savedInstanceState.getSerializable(WikiLocationsFragment.WIKI_APP_OBJECTS);
 
         if (appObjects == null) {
-            try (InputStreamReader ir = new InputStreamReader(
-                new FileInputStream(
-                    new File(ctx.getCacheDir(),
-                        AppConstants.WIKI_CACHE_FILENAME)))) {
+            InputStreamReader ir = null;
+            try {
+                ir = new InputStreamReader(
+                    new FileInputStream(
+                        new File(ctx.getCacheDir(),
+                            AppConstants.WIKI_CACHE_FILENAME)));
 
                 WikiCacheDto dto = new Gson().fromJson(ir, WikiCacheDto.class);
                 appObjects = new ArrayList<>(dto.getAppObject());
 
-            } catch (FileNotFoundException e) {
-                lg.error("File not found", e);
             } catch (IOException e) {
                 lg.error("I/O error", e);
+            } finally {
+                if (ir != null) {
+                    try {
+                        ir.close();
+                    } catch (IOException e) {
+                        lg.error("Error reading reader - I/O error", e);
+                    }
+                }
             }
         }
         return appObjects;

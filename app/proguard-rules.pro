@@ -23,3 +23,7 @@
 -assumenosideeffects class org.slf4j.** { *; }
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
+-dontwarn retrofit2.**
+-dontwarn okio.**
+-dontwarn com.crashlytics.**
+-dontwarn okhttp3.logging.**
