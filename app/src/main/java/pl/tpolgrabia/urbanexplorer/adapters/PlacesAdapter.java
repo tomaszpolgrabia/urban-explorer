@@ -25,7 +25,7 @@ import java.util.List;
 public class PlacesAdapter extends ArrayAdapter<GooglePlaceResult> {
 
 
-    private static final int MAX_CHARS_FOR_TAGS_IN_INDEX_FRAG = 40;
+    private static final int MAX_CHARS_FOR_TAGS_IN_INDEX_FRAG = 35;
 
     public PlacesAdapter(Context context, List<GooglePlaceResult> objects) {
         super(context, R.layout.google_place_item, objects);
