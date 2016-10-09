@@ -274,13 +274,13 @@ public class PlacesFragment extends Fragment {
             response.getNextPageToken());
 
         ListView placesWidget = (ListView) getView().findViewById(R.id.google_places);
-        if (nextPageToken == null) {
-            places = response.getPlaces();
-            PlacesAdapter adapter = new PlacesAdapter(getActivity(), places);
+        PlacesAdapter adapter = (PlacesAdapter)placesWidget.getAdapter();
+        if (adapter == null) {
+            adapter = new PlacesAdapter(getActivity(), new ArrayList<GooglePlaceResult>());
             placesWidget.setAdapter(adapter);
-        } else {
-            places.addAll(response.getPlaces());
-            PlacesAdapter adapter = (PlacesAdapter)placesWidget.getAdapter();
+        }
+
+        if (response.getPlaces() != null) {
             adapter.addAll(response.getPlaces());
         }
 
