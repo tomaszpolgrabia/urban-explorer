@@ -40,9 +40,7 @@ import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Semaphore;
-import java.util.regex.Pattern;
 
 
 /**
@@ -164,6 +162,8 @@ public class PlacesFragment extends Fragment {
                 "Location changed: %.3f,%.3f",
                 location.getLatitude(), location.getLongitude()),
             Toast.LENGTH_SHORT).show();
+
+        cleanAdapter();
 
         places = null;
         nextPageToken = null;
@@ -333,11 +333,25 @@ public class PlacesFragment extends Fragment {
     public void refresh(RefreshEvent event) {
         lg.debug("Refreshing event...");
         Toast.makeText(getActivity(), "Refreshing event google places", Toast.LENGTH_SHORT).show();
+
+        if (getView() == null) {
+            lg.debug("Sorry, headless fragment");
+            return;
+        }
+
+        cleanAdapter();
+
         pageId = 0L;
         places = null;
         nextPageToken = null;
         noMoreResults = false;
         fetchNearbyPlacesAndPresent(LocationUtils.getLastKnownLocation(getActivity()));
+    }
+
+    private void cleanAdapter() {
+        ListView plagesWidget = (ListView) getView().findViewById(R.id.google_places);
+        PlacesAdapter adapter = (PlacesAdapter) plagesWidget.getAdapter();
+        adapter.clear();
     }
 
 }
