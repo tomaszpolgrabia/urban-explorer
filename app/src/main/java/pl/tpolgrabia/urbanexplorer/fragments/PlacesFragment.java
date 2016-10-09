@@ -288,6 +288,9 @@ public class PlacesFragment extends Fragment {
         if (nextPageToken == null) {
             noMoreResults = true;
         }
+
+        MainActivity activity = (MainActivity) getActivity();
+        activity.hideProgress();
         semaphore.release();
     }
 
