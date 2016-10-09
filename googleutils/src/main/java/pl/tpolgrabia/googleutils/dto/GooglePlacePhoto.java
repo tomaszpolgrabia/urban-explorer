@@ -8,11 +8,13 @@ import java.util.List;
  * Created by tpolgrabia on 28.09.16.
  */
 public class GooglePlacePhoto {
+    @SerializedName("height")
     private Long height;
     @SerializedName("html_attributions")
     private List<String> htmlAttributions;
     @SerializedName("photo_reference")
     private String photoReference;
+    @SerializedName("width")
     private Long width;
 
     public Long getHeight() {

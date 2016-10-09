@@ -1,10 +1,14 @@
 package pl.tpolgrabia.googleutils.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by tpolgrabia on 28.09.16.
  */
 public class GooglePlaceGeometry {
+    @SerializedName("location")
     private GooglePlaceLocation location;
+    @SerializedName("viewport")
     private GooglePlaceViewport viewport;
 
     public GooglePlaceLocation getLocation() {

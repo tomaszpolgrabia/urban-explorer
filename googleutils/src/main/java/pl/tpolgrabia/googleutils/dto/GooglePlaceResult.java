@@ -8,17 +8,27 @@ import java.util.List;
  * Created by tpolgrabia on 28.09.16.
  */
 public class GooglePlaceResult {
+    @SerializedName("geometry")
     private GooglePlaceGeometry geometry;
+    @SerializedName("icon")
     private String icon;
+    @SerializedName("id")
     private String id;
+    @SerializedName("name")
     private String name;
+    @SerializedName("photos")
     private List<GooglePlacePhoto> photos;
     @SerializedName("place_id")
     private String placeId;
+    @SerializedName("rating")
     private Double rating;
+    @SerializedName("reference")
     private String reference;
+    @SerializedName("scope")
     private String scope;
+    @SerializedName("types")
     private List<String> types;
+    @SerializedName("vicinity")
     private String vicinity;
 
     public GooglePlaceGeometry getGeometry() {

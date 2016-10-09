@@ -12,7 +12,9 @@ public class GooglePlaceResponse {
     private List<String> htmlAttributions;
     @SerializedName("next_page_token")
     private String nextPageToken;
+    @SerializedName("results")
     private List<GooglePlaceResult> results;
+    @SerializedName("status")
     private String status;
 
     public List<String> getHtmlAttributions() {

@@ -92,3 +92,4 @@
 -keep class java.nio.file.** { *; }
 -keep class retrofit2.** { *; }
 -keep class okio.** { *; }
+-keepclasseswithmembernames class pl.tpolgrabia.urbanexplorer.dto.** { *; }
