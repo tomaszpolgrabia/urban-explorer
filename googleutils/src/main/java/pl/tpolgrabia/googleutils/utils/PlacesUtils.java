@@ -2,10 +2,7 @@ package pl.tpolgrabia.googleutils.utils;
 
 import android.content.Context;
 import com.androidquery.AQuery;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.googleutils.GooglePlacesService;
@@ -53,7 +50,7 @@ public class PlacesUtils {
         }
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        // httpClient.addInterceptor(new RetrofitDebugInterceptor());
+        httpClient.addInterceptor(new RetrofitDebugInterceptor());
 
         Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(GooglePlacesConstants.GOOGLE_MAPS_PLACES_API_BASEURL)
@@ -74,22 +71,4 @@ public class PlacesUtils {
 
     }
 
-    private static class RetrofitDebugInterceptor implements Interceptor {
-        @Override
-        public okhttp3.Response intercept(Chain chain) throws IOException {
-            final Request req = chain.request();
-            okhttp3.Response response = chain.proceed(req);
-            boolean successFull = response.isSuccessful();
-            int code = response.code();
-            String message = response.message();
-            String msg = response.body().string();
-            lg.debug("Got response. Is successfull: {}, code: {}, message: {}, msg: {}",
-                successFull,
-                code,
-                message,
-                msg);
-            // now we repeat once again (because we have used the stream)
-            return chain.proceed(chain.request());
-        }
-    }
 }

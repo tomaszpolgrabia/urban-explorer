@@ -54,7 +54,14 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
                     param.getSearchItemType(),
                     param.getPageToken());
 
+                lg.debug("Whole retrofit response: {}", placesResponse);
+
                 if (placesResponse != null && placesResponse.code() == HttpStatus.SC_OK) {
+                    lg.debug("Retrofit respone code: {}, body: {}, error body: {}, message: {}",
+                        placesResponse.code(),
+                        placesResponse.body(),
+                        placesResponse.errorBody(),
+                        placesResponse.message());
                     GooglePlacesResponse response = new GooglePlacesResponse();
                     final GooglePlaceResponse responseBody = placesResponse.body();
                     lg.debug("Google response body: {}", responseBody);
@@ -83,7 +90,9 @@ public class GooglePlacesWorker extends AsyncTask<GooglePlacesRequest, Integer, 
             final String googleStatus = response.getStatus();
             if (!"OK".equals(googleStatus) && !"SUCCESS".equals(googleStatus)) {
                 if (!"OVER_QUERY_LIMIT".equals(googleStatus)) {
-                    Toast.makeText(ctx, "Google returned status {}", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ctx,
+                        String.format("Google returned status %s", googleStatus),
+                        Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(ctx,
                         "This application has exceeded free google places api daily limit - 150k." +
