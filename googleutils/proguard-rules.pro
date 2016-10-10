@@ -48,8 +48,8 @@
 -keep class javax.inject.** { *; }
 -keep class retrofit.** { *; }
 
--keep class ch.qos.logback.** { *; }
--keep class org.slf4j.** { *; }
+-assumenosideeffects class ch.qos.logback.** { *; }
+-assumenosideeffects class org.slf4j.** { *; }
 
 # Proguard rules for retrofit
 
