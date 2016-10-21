@@ -1,47 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="wrap_content"
+              android:padding="15dp">
 
-    <LinearLayout
-                  android:orientation="horizontal"
-                  android:layout_width="match_parent"
+    <ImageView android:id="@+id/wiki_locs_item_img_preview"
+               android:layout_width="80dp"
+               android:layout_height="80dp"
+               android:layout_marginRight="10dp"/>
+
+    <LinearLayout android:id="@+id/wiki_locs_item_desc_container"
+                  android:layout_width="0dp"
+                  android:layout_height="match_parent"
+                  android:layout_weight="1"
+                  android:orientation="vertical">
+
+        <TextView android:id="@+id/wiki_locs_item_title"
+                  android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:layout_marginLeft="8dp"
-                  android:layout_marginTop="8dp"
-                  android:layout_marginRight="8dp"
-                  android:layout_marginBottom="8dp">
+                  android:text="@string/wiki_location_fill_title"/>
 
-        <ImageView android:id="@+id/wiki_locs_item_img_preview"
-                   android:layout_width="80dp"
-                   android:layout_height="80dp"
-                   android:layout_marginRight="10dp"/>
+        <Space android:layout_width="match_parent"
+               android:layout_height="0dp"
+               android:layout_weight="1"/>
 
-        <LinearLayout android:id="@+id/wiki_locs_item_desc_container"
-                      android:layout_width="0dp"
-                      android:layout_height="match_parent"
-                      android:layout_weight="1"
-                      android:orientation="vertical">
+        <TextView android:id="@+id/wiki_locs_item_distance"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="left"
+                  android:text="@string/wiki_location_fill_distance"/>
 
-            <TextView android:id="@+id/wiki_locs_item_title"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="@string/wiki_location_fill_title"/>
-
-            <Space android:layout_width="match_parent"
-                   android:layout_height="0dp"
-                   android:layout_weight="1"/>
-
-            <TextView android:id="@+id/wiki_locs_item_distance"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="left"
-                      android:text="@string/wiki_location_fill_distance"/>
-
-
-        </LinearLayout>
 
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>
