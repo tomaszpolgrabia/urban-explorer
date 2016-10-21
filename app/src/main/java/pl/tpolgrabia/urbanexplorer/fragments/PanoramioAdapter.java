@@ -22,6 +22,8 @@ import java.util.List;
  * Created by tpolgrabia on 27.08.16.
  */
 public class PanoramioAdapter extends ArrayAdapter<PanoramioImageInfo> {
+    public static final int MAX_OWNERNAME_LENGTH = 10;
+    public static final int MAX_PANORAMIO_DESCRIPTION_LENGTH = 96;
     private final AQuery aq;
 
     public PanoramioAdapter(FragmentActivity activity, int location_item, List<PanoramioImageInfo> photosDescriptions) {
@@ -43,11 +45,29 @@ public class PanoramioAdapter extends ArrayAdapter<PanoramioImageInfo> {
 
         TextView locDesc = (TextView) itemView.findViewById(R.id.location_description);
         itemView.setTag(item.getPhotoId());
-        locDesc.setText(item.getPhotoTitle());
+        final String description = item.getPhotoTitle();
+        final String trimmedDescription =
+            description != null && description.length() > MAX_PANORAMIO_DESCRIPTION_LENGTH
+                ? description.substring(0, MAX_PANORAMIO_DESCRIPTION_LENGTH) + "..."
+                : description;
+        locDesc.setText(trimmedDescription);
         final String photoUrl = item.getPhotoFileUrl();
         ImageView photoImg = (ImageView) itemView.findViewById(R.id.photo_img);
         photoImg.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.noimage));
         ImageLoader.getInstance().displayImage(photoUrl, photoImg, MainActivity.options);
+
+
+        TextView authorWidget = (TextView) itemView.findViewById(R.id.location_author);
+        final String ownerName = item.getOwnerName();
+        final String trimmedOwnerName =
+            ownerName != null && ownerName.length() > MAX_OWNERNAME_LENGTH
+                ? ownerName.substring(0, MAX_OWNERNAME_LENGTH) + "..."
+                : ownerName;
+        authorWidget.setText(trimmedOwnerName);
+
+        TextView uploadDateWidget = (TextView) itemView.findViewById(R.id.location_upload_date);
+        uploadDateWidget.setText(item.getUploadDate());
+
         return itemView;
     }
 }

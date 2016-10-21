@@ -22,7 +22,7 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:text="@string/test_string"/>
-
+w
         <TextView android:id="@+id/place_rate"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
