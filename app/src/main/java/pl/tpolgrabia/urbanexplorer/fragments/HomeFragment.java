@@ -223,8 +223,15 @@ public class HomeFragment extends Fragment  {
         EventBus.getDefault().unregister(this);
         PanoramioCacheUtils.savePhotosToCache(getActivity(), photos);
 
-        EventBus.getDefault().unregister(locationChangedHandler);
-        EventBus.getDefault().unregister(providerChangedHandler);
+        // FIXME true reason is that hot swapping doesn't fire the activityCreated event while it was recreated
+        if (locationChangedHandler != null) {
+            // FIXME only avoiding crash
+            EventBus.getDefault().unregister(locationChangedHandler);
+        }
+        if (providerChangedHandler != null) {
+            // FIXME only avoiding crash
+            EventBus.getDefault().unregister(providerChangedHandler);
+        }
     }
 
     @Override

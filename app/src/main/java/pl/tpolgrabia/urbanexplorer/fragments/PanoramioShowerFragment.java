@@ -66,6 +66,15 @@ public class PanoramioShowerFragment extends Fragment {
 
             photoUrl = (TextView)inflatedView.findViewById(R.id.photo_url);
             photoUrl.setText(imageInfo.getPhotoUrl());
+            photoUrl.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse(imageInfo.getPhotoUrl()));
+                    startActivity(intent);
+                    return true;
+                }
+            });
 
             photoLocation = (TextView)inflatedView.findViewById(R.id.photo_location);
             photoLocation.setText(imageInfo.getLatitude() + "," + imageInfo.getLongitude());
