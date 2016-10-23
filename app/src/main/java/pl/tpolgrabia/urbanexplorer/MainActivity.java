@@ -123,8 +123,11 @@ public class MainActivity extends ActionBarActivity {
         boolean copySavedConfiguration = savedConfiguration =
             savedInstanceState != null && savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY);
 
-        switchFragment();
-        updateSwipeHandler();
+        String deviceType = getResources().getString(R.string.device_type);
+        if ("Plain".equals(deviceType)) {
+            switchFragment();
+            updateSwipeHandler();
+        }
         if (!copySavedConfiguration && HelperUtils.checkForLocalicatonEnabled(this)) return;
     }
 
