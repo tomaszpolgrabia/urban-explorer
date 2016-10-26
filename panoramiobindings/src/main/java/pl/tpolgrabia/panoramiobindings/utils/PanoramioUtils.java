@@ -1,6 +1,10 @@
 package pl.tpolgrabia.panoramiobindings.utils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.PointF;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
@@ -146,4 +150,24 @@ public class PanoramioUtils {
     }
 
 
+    public static PointF calcDims(Activity ctx) {
+        DisplayMetrics metrics = calcMetrics(ctx);
+        int w = metrics.widthPixels;
+        int h = metrics.heightPixels;
+        float wi = w / metrics.xdpi;
+        float hi = h / metrics.ydpi;
+        return new PointF(wi, hi);
+    }
+
+    public static DisplayMetrics calcMetrics(Activity ctx) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        final Display display = ctx.getWindowManager().getDefaultDisplay();
+        display.getMetrics(metrics);
+        return metrics;
+    }
+
+    public static double calcDiag(Activity ctx) {
+        PointF dims = calcDims(ctx);
+        return Math.sqrt(dims.x*dims.x + dims.y*dims.y);
+    }
 }

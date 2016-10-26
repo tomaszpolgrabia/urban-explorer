@@ -1,7 +1,11 @@
 package pl.tpolgrabia.urbanexplorer;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
@@ -10,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.view.*;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import org.greenrobot.eventbus.EventBus;
@@ -42,6 +47,7 @@ public class MainActivity extends ActionBarActivity {
 
     public static DisplayImageOptions options;
     public static DisplayImageOptions rectOptions;
+
     private GestureDetectorCompat gestureDetector;
     private MainActivityState currFrag = MainActivityState.PANORAMIO;
     private StandardLocationListener locationCallback;
@@ -193,10 +199,7 @@ public class MainActivity extends ActionBarActivity {
         this.currFrag = MainActivityState.PANORAMIO_SHOWER;
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        PanoramioShowerFragment panoramioShower = new PanoramioShowerFragment();
-        Bundle arguments = new Bundle();
-        arguments.putSerializable(PanoramioShowerFragment.PANORAMIO_PHOTO_ARG_KEY, photoInfo);
-        panoramioShower.setArguments(arguments);
+        PanoramioShowerFragment panoramioShower = createShowerFragment(photoInfo);
 
         ctx.setCustomAnimations(R.anim.slide_in_down,
             R.anim.slide_out_down,
@@ -214,6 +217,14 @@ public class MainActivity extends ActionBarActivity {
 
         ctx.commit();
 
+    }
+
+    public static PanoramioShowerFragment createShowerFragment(PanoramioImageInfo photoInfo) {
+        PanoramioShowerFragment panoramioShower = new PanoramioShowerFragment();
+        Bundle arguments = new Bundle();
+        arguments.putSerializable(PanoramioShowerFragment.PANORAMIO_PHOTO_ARG_KEY, photoInfo);
+        panoramioShower.setArguments(arguments);
+        return panoramioShower;
     }
 
     private void switchFragment() {
@@ -261,7 +272,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void updateSwipeHandler() {
-        SwipeFrameLayout swipeFragments = (SwipeFrameLayout) findViewById(R.id.fragments);
+        SwipeFrameLayout swipeFragments = (SwipeFrameLayout) findViewById(R.id.swipe_frag);
         swipeFragments.setCustomInterceptor(new CustomInterceptor() {
             @Override
             public void handle(MotionEvent ev) {
@@ -405,6 +416,13 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void handleLoadingFinish(DataLoadingFinishEvent event) {
         progressDlg.dismiss();
+    }
+
+    public void addFragment(Fragment fragment, String tag) {
+        FragmentManager fragMgr = getSupportFragmentManager();
+        FragmentTransaction tx = fragMgr.beginTransaction();
+        tx.add(R.id.fragments, fragment, tag);
+        tx.commit();
     }
 
 }

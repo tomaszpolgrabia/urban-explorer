@@ -24,11 +24,9 @@ import java.util.List;
 public class PanoramioAdapter extends ArrayAdapter<PanoramioImageInfo> {
     public static final int MAX_OWNERNAME_LENGTH = 10;
     public static final int MAX_PANORAMIO_DESCRIPTION_LENGTH = 96;
-    private final AQuery aq;
 
-    public PanoramioAdapter(FragmentActivity activity, int location_item, List<PanoramioImageInfo> photosDescriptions) {
-        super(activity, location_item, photosDescriptions);
-        aq = NetUtils.createProxyAQueryInstance(activity);
+    public PanoramioAdapter(FragmentActivity ctx, int location_item, List<PanoramioImageInfo> photosDescriptions) {
+        super(ctx, location_item, photosDescriptions);
     }
 
     @Override
