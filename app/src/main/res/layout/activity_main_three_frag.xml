@@ -2,7 +2,6 @@
 <pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/fragments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -14,26 +13,26 @@
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent">
 
-        <fragment android:name="pl.tpolgrabia.urbanexplorer.fragments.PlacesFragment"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_weight="1">
+        <FrameLayout android:id="@+id/frag_container1"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:layout_weight="1">
 
-        </fragment>
+        </FrameLayout>
 
-        <fragment android:name="pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_weight="1">
+        <FrameLayout android:id="@+id/frag_container2"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:layout_weight="1">
 
-        </fragment>
-        
-        <fragment android:name="pl.tpolgrabia.urbanexplorer.fragments.HomeFragment"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_weight="1">
+        </FrameLayout>
 
-        </fragment>
+        <FrameLayout android:id="@+id/frag_container3"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:layout_weight="1">
+
+        </FrameLayout>
 
     </LinearLayout>
 
