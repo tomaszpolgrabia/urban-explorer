@@ -51,59 +51,6 @@ public class WikiUtils {
         this.countryCode = countryCode;
     }
 
-    public void fetchNearPlaces(
-        final double latitude,
-        final double longitude,
-        final Long resultsLimit,
-        final Long radiusLimit,
-        final WikiResponseCallback callback) {
-        final AQuery aq = NetUtils.createProxyAQueryInstance(ctx);
-
-        aq.ajax("TODO", JSONObject.class, new AjaxCallback<JSONObject>(){
-            @Override
-            public void callback(String url, JSONObject object, AjaxStatus status) {
-                // TODO handle response
-                final String qurl = "https://" + countryCode + ".wikipedia.org/w/api.php?" +
-                    "action=query" +
-                    "&prop=coordinates%7Cpageimages%7Cpageterms" +
-                    "&colimit=50" +
-                    "&piprop=thumbnail" +
-                    "&pithumbsize=144" +
-                    "&pilimit=50" +
-                    "&wbptterms=description" +
-                    "&generator=geosearch" +
-                    "&ggscoord=" + latitude + "%7C" + longitude +
-                    "&ggsradius=" + Math.max(WIKI_MIN_RADIUS, ifNullSet(radiusLimit, 10000L)) +
-                    "&ggslimit=" + Math.min(WIKI_MIN_RESULTS, Math.max(WIKI_MAX_RESULTS_LIMIT,
-                        checkIfNullLong(resultsLimit))) +
-                    "&format=" + WIKI_FORMAT;
-                aq.ajax(qurl, JSONObject.class, new AjaxCallback<JSONObject>() {
-                    @Override
-                    public void callback(String url, JSONObject object, AjaxStatus status) {
-                        if (status.getCode() == 200) {
-                            try {
-                                callback.callback(WikiStatus.SUCCESS, fetchWikiResponse(object));
-                            } catch (JSONException e) {
-                                lg.error("JSon error: {}", object, e);
-                            }
-                        } else {
-                            callback.callback(WikiStatus.NETWORK_ERROR, null);
-                        }
-                    }
-                });
-
-            }
-        });
-    }
-
-    private static <T> T ifNullSet(T val, T def) {
-        return val == null ? def : val;
-    }
-
-    private static Long checkIfNullLong(Long lval) {
-        return lval != null ? lval : 0L;
-    }
-
     public static WikiResponse fetchWikiResponse(JSONObject object) throws JSONException {
         if (object == null) {
             return null;
