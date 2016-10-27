@@ -1,11 +1,7 @@
 package pl.tpolgrabia.urbanexplorer;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
@@ -14,25 +10,27 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.DisplayMetrics;
 import android.view.*;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
-import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.events.RefreshSettingsEvent;
-import pl.tpolgrabia.urbanexplorer.fragments.*;
+import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
+import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
+import pl.tpolgrabia.urbanexplorer.fragments.PlacesFragment;
+import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorer.handlers.*;
-import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
-import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorer.utils.HelperUtils;
 import pl.tpolgrabia.urbanexplorer.views.CustomInterceptor;
 import pl.tpolgrabia.urbanexplorer.views.SwipeFrameLayout;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
+import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingStartEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
@@ -199,18 +197,18 @@ public class MainActivity extends ActionBarActivity {
         this.currFrag = MainActivityState.PANORAMIO_SHOWER;
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ctx = fragmentManager.beginTransaction();
-        PanoramioShowerFragment panoramioShower = createShowerFragment(photoInfo);
 
         ctx.setCustomAnimations(R.anim.slide_in_down,
             R.anim.slide_out_down,
             R.anim.slide_in_up,
             R.anim.slide_out_up);
         Fragment frag = fragmentManager.findFragmentByTag(PanoramioShowerFragment.TAG);
-        if (frag != null) {
-            ctx.replace(R.id.fragments, frag);
-        } else {
-            ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
-        }
+        ctx.replace(R.id.fragments, frag);
+//        if (frag != null) {
+//            ctx.replace(R.id.fragments, frag);
+//        } else {
+//            ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
+//        }
         if (!savedConfiguration) {
             ctx.addToBackStack(AppConstants.PHOTO_BACKSTACK);
         }
@@ -258,15 +256,17 @@ public class MainActivity extends ActionBarActivity {
         HelperUtils.traceAllAvailableFragments(fragmentManager);
 
         lg.trace("Trying to search newFragment by tag {}", tag);
-        Fragment currFragment = fragmentManager.findFragmentByTag(tag);
-        if (currFragment == null) {
-            lg.trace("Using new newFragment: {}", System.identityHashCode(newFragment));
-            ctx.replace(R.id.fragments, newFragment, tag);
-        } else {
-            lg.trace("Reusing old newFragment: {}", System.identityHashCode(currFragment));
-            ctx.replace(R.id.fragments, currFragment);
+        // Fragment currFragment = fragmentManager.findFragmentByTag(tag);
+        final List<Fragment> fragments = fragmentManager.getFragments();
+        if (fragments != null) {
+            for (Fragment frag : fragments) {
+                if (frag == null){
+                    continue;
+                }
+                ctx.remove(frag);
+            }
         }
-        // ctx.addToBackStack(MAIN_BACKSTACK);
+        ctx.add(R.id.fragments, newFragment);
         ctx.commit();
         updateSwipeHandler();
     }
