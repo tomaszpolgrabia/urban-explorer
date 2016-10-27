@@ -6,6 +6,7 @@ import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -17,6 +18,7 @@ import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
 import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
 import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
+import pl.tpolgrabia.wikibinding.WikiService;
 import pl.tpolgrabia.wikibinding.callback.WikiAppResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiStatus;
@@ -28,7 +30,11 @@ import pl.tpolgrabia.wikibinding.dto.generator.WikiThumbnail;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoObject;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponseCallback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -119,6 +125,26 @@ public class WikiUtils {
         wikiLocation.setPrimary(jlocation.optString("primary"));
         wikiLocation.setGlobe(jlocation.optString("globe"));
         return wikiLocation;
+    }
+
+    public Response<WikiGeoResponse> fetchGeoSearchWikiMetadata2(Double latitude,
+                                                                 Double longitude,
+                                                                 Double radius,
+                                                                 Long limit) throws IOException {
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
+
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(httpClient.build())
+            .build();
+
+        return retrofit.create(WikiService.class).fetchGeoSearch(
+            String.format("%s%7C%s", latitude, longitude),
+            radius,
+            limit
+        ).execute();
     }
 
     public void fetchGeoSearchWikiMetadata(Context ctx,
@@ -277,6 +303,23 @@ public class WikiUtils {
                     });
             }
         });
+
+    }
+
+    public Response<String> fetchPageInfos2(List<Long> pageIds) throws IOException {
+
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
+
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(httpClient.build())
+            .build();
+
+        return retrofit.create(WikiService.class)
+            .fetchPageInfos(StringUtils.join(pageIds, "|"))
+            .execute();
 
     }
 
