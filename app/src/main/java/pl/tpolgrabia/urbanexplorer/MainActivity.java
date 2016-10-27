@@ -17,6 +17,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
+import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
@@ -203,12 +204,13 @@ public class MainActivity extends ActionBarActivity {
             R.anim.slide_in_up,
             R.anim.slide_out_up);
         Fragment frag = fragmentManager.findFragmentByTag(PanoramioShowerFragment.TAG);
-        ctx.replace(R.id.fragments, frag);
-//        if (frag != null) {
-//            ctx.replace(R.id.fragments, frag);
-//        } else {
-//            ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
-//        }
+
+        if (frag != null) {
+            ctx.replace(R.id.fragments, frag);
+        } else {
+            Fragment panoramioShower = createShowerFragment(photoInfo);
+            ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
+        }
         if (!savedConfiguration) {
             ctx.addToBackStack(AppConstants.PHOTO_BACKSTACK);
         }
