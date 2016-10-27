@@ -36,8 +36,7 @@ public class PanoramioItemLongClickHandler implements AdapterView.OnItemLongClic
         PanoramioAdapter panAdapter = (PanoramioAdapter) finalLocations.getAdapter();
         PanoramioImageInfo photoInfo = panAdapter.getItem(pos);
         MainActivity activity = (MainActivity) homeFragment.getActivity();
-        double dims = PanoramioUtils.calcDiag(activity);
-        if (dims >= AppConstants.PANORAMIO_SHOWER_SIDEBAR_THRESHOLD) {
+        if (PanoramioSwitchHandler.enoughLargeAndHorizontal(activity)) {
             lg.debug("Sending panoramio image event");
             EventBus.getDefault().post(new PhotoInfoUpdateEvent(this, photoInfo));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(

@@ -1,5 +1,8 @@
 package pl.tpolgrabia.urbanexplorer.handlers;
 
+import android.app.Activity;
+import android.content.Context;
+import android.util.DisplayMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
@@ -25,10 +28,15 @@ public class PanoramioSwitchHandler implements Runnable {
     public void run() {
         lg.debug("Switching to home fragment");
         mainActivity.switchFragment(new HomeFragment(), HomeFragment.TAG);
-        double diagInches = PanoramioUtils.calcDiag(mainActivity);
-        if (diagInches >= AppConstants.PANORAMIO_SHOWER_SIDEBAR_THRESHOLD) {
+        if (enoughLargeAndHorizontal(mainActivity)) {
             mainActivity.addFragment(MainActivity.createShowerFragment(null), PanoramioShowerFragment.TAG);
             // mainActivity.addFragment(new WikiLocationsFragment(), WikiLocationsFragment.TAG);
         }
+    }
+
+    public static boolean enoughLargeAndHorizontal(Activity ctx) {
+        DisplayMetrics metrics = PanoramioUtils.calcMetrics(ctx);
+        return metrics.widthPixels >= metrics.heightPixels // horizontal
+            && PanoramioUtils.calcDiag(ctx) >= AppConstants.PANORAMIO_SHOWER_SIDEBAR_THRESHOLD;
     }
 }

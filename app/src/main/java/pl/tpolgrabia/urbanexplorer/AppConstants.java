@@ -22,5 +22,5 @@ public class AppConstants {
     static final String SAVED_CONFIG_KEY = "SAVED_CONFIG_KEY";
     public static final String GOOGLE_API_KEY = "AIzaSyBAJoK-pu_qnQ0U8EGjM1Zkz_g8oJV4w2g";
     public static final Locale DEF_APP_LOCALE = Locale.ENGLISH;
-    public static final double PANORAMIO_SHOWER_SIDEBAR_THRESHOLD = 5.0;
+    public static final double PANORAMIO_SHOWER_SIDEBAR_THRESHOLD = 7.0;
 }
