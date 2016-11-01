@@ -1,16 +1,23 @@
 package pl.tpolgrabia.wikibinding.dto.generator;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
  * Created by tpolgrabia on 28.08.16.
  */
 public class WikiPage {
+    @SerializedName("coordinates")
     private List<WikiLocation> coordinates;
     private Long index;
+    @SerializedName("ns")
     private Long ns;
+    @SerializedName("pageid")
     private Long pageId;
+    @SerializedName("thumbnail")
     private WikiThumbnail thumbnail;
+    @SerializedName("title")
     private String title;
 
     public List<WikiLocation> getCoordinates() {

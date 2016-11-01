@@ -1,5 +1,7 @@
 package pl.tpolgrabia.wikibinding.dto.generator;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 /**
@@ -7,9 +9,13 @@ import java.io.Serializable;
  */
 public class WikiLocation implements Serializable{
     private static final long serialVersionUID = 2574692501816893919L;
+    @SerializedName("globe")
     private String globe;
+    @SerializedName("lat")
     private Double latitude;
+    @SerializedName("lon")
     private Double longitude;
+    @SerializedName("primary")
     private String primary;
 
     public static long getSerialVersionUID() {

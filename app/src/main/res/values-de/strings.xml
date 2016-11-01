@@ -18,7 +18,7 @@
     <string name="panoramio_search_settings">Panoramio Sucheeinstellungen</string>
     <string name="panoramio_radiusx_summary">X-Radius</string>
     <string name="panoramio_radiusx_title">X-Radius</string>
-    <string name="panoramio_bulk_size_summary">Panoramio Unterladung's größe</string>
+    <string name="panoramio_bulk_size_summary">Panoramio Unterladung\'s größe</string>
     <string name="login">Benutzer</string>
     <string name="location_xrange">Lage X-Radius</string>
     <string name="location_yrange">Lage Y-Radius</string>

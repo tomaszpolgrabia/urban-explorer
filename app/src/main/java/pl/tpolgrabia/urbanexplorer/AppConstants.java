@@ -6,7 +6,7 @@ import java.util.Locale;
  * Created by tpolgrabia on 27.08.16.
  */
 public class AppConstants {
-    public static final AppStage RELEASE = AppStage.FINAL;
+    public static final AppStage RELEASE = AppStage.DEVELOPMENT;
     public static final float MIN_DISTANCE = 100;
     public static final long GPS_LOCATION_UPDATE_FREQ = 15000;
     public static final float GPS_LOCATION_DISTANCE_FREQ = MIN_DISTANCE;

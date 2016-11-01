@@ -1,7 +1,8 @@
 package pl.tpolgrabia.wikibinding;
 
 import pl.tpolgrabia.wikibinding.dto.generator.WikiResponse;
-import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse;
+import pl.tpolgrabia.wikibinding.dto.generator.WikiResponse2;
+import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse2;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -11,7 +12,7 @@ import retrofit2.http.Query;
  */
 public interface WikiService {
     @GET("api.php?action=query&list=geosearch&format=json")
-    Call<WikiGeoResponse> fetchGeoSearch(
+    Call<WikiGeoResponse2> fetchGeoSearch(
         @Query("gscoord") String gscoord,
         @Query("gsradius") Double radius,
         @Query("gslimit") Long limit);
@@ -25,6 +26,6 @@ public interface WikiService {
         "&pilimit=50" +
         "&wbptterms=description" +
         "&format=json")
-    Call<WikiResponse> fetchPageInfos(
+    Call<WikiResponse2> fetchPageInfos(
         @Query("pageids") String pageIds);
 }

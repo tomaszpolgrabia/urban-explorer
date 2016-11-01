@@ -1,11 +1,16 @@
 package pl.tpolgrabia.wikibinding.dto.generator;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by tpolgrabia on 28.08.16.
  */
 public class WikiThumbnail {
+    @SerializedName("height")
     private Long height;
+    @SerializedName("source")
     private String source;
+    @SerializedName("width")
     private Long width;
 
     public Long getHeight() {

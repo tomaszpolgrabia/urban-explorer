@@ -3,6 +3,7 @@ package pl.tpolgrabia.urbanexplorer.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -23,7 +24,11 @@ import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.R;
 import pl.tpolgrabia.urbanexplorer.adapters.WikiLocationsAdapter;
 import pl.tpolgrabia.urbanexplorer.callbacks.wiki.*;
+import pl.tpolgrabia.urbanexplorer.dto.wiki.WikiRequestDto;
 import pl.tpolgrabia.urbanexplorer.events.RefreshSettingsEvent;
+import pl.tpolgrabia.urbanexplorer.worker.WikiWorker;
+import pl.tpolgrabia.urbanexplorerutils.utils.LocationUtils;
+import pl.tpolgrabia.urbanexplorerutils.utils.SettingsUtils;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
@@ -105,8 +110,8 @@ public class WikiLocationsFragment extends Fragment {
     public void fetchWikiLocations() {
         lg.trace("Fetch wiki locations");
 
-        final FragmentActivity activity = getActivity();
-        if (activity == null) {
+        final FragmentActivity ctx = getActivity();
+        if (ctx == null) {
             lg.warn("Activity shouldn't be null. No headless fragment");
             EventBus.getDefault().post(new DataLoadingFinishEvent(this));
             return;
@@ -124,7 +129,21 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        wikiUtils.fetchAppData(new WikiFetchAppDataCallback(this, activity));
+        // wikiUtils.fetchAppData(new WikiFetchAppDataCallback(this, activity));
+        // FIXME hardcoded locale value
+        final Location location = LocationUtils.getLastKnownLocation(ctx);
+        if (location == null) {
+            lg.warn("Location not available");
+            return;
+        }
+
+        WikiRequestDto dto = new WikiRequestDto();
+        dto.setLatitude(location.getLatitude());
+        dto.setLongitude(location.getLongitude());
+        dto.setLimit(SettingsUtils.fetchSearchLimit(ctx));
+        dto.setRadius(SettingsUtils.fetchRadiusLimit(ctx));
+        WikiWorker worker = new WikiWorker(ctx, this, "en");
+        worker.execute(dto);
     }
 
     @Override

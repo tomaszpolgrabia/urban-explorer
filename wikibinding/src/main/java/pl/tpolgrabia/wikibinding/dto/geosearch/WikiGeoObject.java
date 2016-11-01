@@ -1,5 +1,7 @@
 package pl.tpolgrabia.wikibinding.dto.geosearch;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 /**
@@ -7,12 +9,19 @@ import java.io.Serializable;
  */
 public class WikiGeoObject implements Serializable {
     private static final long serialVersionUID = 4527861009683008530L;
+    @SerializedName("pageid")
     private Long pageId;
+    @SerializedName("ns")
     private Long ns;
+    @SerializedName("title")
     private String title;
+    @SerializedName("lat")
     private Double latitude;
+    @SerializedName("lon")
     private Double longitude;
+    @SerializedName("dist")
     private Double distance;
+    @SerializedName("primary")
     private String primary;
 
     public Long getPageId() {

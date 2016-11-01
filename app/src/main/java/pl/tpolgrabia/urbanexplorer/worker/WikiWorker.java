@@ -18,8 +18,9 @@ import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 import pl.tpolgrabia.wikibinding.dto.generator.WikiPage;
 import pl.tpolgrabia.wikibinding.dto.generator.WikiResponse;
+import pl.tpolgrabia.wikibinding.dto.generator.WikiResponse2;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoObject;
-import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse;
+import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse2;
 import pl.tpolgrabia.wikibinding.utils.WikiUtils;
 import retrofit2.Response;
 
@@ -50,10 +51,14 @@ public class WikiWorker extends AsyncTask<WikiRequestDto, Integer, List<WikiAppO
 
     @Override
     protected List<WikiAppObject> doInBackground(WikiRequestDto... params) {
+
+        lg.info("Fetching {} wiki results", params.length);
+
         List<WikiAppObject> results = new ArrayList<>();
         for (WikiRequestDto param : params) {
+            lg.debug("Fetching wiki results for {}", param);
             try {
-                Response<WikiGeoResponse> apiResult = wikiUtils.fetchGeoSearchWikiMetadata2(
+                Response<WikiGeoResponse2> apiResult = wikiUtils.fetchGeoSearchWikiMetadata2(
                     param.getLatitude(),
                     param.getLongitude(),
                     param.getRadius(),
@@ -67,9 +72,16 @@ public class WikiWorker extends AsyncTask<WikiRequestDto, Integer, List<WikiAppO
                     return results;
                 }
 
-                WikiGeoResponse apiGeoResponse = apiResult.body();
+                lg.debug("Fetched wiki response {}", apiResult.body());
+
+                WikiGeoResponse2 apiGeoResponse = apiResult.body();
                 List<Long> pageIds = new ArrayList<>();
-                final List<WikiGeoObject> geoItems = apiGeoResponse.getQuery();
+                final List<WikiGeoObject> geoItems = apiGeoResponse.getQuery().getGeosearch();
+
+                if (geoItems == null) {
+                    return results;
+                }
+
                 for (WikiGeoObject geoObject : geoItems) {
                     pageIds.add(geoObject.getPageId());
                 }
@@ -79,7 +91,8 @@ public class WikiWorker extends AsyncTask<WikiRequestDto, Integer, List<WikiAppO
                     geoItemsMap.put(geoItem.getPageId(), geoItem);
                 }
 
-                Response<WikiResponse> pageInfoResponse = wikiUtils.fetchPageInfos2(pageIds);
+                lg.debug("Fetching wiki page infos for {}", pageIds);
+                Response<WikiResponse2> pageInfoResponse = wikiUtils.fetchPageInfos2(pageIds);
                 int pageInfoResponseCode = pageInfoResponse.code();
                 if (pageInfoResponseCode != 200) {
                     lg.warn("Invalid http code {}. Message: {}. Try it later again",
@@ -87,18 +100,23 @@ public class WikiWorker extends AsyncTask<WikiRequestDto, Integer, List<WikiAppO
                     return results;
                 }
 
-                WikiResponse wikiResponse = pageInfoResponse.body();
+                WikiResponse2 wikiResponse = pageInfoResponse.body();
 
-                for (WikiPage page : wikiResponse.getPages()) {
+                lg.debug("Fetched page infos response: {}", wikiResponse);
+
+                for (WikiPage page : wikiResponse.getQuery().getPages().values()) {
                     WikiAppObject appObject = WikiUtils.convertWikiAppObject(geoItemsMap, page);
                     results.add(appObject);
                 }
-
 
             } catch (IOException e) {
                 lg.error("I/O error", e);
             }
         }
+
+        success = true;
+
+        lg.info("Retrieved {} wiki results", results.size());
         return results;
     }
 
@@ -108,7 +126,7 @@ public class WikiWorker extends AsyncTask<WikiRequestDto, Integer, List<WikiAppO
         frag.setAppObjects(nobjects);
 
         // handling here wiki locations
-        if (success) {
+        if (!success) {
             Toast.makeText(ctx, "Sorry, currently we have problem with interfacing wiki" +
                 ": " + success + ". Try again later", Toast.LENGTH_SHORT).show();
             return;

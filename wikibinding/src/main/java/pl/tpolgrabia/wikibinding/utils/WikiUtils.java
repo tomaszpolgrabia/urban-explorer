@@ -2,6 +2,7 @@ package pl.tpolgrabia.wikibinding.utils;
 
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -23,12 +24,10 @@ import pl.tpolgrabia.wikibinding.callback.WikiAppResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiResponseCallback;
 import pl.tpolgrabia.wikibinding.callback.WikiStatus;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
-import pl.tpolgrabia.wikibinding.dto.generator.WikiLocation;
-import pl.tpolgrabia.wikibinding.dto.generator.WikiPage;
-import pl.tpolgrabia.wikibinding.dto.generator.WikiResponse;
-import pl.tpolgrabia.wikibinding.dto.generator.WikiThumbnail;
+import pl.tpolgrabia.wikibinding.dto.generator.*;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoObject;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse;
+import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse2;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponseCallback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -141,12 +140,13 @@ public class WikiUtils {
         return appObject;
     }
 
-    public Response<WikiGeoResponse> fetchGeoSearchWikiMetadata2(Double latitude,
-                                                                 Double longitude,
-                                                                 Double radius,
-                                                                 Long limit) throws IOException {
+    public Response<WikiGeoResponse2> fetchGeoSearchWikiMetadata2(Double latitude,
+                                                                  Double longitude,
+                                                                  Double radius,
+                                                                  Long limit) throws IOException {
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
+        httpClient.addInterceptor(new WikiDebugInterceptor());
 
         Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
@@ -154,8 +154,10 @@ public class WikiUtils {
             .client(httpClient.build())
             .build();
 
+        final String gscoord = "" + latitude + "|" + longitude;
+        Log.d("XXX", "GSCoord" + gscoord);
         return retrofit.create(WikiService.class).fetchGeoSearch(
-            String.format("%s%7C%s", latitude, longitude),
+            gscoord,
             radius,
             limit
         ).execute();
@@ -310,10 +312,11 @@ public class WikiUtils {
 
     }
 
-    public Response<WikiResponse> fetchPageInfos2(List<Long> pageIds) throws IOException {
+    public Response<WikiResponse2> fetchPageInfos2(List<Long> pageIds) throws IOException {
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
+        httpClient.addInterceptor(new WikiDebugInterceptor());
 
         Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
