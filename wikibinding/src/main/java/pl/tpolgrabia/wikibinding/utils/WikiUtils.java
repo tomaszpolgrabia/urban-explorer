@@ -127,6 +127,20 @@ public class WikiUtils {
         return wikiLocation;
     }
 
+    public static WikiAppObject convertWikiAppObject(Map<Long, WikiGeoObject> geoItemsMap, WikiPage page) {
+        WikiAppObject appObject = new WikiAppObject();
+        appObject.setTitle(page.getTitle());
+        appObject.setDistance(geoItemsMap.get(page.getPageId()).getDistance());
+        appObject.setLatitude(page.getCoordinates().get(0).getLatitude());
+        appObject.setLongitude(page.getCoordinates().get(0).getLongitude());
+        final WikiThumbnail thumbonail = page.getThumbnail();
+        final String thumSource = thumbonail != null ? thumbonail.getSource() : null;
+        appObject.setThumbnail(thumSource);
+        appObject.setUrl(thumSource);
+        appObject.setPageId(page.getPageId());
+        return appObject;
+    }
+
     public Response<WikiGeoResponse> fetchGeoSearchWikiMetadata2(Double latitude,
                                                                  Double longitude,
                                                                  Double radius,
@@ -282,17 +296,7 @@ public class WikiUtils {
                             }
 
                             for (WikiPage page : pages) {
-                                WikiAppObject appObject = new WikiAppObject();
-                                appObject.setTitle(page.getTitle());
-                                appObject.setDistance(geoItemsMap.get(page.getPageId()).getDistance());
-                                appObject.setLatitude(page.getCoordinates().get(0).getLatitude());
-                                appObject.setLongitude(page.getCoordinates().get(0).getLongitude());
-                                final WikiThumbnail thumbonail = page.getThumbnail();
-                                final String thumSource = thumbonail != null ? thumbonail.getSource() : null;
-                                appObject.setThumbnail(thumSource);
-                                appObject.setUrl(thumSource);
-                                appObject.setPageId(page.getPageId());
-                                results.add(appObject);
+                                results.add(convertWikiAppObject(geoItemsMap, page));
                             }
 
                             // TODO here add callback invocation with result
@@ -306,7 +310,7 @@ public class WikiUtils {
 
     }
 
-    public Response<String> fetchPageInfos2(List<Long> pageIds) throws IOException {
+    public Response<WikiResponse> fetchPageInfos2(List<Long> pageIds) throws IOException {
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());

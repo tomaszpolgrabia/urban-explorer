@@ -1,5 +1,6 @@
 package pl.tpolgrabia.wikibinding;
 
+import pl.tpolgrabia.wikibinding.dto.generator.WikiResponse;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiGeoResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -24,17 +25,6 @@ public interface WikiService {
         "&pilimit=50" +
         "&wbptterms=description" +
         "&format=json")
-    Call<String> fetchPageInfos(
+    Call<WikiResponse> fetchPageInfos(
         @Query("pageids") String pageIds);
-
-//        aq.ajax("https://" + countryCode + ".wikipedia.org/w/api.php" +
-//        "?action=query" +
-//        "&prop=coordinates%7Cpageimages%7Cpageterms" +
-//        "&colimit=50" +
-//        "&piprop=thumbnail" +
-//        "&pithumbsize=144" +
-//        "&pilimit=50" +
-//        "&wbptterms=description" +
-//        "&pageids=" + StringUtils.join(pageIds, "|") +
-//        "&format=json", JSONObject.class, new AjaxCallback<JSONObject>() {
 }
