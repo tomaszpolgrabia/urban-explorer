@@ -34,7 +34,6 @@ import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.utils.*;
 import pl.tpolgrabia.urbanexplorerutils.utils.DebugUtils;
-import pl.tpolgrabia.wikibinding.utils.WikiUtils;
 
 import java.util.ArrayList;
 
@@ -54,7 +53,6 @@ public class WikiLocationsFragment extends Fragment {
     private int lastFetchSize = -1;
     private String currentGeocodedLocation;
     private GeocoderUtils geocoderUtils;
-    private WikiUtils wikiUtils;
     private WikiLocationCallback locationHandler;
     private WikiLocationProviderStatusCallback providerHandler;
 
@@ -78,7 +76,6 @@ public class WikiLocationsFragment extends Fragment {
 
     private void refreshSettings() {
         geocoderUtils = new GeocoderUtils(getActivity(), AppConstants.GOOGLE_API_KEY);
-        wikiUtils = new WikiUtils(getActivity(), getWikiLocale(getActivity()));
         ListView locations = (ListView) getView().findViewById(R.id.wiki_places);
         locations.setOnItemLongClickListener(new FetchWikiLocationsCallback(this));
     }
@@ -129,8 +126,6 @@ public class WikiLocationsFragment extends Fragment {
             return;
         }
 
-        // wikiUtils.fetchAppData(new WikiFetchAppDataCallback(this, activity));
-        // FIXME hardcoded locale value
         final Location location = LocationUtils.getLastKnownLocation(ctx);
         if (location == null) {
             lg.warn("Location not available");
