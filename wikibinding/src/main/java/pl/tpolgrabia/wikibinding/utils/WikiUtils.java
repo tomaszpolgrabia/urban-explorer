@@ -7,6 +7,7 @@ import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.google.gson.JsonObject;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -148,11 +149,7 @@ public class WikiUtils {
         // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
         httpClient.addInterceptor(new WikiDebugInterceptor());
 
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(httpClient.build())
-            .build();
+        Retrofit retrofit = createStandardInstance();
 
         final String gscoord = "" + latitude + "|" + longitude;
         Log.d("XXX", "GSCoord" + gscoord);
@@ -318,11 +315,7 @@ public class WikiUtils {
         // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
         httpClient.addInterceptor(new WikiDebugInterceptor());
 
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(httpClient.build())
-            .build();
+        Retrofit retrofit = createStandardInstance();
 
         return retrofit.create(WikiService.class)
             .fetchPageInfos(StringUtils.join(pageIds, "|"))
@@ -363,11 +356,55 @@ public class WikiUtils {
                                                              Long pageId,
                                                              AjaxCallback<JSONObject> callback) {
         NetUtils.createProxyAQueryInstance(ctx).ajax(
-            "https://" + countryCode + ".wikipedia.org/w/api.php?action=query&prop=info&pageids="
-                + pageId + "&inprop=url&format=json",
+            "https://" + countryCode + ".wikipedia.org/w/api.php" +
+                "?action=query" +
+                "&prop=info" +
+                "&inprop=url" +
+                "&format=json" +
+                "&pageids=" + pageId,
             JSONObject.class,
             callback
         );
+    }
+
+    public Response<JsonObject> fetchPageInfo(Long pageId) throws IOException {
+        Retrofit retrofit = createStandardInstance();
+        return retrofit.create(WikiService.class).fetchPageInfo(pageId).execute();
+    }
+
+    public String fetchPageInfoUrl(Long pageId) throws IOException {
+        Response<JsonObject> pageResponse = fetchPageInfo(pageId);
+        lg.debug("Received page response {}", pageResponse);
+        final int responseCode = pageResponse.code();
+        lg.debug("Received page respone code {}", responseCode);
+
+        if (responseCode != 200) {
+            return null;
+        }
+
+        JsonObject pageBody = pageResponse.body();
+        lg.debug("Received page response body {}", pageBody);
+
+        String wikiUrl = pageBody.getAsJsonObject("query")
+            .getAsJsonObject("pages")
+            .getAsJsonObject(pageId == null ? null : pageId.toString())
+            .getAsJsonPrimitive("fullurl")
+            .getAsString();
+
+        lg.debug("Received page wiki url {}", wikiUrl);
+        return wikiUrl;
+    }
+
+    private Retrofit createStandardInstance() {
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
+        httpClient.addInterceptor(new WikiDebugInterceptor());
+
+        return new Retrofit.Builder()
+            .baseUrl("https://" + countryCode + ".wikipedia.org/w/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(httpClient.build())
+            .build();
     }
 
     public void fetchAppData(WikiAppResponseCallback clbk) {
