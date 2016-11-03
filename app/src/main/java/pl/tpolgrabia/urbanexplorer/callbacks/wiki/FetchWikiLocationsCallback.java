@@ -4,6 +4,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
+import pl.tpolgrabia.urbanexplorer.worker.WikiBrowserWorker;
 import pl.tpolgrabia.wikibinding.dto.app.WikiAppObject;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.wikibinding.utils.WikiUtils;
@@ -26,10 +27,8 @@ public class FetchWikiLocationsCallback implements AdapterView.OnItemLongClickLi
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
         final WikiAppObject item = wikiLocationsFragment.getAppObjects().get(position);
-        wikiUtils.fetchSingleWikiInfoItemAndRunWikiPage(
-            wikiLocationsFragment.getActivity(),
-            item.getPageId(),
-            new WikiInfoRunBrowserCallback(wikiLocationsFragment, item));
+        WikiBrowserWorker worker = new WikiBrowserWorker(wikiLocationsFragment.getActivity(), "en");
+        worker.execute(item);
         return false;
     }
 }
