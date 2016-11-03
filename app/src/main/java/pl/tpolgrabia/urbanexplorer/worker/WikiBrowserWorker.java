@@ -32,7 +32,11 @@ public class WikiBrowserWorker extends AsyncTask<WikiAppObject, Integer, List<St
         List<String> results = new ArrayList<>();
         for (WikiAppObject param : params) {
             try {
-                wikiUtils.fetchPageInfo(param.getPageId());
+                final Long pageId = param.getPageId();
+                lg.debug("Fetching page info url for {}", pageId);
+                final String pageUrl = wikiUtils.fetchPageInfoUrl(pageId);
+                lg.debug("Fetched page url {}", pageUrl);
+                results.add(pageUrl);
             } catch (IOException e) {
                 lg.error("I/O error during fetch page info", e);
             }
