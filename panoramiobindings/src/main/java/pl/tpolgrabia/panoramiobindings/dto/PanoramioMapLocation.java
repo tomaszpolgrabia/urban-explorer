@@ -1,5 +1,7 @@
 package pl.tpolgrabia.panoramiobindings.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 /**
@@ -7,8 +9,11 @@ import java.io.Serializable;
  */
 public class PanoramioMapLocation implements Serializable{
     private static final long serialVersionUID = -3048527017887972550L;
+    @SerializedName("lat")
     private Double latitude;
+    @SerializedName("lng")
     private Double longitude;
+    @SerializedName("panoramio_zoom")
     private Long zoom;
 
     public Double getLatitude() {

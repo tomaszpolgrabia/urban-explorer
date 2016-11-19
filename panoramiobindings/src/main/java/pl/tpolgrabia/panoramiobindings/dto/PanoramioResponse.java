@@ -1,5 +1,7 @@
 package pl.tpolgrabia.panoramiobindings.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -8,9 +10,13 @@ import java.util.List;
  */
 public class PanoramioResponse implements Serializable{
     private static final long serialVersionUID = 8840731825651350777L;
+    @SerializedName("photos")
     private List<PanoramioImageInfo> photos;
+    @SerializedName("count")
     private Long count;
+    @SerializedName("moreAvailable")
     private Boolean moreAvailable;
+    @SerializedName("map_location")
     private PanoramioMapLocation mapLocation;
 
     public List<PanoramioImageInfo> getPhotos() {

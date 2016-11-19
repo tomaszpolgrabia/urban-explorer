@@ -1,5 +1,7 @@
 package pl.tpolgrabia.panoramiobindings.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 /**
@@ -7,17 +9,29 @@ import java.io.Serializable;
  */
 public class PanoramioImageInfo implements Serializable{
     private static final long serialVersionUID = -3749926831546160047L;
+    @SerializedName("height")
     private Double height;
+    @SerializedName("owner_name")
     private String ownerName;
+    @SerializedName("owner_id")
     private Long ownerId;
+    @SerializedName("photo_file_url")
     private String photoFileUrl;
+    @SerializedName("photo_title")
     private String photoTitle;
+    @SerializedName("upload_date")
     private String uploadDate;
+    @SerializedName("width")
     private Double width;
+    @SerializedName("latitude")
     private Double latitude;
+    @SerializedName("longitude")
     private Double longitude;
+    @SerializedName("owner_url")
     private String ownerUrl;
+    @SerializedName("photo_id")
     private Long photoId;
+    @SerializedName("photo_url")
     private String photoUrl;
 
     public Double getHeight() {

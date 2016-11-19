@@ -8,11 +8,13 @@ import android.view.Display;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import okhttp3.OkHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.tpolgrabia.panoramiobindings.PanoramioConstants;
 import pl.tpolgrabia.panoramiobindings.callback.PanoramioResponseCallback;
 import pl.tpolgrabia.panoramiobindings.callback.PanoramioResponseStatus;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
@@ -20,7 +22,12 @@ import pl.tpolgrabia.panoramiobindings.dto.PanoramioMapLocation;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioResponse;
 import pl.tpolgrabia.panoramiobindings.exceptions.PanoramioResponseNotExpected;
 import pl.tpolgrabia.urbanexplorerutils.utils.NetUtils;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +38,40 @@ import java.util.List;
 public class PanoramioUtils {
 
     private static final Logger lg = LoggerFactory.getLogger(PanoramioUtils.class);
-    private static final String CLASS_TAG = PanoramioUtils.class.getSimpleName();
 
     private static final String LOCATIONS_LIST_IMAGE_SIZE = "medium";
     private static final String LOCATIONS_ORDER = "popularity";
+
+    public static Response<PanoramioResponse> fetchPanoramioImagesSync(
+        Double lat,
+        Double lon,
+        Double radiusX,
+        Double radiusY,
+        Long offset,
+        Long count
+    ) throws IOException {
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // TODO httpClient.addInterceptor(new RetrofitDebugInterceptor());
+
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(PanoramioConstants.PANORAMIO_WS_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(httpClient.build())
+            .build();
+
+        PanoramioService panoramioService = retrofit.create(PanoramioService.class);
+        return panoramioService.fetch(
+            "public",
+            offset,
+            offset + count,
+            lon - radiusX,
+            lat - radiusY,
+            lon + radiusX,
+            lat + radiusY,
+            LOCATIONS_LIST_IMAGE_SIZE,
+            LOCATIONS_ORDER,
+            true).execute();
+    }
 
     public static void fetchPanoramioImages(
         Context ctx,
