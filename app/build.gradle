@@ -35,8 +35,8 @@ android {
         applicationId "pl.tpolgrabia.urbanexplorer"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 4
-        versionName "1.1"
+        versionCode 5
+        versionName "1.1.1"
     }
 
     signingConfigs {
