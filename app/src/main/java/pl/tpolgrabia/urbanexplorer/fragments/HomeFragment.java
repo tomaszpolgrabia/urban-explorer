@@ -20,13 +20,13 @@ import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.AppConstants;
 import pl.tpolgrabia.urbanexplorer.MainActivity;
 import pl.tpolgrabia.urbanexplorer.R;
-import pl.tpolgrabia.urbanexplorer.callbacks.*;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
 import pl.tpolgrabia.urbanexplorer.callbacks.geocoder.GeocodedLocationCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.FetchAdditionalPanoramioPhotosCallback;
-import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.FetchPanoramioPhotosCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.PanoramioLocationCallback;
 import pl.tpolgrabia.urbanexplorer.callbacks.panoramio.PanoramioProviderCallback;
+import pl.tpolgrabia.urbanexplorer.dto.PanoramioRequest;
+import pl.tpolgrabia.urbanexplorer.worker.PanoramioWorker;
 import pl.tpolgrabia.urbanexplorerutils.events.DataLoadingFinishEvent;
 import pl.tpolgrabia.urbanexplorerutils.events.RefreshEvent;
 import pl.tpolgrabia.urbanexplorer.handlers.PanoramioItemLongClickHandler;
@@ -259,16 +259,26 @@ public class HomeFragment extends Fragment  {
             Toast.makeText(getActivity(), "Location is still not available", Toast.LENGTH_SHORT).show();
             return;
         }
-        PanoramioUtils.fetchPanoramioImages(
-            activity,
-            location.getLatitude(),
-            location.getLongitude(),
-            SettingsUtils.fetchRadiusX(getActivity()),
-            SettingsUtils.fetchRadiusY(getActivity()),
-            0L,
-            fetchLocationPageSize(),
-            new FetchPanoramioPhotosCallback(this, activity)
-        );
+
+        PanoramioRequest req = new PanoramioRequest();
+        req.setLatitude(location.getLatitude());
+        req.setLongitude(location.getLongitude());
+        req.setOffset(0L);
+        req.setCount(fetchLocationPageSize());
+        req.setRadiusX(SettingsUtils.fetchRadiusX(getActivity()));
+        req.setRadiusY(SettingsUtils.fetchRadiusY(getActivity()));
+        new PanoramioWorker(this).execute(req);
+
+//        PanoramioUtils.fetchPanoramioImages(
+//            activity,
+//            location.getLatitude(),
+//            location.getLongitude(),
+//            SettingsUtils.fetchRadiusX(getActivity()),
+//            SettingsUtils.fetchRadiusY(getActivity()),
+//            0L,
+//            fetchLocationPageSize(),
+//            new FetchPanoramioPhotosCallback(this, activity)
+//        );
     }
 
     public Semaphore getLoading() {

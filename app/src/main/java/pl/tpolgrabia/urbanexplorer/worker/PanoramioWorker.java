@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import pl.tpolgrabia.panoramiobindings.dto.PanoramioResponse;
 import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.dto.PanoramioRequest;
+import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
 import retrofit2.Response;
 
 import java.io.IOException;
@@ -19,6 +20,11 @@ import java.util.List;
 public class PanoramioWorker extends AsyncTask<PanoramioRequest, Integer, List<PanoramioResponse>> {
 
     private static final Logger lg = LoggerFactory.getLogger(PanoramioWorker.class);
+    private final HomeFragment homeFragment;
+
+    public PanoramioWorker(HomeFragment homeFragment) {
+        this.homeFragment = homeFragment;
+    }
 
     @Override
     protected List<PanoramioResponse> doInBackground(PanoramioRequest... params) {
@@ -57,5 +63,7 @@ public class PanoramioWorker extends AsyncTask<PanoramioRequest, Integer, List<P
         super.onPostExecute(panoramioResponses);
         lg.warn("NOT IMPLEMENTED");
         // TODO implement this
+
+
     }
 }
