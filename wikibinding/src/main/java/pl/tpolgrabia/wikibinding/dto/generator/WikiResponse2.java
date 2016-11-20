@@ -1,5 +1,6 @@
 package pl.tpolgrabia.wikibinding.dto.generator;
 
+import com.google.gson.annotations.SerializedName;
 import pl.tpolgrabia.wikibinding.dto.geosearch.WikiQuery;
 
 import java.io.Serializable;
@@ -11,7 +12,9 @@ import java.util.Map;
  */
 public class WikiResponse2 implements Serializable {
     private static final long serialVersionUID = 2208673089408151268L;
+    @SerializedName("batch_complete")
     private Boolean batchComplete;
+    @SerializedName("query")
     private WikiQuery2 query;
 
     public Boolean getBatchComplete() {

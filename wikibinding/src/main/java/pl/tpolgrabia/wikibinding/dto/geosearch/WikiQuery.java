@@ -1,11 +1,14 @@
 package pl.tpolgrabia.wikibinding.dto.geosearch;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
  * Created by tpolgrabia on 01.11.16.
  */
 public class WikiQuery {
+    @SerializedName("geosearch")
     private List<WikiGeoObject> geosearch;
 
     public List<WikiGeoObject> getGeosearch() {
