@@ -72,7 +72,7 @@ dependencies {
         // workaround issue #73
         exclude group: 'com.google.android', module: 'android'
     }
-    compile project(':panoramiobindings')
+
     compile project(':urbanexplorerutils')
     compile project(':wikibinding')
     compile project(':googleutils')

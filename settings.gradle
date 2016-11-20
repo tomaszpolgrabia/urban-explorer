@@ -1,1 +1,1 @@
-include ':app', ':panoramiobindings', ':urbanexplorerutils', ':wikibinding', ':googleutils'
+include ':app', ':urbanexplorerutils', ':wikibinding', ':googleutils'

@@ -16,14 +16,10 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.tpolgrabia.panoramiobindings.dto.PanoramioImageInfo;
-import pl.tpolgrabia.panoramiobindings.utils.PanoramioUtils;
 import pl.tpolgrabia.urbanexplorer.activities.SettingsActivity;
 import pl.tpolgrabia.urbanexplorer.callbacks.StandardLocationListener;
 import pl.tpolgrabia.urbanexplorer.dto.MainActivityState;
 import pl.tpolgrabia.urbanexplorer.events.RefreshSettingsEvent;
-import pl.tpolgrabia.urbanexplorer.fragments.HomeFragment;
-import pl.tpolgrabia.urbanexplorer.fragments.PanoramioShowerFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.PlacesFragment;
 import pl.tpolgrabia.urbanexplorer.fragments.WikiLocationsFragment;
 import pl.tpolgrabia.urbanexplorer.handlers.*;
@@ -48,32 +44,26 @@ public class MainActivity extends ActionBarActivity {
     public static DisplayImageOptions rectOptions;
 
     private GestureDetectorCompat gestureDetector;
-    private MainActivityState currFrag = MainActivityState.PANORAMIO;
+    private MainActivityState currFrag = MainActivityState.WIKI;
     private StandardLocationListener locationCallback;
     private boolean locationServicesActivated = false;
     private GestureDetector.OnGestureListener swipeHandler;
-    private PanoramioImageInfo photoInfo;
     private ProgressDialog progressDlg;
-    private MainActivityState oldFrag = MainActivityState.PANORAMIO_SHOWER;
+    private MainActivityState oldFrag = MainActivityState.GOOGLE_PLACES;
     private boolean savedConfiguration;
     private static final Map<MainActivityState, Runnable> switchFragmentActions = new HashMap<>();
 
     private static final Map<Integer, String> fragTags = new HashMap<>();
 
     static {
-        fragTags.put(MainActivityState.PANORAMIO.getOrder(), HomeFragment.TAG);
         fragTags.put(MainActivityState.WIKI.getOrder(), WikiLocationsFragment.TAG);
         fragTags.put(MainActivityState.GOOGLE_PLACES.getOrder(), PlacesFragment.TAG);
     }
 
     public MainActivity() {
-        switchFragmentActions.put(MainActivityState.PANORAMIO_SHOWER, new PanoramioShowerSwitchHandler(this));
-        switchFragmentActions.put(MainActivityState.PANORAMIO, new PanoramioSwitchHandler(this));
         switchFragmentActions.put(MainActivityState.WIKI, new WikiSwitchHandler(this));
         switchFragmentActions.put(MainActivityState.GOOGLE_PLACES, new GooglePlacesSwitchHandler(this));
     }
-
-    private List<PanoramioImageInfo> photos;
 
     public StandardLocationListener getLocationCallback() {
         return locationCallback;
@@ -105,7 +95,7 @@ public class MainActivity extends ActionBarActivity {
         HelperUtils.initErrorAndDebugHanlers(this);
         NetUtils.setGlobalProxyAuth(this);
 
-        currFrag = MainActivityState.PANORAMIO;
+        currFrag = MainActivityState.WIKI;
         progressDlg = new ProgressDialog(this);
         progressDlg.setCancelable(false);
 
@@ -119,12 +109,11 @@ public class MainActivity extends ActionBarActivity {
         // init fragments
         MainActivityState fragId = savedInstanceState != null
             ? (MainActivityState)savedInstanceState.getSerializable(AppConstants.FRAG_ID)
-            : MainActivityState.PANORAMIO;
+            : MainActivityState.WIKI;
 
         lg.trace("Restored orig frag id:  {}", fragId);
-        currFrag = fragId == null ? MainActivityState.PANORAMIO : fragId;
+        currFrag = fragId == null ? MainActivityState.WIKI : fragId;
         lg.trace("Set final frag id: {}", fragId);
-        photoInfo = savedInstanceState != null ? (PanoramioImageInfo) savedInstanceState.getSerializable(AppConstants.PHOTO_INFO) : null;
         boolean copySavedConfiguration = savedConfiguration =
             savedInstanceState != null && savedInstanceState.getBoolean(AppConstants.SAVED_CONFIG_KEY);
 
@@ -136,13 +125,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onBackPressed() {
         lg.debug("Back pressed");
-
-        switch(currFrag) {
-            case PANORAMIO_SHOWER:
-                photoInfo = null;
-                currFrag = MainActivityState.PANORAMIO;
-                break;
-        }
 
         super.onBackPressed();
     }
@@ -189,52 +171,11 @@ public class MainActivity extends ActionBarActivity {
         EventBus.getDefault().post(new RefreshEvent(this));
     }
 
-    public void resetPhotoInfo() {
-        this.photoInfo = null;
-    }
-
-    public void switchToPhoto(PanoramioImageInfo photoInfo) {
-        this.photoInfo = photoInfo;
-        this.currFrag = MainActivityState.PANORAMIO_SHOWER;
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction ctx = fragmentManager.beginTransaction();
-
-        ctx.setCustomAnimations(R.anim.slide_in_down,
-            R.anim.slide_out_down,
-            R.anim.slide_in_up,
-            R.anim.slide_out_up);
-        Fragment frag = fragmentManager.findFragmentByTag(PanoramioShowerFragment.TAG);
-
-        if (frag != null) {
-            ctx.replace(R.id.fragments, frag);
-        } else {
-            Fragment panoramioShower = createShowerFragment(photoInfo);
-            ctx.replace(R.id.fragments, panoramioShower, PanoramioShowerFragment.TAG);
-        }
-        if (!savedConfiguration) {
-            ctx.addToBackStack(AppConstants.PHOTO_BACKSTACK);
-        }
-
-        ctx.commit();
-
-    }
-
-    public static PanoramioShowerFragment createShowerFragment(PanoramioImageInfo photoInfo) {
-        PanoramioShowerFragment panoramioShower = new PanoramioShowerFragment();
-        Bundle arguments = new Bundle();
-        arguments.putSerializable(PanoramioShowerFragment.PANORAMIO_PHOTO_ARG_KEY, photoInfo);
-        panoramioShower.setArguments(arguments);
-        return panoramioShower;
-    }
 
     private void switchFragment() {
 
         if (currFrag == oldFrag) {
             return;
-        }
-
-        if (!savedConfiguration) {
-            photoInfo = null;
         }
 
         Runnable switchAction = switchFragmentActions.get(currFrag);
@@ -385,7 +326,6 @@ public class MainActivity extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         lg.trace("1 Saving current fragment id: {}", currFrag);
         outState.putSerializable(AppConstants.FRAG_ID, currFrag);
-        outState.putSerializable(AppConstants.PHOTO_INFO, photoInfo);
         outState.putBoolean(AppConstants.SAVED_CONFIG_KEY, true);
         lg.trace("2 Saving current fragment id: {}", currFrag);
     }
@@ -400,14 +340,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onStart() {
         super.onStart();
         lg.trace("onStart {}", System.identityHashCode(this));
-    }
-
-    public void setPhotos(List<PanoramioImageInfo> photos) {
-        this.photos = photos;
-    }
-
-    public PanoramioImageInfo getPhotoInfo() {
-        return photoInfo;
     }
 
     @Subscribe

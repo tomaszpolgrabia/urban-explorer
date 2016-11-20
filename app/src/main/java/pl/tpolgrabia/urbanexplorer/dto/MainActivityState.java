@@ -4,10 +4,8 @@ package pl.tpolgrabia.urbanexplorer.dto;
  * Created by tpolgrabia on 19.09.16.
  */
 public enum MainActivityState {
-    PANORAMIO(0),
     WIKI(1),
-    GOOGLE_PLACES(2),
-    PANORAMIO_SHOWER(-1);
+    GOOGLE_PLACES(2);
 
     private final Integer order;
 
