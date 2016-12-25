@@ -26,7 +26,7 @@ public class StandardLocationListener implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         lg.info("Location provider changed: {}", location);
-        Toast.makeText(ctx, "Location changed " + location, Toast.LENGTH_LONG).show();
+        // Toast.makeText(ctx, "Location changed " + location, Toast.LENGTH_LONG).show();
         LocationUtils.updateLastLocationUPdate(ctx);
         EventBus.getDefault().post(
             new LocationChangedEventBuilder()
@@ -37,7 +37,7 @@ public class StandardLocationListener implements LocationListener {
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         lg.debug("Location provider {} status  has changed to {} with {}", provider, status, extras);
-        Toast.makeText(ctx, "Location provider " + provider + " status changed to " + status, Toast.LENGTH_LONG).show();
+        // Toast.makeText(ctx, "Location provider " + provider + " status changed to " + status, Toast.LENGTH_LONG).show();
     }
 
     @Override

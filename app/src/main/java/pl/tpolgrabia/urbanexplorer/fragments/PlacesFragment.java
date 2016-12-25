@@ -159,11 +159,11 @@ public class PlacesFragment extends Fragment {
             return;
         }
 
-        Toast.makeText(getActivity(),
-            String.format(AppConstants.DEF_APP_LOCALE,
-                "Location changed: %.3f,%.3f",
-                location.getLatitude(), location.getLongitude()),
-            Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(),
+//            String.format(AppConstants.DEF_APP_LOCALE,
+//                "Location changed: %.3f,%.3f",
+//                location.getLatitude(), location.getLongitude()),
+//            Toast.LENGTH_SHORT).show();
 
         cleanAdapter();
 
