@@ -1,3 +1,5 @@
+# Purpose of application
+
 Urban explorer is an app which serves the knowledge about interesting places
 in the user's neighborhood.
 
@@ -13,3 +15,7 @@ Currently used libraries:
 - crashlytics (for bug reporting),
 - universal image loader
 - google support libs.
+
+# Post mortem update
+
+By now (since Nov 2016 ), Panoramio is defunct and it was 50% of the application data sources (other was wiki) https://www.panoramio.com/ https://en.wikipedia.org/wiki/Panoramio . It was available since Nov 2016 under the google play key pl.tpolgrabia.urbanexplorer and taken down on March 2018 by Google due to inactivity (not updating information about the application).
